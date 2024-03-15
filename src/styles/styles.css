@@ -9,7 +9,10 @@
     font-weight: 700;
 line-height: normal;
 }
-
+.custom-button:hover, .custom-button:active {
+    background-color: #DA291C !important; /* Importante para sobrescribir estilos de Bootstrap */
+    color: white !important; /* Cambia el color del texto a blanco */
+  }
 .nav-link.active {
     background-color: #FFF !important;
     
@@ -18,7 +21,58 @@ line-height: normal;
     line-height: normal;
 
 }
+.custom-scrollbar::-webkit-scrollbar {
+    width: 2px !important;
+}
+/* Estilo para la pista (track) del scrollbar */
+::-webkit-scrollbar-track {
+    background: #f1f1f1!important; /* Color de fondo de la pista */
+}
+.modal-button {
+    color: #DA291C;
+    backgroundColor: white;
+    borderColor: #DA291C;
+}
+.modal-button:hover {
+    color: #fff;
+    backgroundColor: #DA291C;
+    borderColor: #DA291C;
+}
+.buttonBase {
+    margin-right: 5px;
+    font-size: 8pt;
+    border-color: #DA291C;
+    background-color: white;
+    color: #DA291C;
+    transition: background-color 0.2s, color 0.2s; /* Suave transición */
+  }
+  
+  .buttonBase:hover, .buttonBase:active, .buttonBase:focus {
+    background-color: #DA291C;
+    color: white;
+  }
+  .buttonBase .icon {
+    color: #DA291C; /* Color por defecto */
+  }
+  
+  .buttonBase:hover .icon, .buttonBase:active .icon, .buttonBase:focus .icon {
+    color: white; /* Color cuando se pasa el mouse o se selecciona */
+  }
+  
+.modal-button:focus {
+    color: hsl(0, 0%, 100%);
+    backgroundColor: #DA291C;
+    borderColor: #DA291C;
+}
+/* Estilo para el control deslizante (thumb) del scrollbar */
+::-webkit-scrollbar-thumb {
+    background:  #DA291C !important; /* Color del control deslizante */
+}
 
+/* Estilo para el control deslizante al pasar el mouse */
+::-webkit-scrollbar-thumb:hover {
+    background: #555!important;/* Color del control deslizante al pasar el mouse */
+}
 .nav-tabs .nav-item {
     margin-right: 15px; /* Añade un margen a la derecha de cada pestaña */
 }

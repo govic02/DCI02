@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom/client';
 import App from './components/App';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './styles/styles.css';
-
+import API_BASE_URL from './config';
 const APS_MODEL_URN = 'dXJuOmFkc2sub2JqZWN0czpvcy5vYmplY3Q6cDJfcHJveWVjdG9zLzQ4MzAtU0MtMTAxMi5ydnQ=';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
@@ -13,7 +13,9 @@ const RootComponent = () => {
     const [token, setToken] = useState('');
 
     useEffect(() => {
-        fetch('http://localhost:3001/api/gettoken')
+        console.log("APIBASE URL");
+        console.log(API_BASE_URL);
+        fetch(API_BASE_URL+'/api/gettoken')
             .then(response => response.json())
             .then(data => {
                 setToken(data.token);

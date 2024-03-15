@@ -6,7 +6,7 @@ import AdministradorDeVistas from './visualizador/AdministradorDeVistas';
 import Paleta from './visualizador/Paleta';
 import HeaderApp from './HeaderApp';
 import { ActionsProvider } from '../context/ActionContext';
-
+import API_BASE_URL from '../config';
 const ColumnaDerecha = ({ isCollapsed, token, urn, selectedIds, onCameraChange, onSelectionChange, refViewer }) => {
     const [urnSelected, setUrnSelected] = useState('');
     const [proyectoKeySeleccionado, setProyectoKeySeleccionado] = useState('');
@@ -30,7 +30,7 @@ const ColumnaDerecha = ({ isCollapsed, token, urn, selectedIds, onCameraChange, 
     useEffect(() => {
       const obtenerUsuarioProyecto = async () => {
         try {
-          const response = await fetch('http://localhost:3001/api/getUserProyectId', {
+          const response = await fetch(API_BASE_URL+'/api/getUserProyectId', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'
@@ -43,6 +43,7 @@ const ColumnaDerecha = ({ isCollapsed, token, urn, selectedIds, onCameraChange, 
           setProyectoKeySeleccionado(data.proyectoKey);
           console.log("Urn seleccionada en useEffect:", urnSelected);
           console.log("Urn recibida en la respuesta:", data.urn);
+          console.log("Urn recibida en la respuesta:", urnSelected);
         } catch (error) {
           console.error('Error al obtener el usuario-proyecto asignado:', error);
           toast.error('Error al obtener el usuario-proyecto asignado');
@@ -70,7 +71,7 @@ const ColumnaDerecha = ({ isCollapsed, token, urn, selectedIds, onCameraChange, 
                         <div ref={tabsRef}>
                             <TabsComponent  urnBuscada={urnSelected} /> {/* Instanciar TabsComponent */}
                         </div>
-                        <AdministradorDeVistas tabsRef={tabsRef}  identificadoresActual={identificadoresActual} refViewer2={refViewer2} urnSelected={urnSelected} /> {/* Pasar la ref a AdministradorDeVistas */}
+                        <AdministradorDeVistas   identificadoresActual={identificadoresActual} urnBuscada={urnSelected} /> {/* Pasar la ref a AdministradorDeVistas */}
                         <Paleta /> {/* Instanciar Paleta aquí */}
                     </div>
 

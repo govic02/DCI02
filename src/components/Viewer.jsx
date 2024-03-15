@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { ActionsContext } from '../context/ActionContext';
 import { buscaKeys, transformJsonToArray, consulta_filtro,consulta_filtro2 } from '../utils/ViewerUtils';
 import axios from 'axios';
+import API_BASE_URL from '../config';
 const { Autodesk } = window;
 var { filtroPiso } ="";
 var { filtroHa } ="";
@@ -30,7 +31,7 @@ class Viewer extends React.Component {
             console.log("URN ANTES DE AXIOS");
             console.log(this.props);
 
-            const response1 = await axios.get(`http://localhost:3001/api/filtros`);
+            const response1 = await axios.get(API_BASE_URL+`/api/filtros`);
             console.log("Respuesta Filtros88");
           // const response = await axios.get(`http://localhost:3001/api/filtrosPorUrn/${this.props.urn}`);
             

@@ -10,6 +10,7 @@ const { DerivativesApi, JobPayload, JobPayloadInput, JobPayloadOutput, JobSvfOut
 
 const { BucketsApi, ObjectsApi, PostBucketsPayload } = forgeSDK;
 import { obtenerFiltros } from '../controllers/filtrosController.js';
+import {crearPedido,eliminarPedido,obtenerPedidos } from '../controllers/pedidoController.js';
 import  {actualizarUsuarioProyectoAsignadoPorIdUsuario,obtenerUsuarioProyectoAsignadoPorIdUsuario } from '../controllers/usuarioProyectoAsignadoController.js'; 
 import {
   crearFiltroOpcionesProyecto,crearFiltroOpcionesProyectoSiNoExiste,
@@ -19,7 +20,7 @@ import {
   actualizarFiltroOpcionesProyecto,
   eliminarFiltroOpcionesProyecto
 } from '../controllers/FiltrosOpcionesProyectoController.js'; 
-
+import { crearAdicionalPedido,obtenerAdicionalesPorPedidoId ,eliminarAdicionalPedido} from '../controllers/pedidoController.js';
 import { 
   obtenerVistasSave, obtenerVistaSave,obtenerVistasPorUrn,crearVistaSave, eliminarVistaSave} from '../controllers/VistasSaveController.js'; // Importar los controladores de las vistas guardadas
 
@@ -250,28 +251,35 @@ app.post('/api/deleteObject', async (req, res, next) => {
   
 });
 
-app.get('/api/filtros', obtenerFiltros );
 
-app.get('/api/data', (req, res) => {
-    res.json({ mensaje: 'Datos de ejemplo' });
-});
 app.post('/api/filtrosOpcionesProyecto', crearFiltroOpcionesProyectoSiNoExiste);
-app.get('/api/filtrosPorUrn/:urn', obtenerFiltrosOpcionesProyectoPorUrn);
-
-
 app.get('/api/vistasGuardadas', obtenerVistasSave); // Obtener todas las vistas guardadas
+
 app.get('/api/vistasGuardadas/:idVS', obtenerVistaSave); // Obtener una vista guardada por ID
 app.post('/api/vistasGuardadas', crearVistaSave); // Crear una nueva vista guardada
 
-app.delete('/api/vistasGuardadas/:idVS', eliminarVistaSave); // Eliminar una vista guardada por ID
-app.get('/api/vistasGuardadasPorUrn/:urn', obtenerVistasPorUrn);
+app.delete('/api/eliminarPedido', eliminarPedido);
 
+app.delete('/api/vistasGuardadas/:idVS', eliminarVistaSave); // Eliminar una vista guardada por ID
 app.post('/api/getUserProyectId',  obtenerUsuarioProyectoAsignadoPorIdUsuario  );
 app.post('/api/setproyectoAdmin',  actualizarUsuarioProyectoAsignadoPorIdUsuario );// buscar proyectoasignado, en caso de que no crea una colección y le ingresa la urn
+app.post('/api/pedido', crearPedido);
+app.post('/api/adicionalesPedido', crearAdicionalPedido);
+
+app.get('/api/filtros', obtenerFiltros );
+app.get('/api/data', (req, res) => {
+    res.json({ mensaje: 'Datos de ejemplo' });
+});
+app.get('/api/vistasGuardadasPorUrn/:urn', obtenerVistasPorUrn);
+app.get('/api/filtrosPorUrn/:urn', obtenerFiltrosOpcionesProyectoPorUrn);
+app.get('/api/listPedidos', obtenerPedidos); //
+
+app.get('/api/getadicionalesPedido/:pedidoId', obtenerAdicionalesPorPedidoId);
+
+app.delete('/api/adicionalesPedido/eliminar/:id', eliminarAdicionalPedido);
 
 app.get('/', (req, res) => {
     res.json({ message: 'We are working for you!' });
 });
-
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => console.log(`Servidor corriendo en puerto ${PORT}`));

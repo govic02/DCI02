@@ -4,35 +4,42 @@ import { useVisibility } from '../../context/VisibilityContext';
 import { useActions } from '../../context/ActionContext'; 
 import Modal from 'react-modal';
 import axios from 'axios';
-const AdministradorDeVistas = ({ tabsRef,identificadoresActual,refViewer2 }) => {
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEye,faPlus, faHandPointer,faTrash } from '@fortawesome/free-solid-svg-icons';
+import API_BASE_URL from '../../config';
+const AdministradorDeVistas = ({ tabsRef,identificadoresActual,refViewer2 , urnBuscada }) => {
     const { isVisible } = useVisibility();
+    
     const [vistaSeleccionada, setVistaSeleccionada] = useState(null);
-    const [topPosition, setTopPosition] = useState('45%');
+    const [topPosition, setTopPosition] = useState('55%');
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [nombreVista, setNombreVista] = useState('');
     const [opcionesDeVistas, setOpcionesDeVistas] = useState([]);
     const abrirModal = () => setModalIsOpen(true);
     const cerrarModal = () => setModalIsOpen(false);
-    const { despliegaSavedVista } = useActions();
-    const urn = 'dXJuOmFkc2sub2JqZWN0czpvcy5vYmplY3Q6cDJfcHJveWVjdG9zL1BfUnZ0XzIwMjQucnZ0';
+    const [modalEliminarIsOpen, setModalEliminarIsOpen] = useState(false);
+
+    const { despliegaSavedVista, identificadoresActuales } = useActions(); // Ahora también accedes a identificadoresActuales aquí
+    const urn = urnBuscada;
     
     const guardarVista = async () => {
         try {
             // Crear el objeto de datos de la vista
             console.log('Nombre de la vista:', nombreVista);
-            console.log(identificadoresActual);
-
-            if(identificadoresActual.length >0){
+            console.log(identificadoresActuales);
+            console.log(urn);
+            if(identificadoresActuales.length >0){
                 const nuevaVista = {
                     nombre: nombreVista,
-                    ids: identificadoresActual,
+                    ids: identificadoresActuales,
                     urn: urn
                 };
         
                 // Realizar la solicitud HTTP para guardar la vista
-                const response = await axios.post('http://localhost:3001/api/vistasGuardadas', nuevaVista);
+                const response = await axios.post(API_BASE_URL+'/api/vistasGuardadas', nuevaVista);
                 if (response.status === 201) {
                     console.log('Vista guardada exitosamente:', response.data);
+                    cargarVistasGuardadas();
                     // Aquí puedes realizar cualquier acción adicional después de guardar la vista, como cerrar el modal
                     cerrarModal(); // Cerrar el modal después de guardar
                 } else {
@@ -55,43 +62,59 @@ const AdministradorDeVistas = ({ tabsRef,identificadoresActual,refViewer2 }) => 
         identificadoresActual = selectedOption.ids;
         setVistaSeleccionada(selectedOption);
     };
+    async function handleDeleteClick(idVS) {
+        console.log("ID A BORRAR");
+        console.log(idVS);
+        const confirmDelete = window.confirm("¿Estás seguro de que deseas eliminar esta vista?");
+        if (!confirmDelete) {
+            return; // Detiene la función si el usuario cancela la acción
+        }
+    
+        try {
+            const response = await fetch(API_BASE_URL+`/api/vistasGuardadas/${idVS}`, {
+                method: 'DELETE', // Método HTTP
+            });
+    
+            if (!response.ok) {
+                throw new Error('La vista guardada con ese ID no fue encontrada o ocurrió un error al eliminarla');
+            }
+    
+            const result = await response.text(); // O `response.json()` si tu API devuelve un JSON
+            console.log(result); // "Vista guardada eliminada"
+            alert('Vista guardada eliminada correctamente');
+            cargarVistasGuardadas();
+            // Aquí podrías también actualizar el estado de tu componente para reflejar que la vista fue eliminada,
+            // por ejemplo, eliminándola de la lista de vistas mostradas al usuario.
+        } catch (error) {
+            console.error("Error al eliminar la vista guardada:", error.message);
+            alert("Ocurrió un error al eliminar la vista guardada.");
+        }
+    }
+    
+    const abrirModalEliminar = () => setModalEliminarIsOpen(true);
+    const cerrarModalEliminar = () => setModalEliminarIsOpen(false);
+
+    const cargarVistasGuardadas = async () => {
+        try {
+            const response = await axios.get(API_BASE_URL+`/api/vistasGuardadasPorUrn/${urn}`);
+            const vistas = response.data.map(vista => ({
+                value: vista._id,
+                label: vista.nombre,
+                ids: vista.ids
+            }));
+            setOpcionesDeVistas(vistas);
+        } catch (error) {
+            console.error('Error al cargar las vistas guardadas:', error);
+        }
+    };
     useEffect(() => {
-
-        const cargarVistasGuardadas = async () => {
-            try {
-                const response = await axios.get(`http://localhost:3001/api/vistasGuardadasPorUrn/${urn}`);
-                console.log("respuestaVistas");
-                console.log(response);
-                const vistas = response.data.map(vista => ({
-                    value: vista._id, // Asumiendo que cada vista tiene un ID único
-                    label: vista.nombre,
-                    ids:vista.ids
-                }));
-                console.log("vistas");
-                console.log(vistas);
-                setOpcionesDeVistas(vistas);
-            } catch (error) {
-                console.error('Error al cargar las vistas guardadas:', error);
-            }
-        };
-        if (urn) cargarVistasGuardadas();
-        
-        const updatePosition = () => {
-            if (tabsRef.current) {
-                const tabsHeight = tabsRef.current.offsetHeight;
-                const newPosition = `calc(35% + ${tabsHeight}px + 150px)`;
-                setTopPosition(newPosition);
-            }
-        };
-
-        updatePosition();
-        window.addEventListener('resize', updatePosition);
-
-        return () => window.removeEventListener('resize', updatePosition);
-    }, [tabsRef]);
+        cargarVistasGuardadas();
+        // Otros efectos que necesiten ejecutarse en el montaje vendrían aquí
+    }, [urn]); 
 
     const estiloDelComponente = {
         width: '450px',
+        marginTop:'50px',
         zIndex: 1000,
         position: 'fixed',
         top: topPosition,
@@ -197,8 +220,12 @@ const AdministradorDeVistas = ({ tabsRef,identificadoresActual,refViewer2 }) => 
             <div style={estiloCabecera}>
                 <span>Administrador de Vistas</span>
                 <button  onClick={abrirModal} style={estiloBoton}>
-                    <img src="images/masVista.svg" alt="Nueva Vista"   style={estiloImagenBoton}/> Guardar Vista
+                    <img src="images/masVista.svg" alt="Nueva Vista"   style={estiloImagenBoton}/> Guardar 
                 </button>
+                <button onClick={abrirModalEliminar} style={estiloBoton}>
+                <FontAwesomeIcon icon={faTrash} style={estiloImagenBoton}/> Eliminar
+        </button>
+
             </div>
             <Select
                 options={opcionesDeVistas}
@@ -213,6 +240,52 @@ const AdministradorDeVistas = ({ tabsRef,identificadoresActual,refViewer2 }) => 
                     },
                 })} styles={customSelectStyles}
             />  
+           <Modal
+    isOpen={modalEliminarIsOpen}
+    onRequestClose={cerrarModalEliminar}
+    style={modalStyle}
+    contentLabel="Eliminar Vista"
+    appElement={document.getElementById('root')}
+>
+    <div style={{ position: 'relative', overflowY: 'auto', maxHeight: '250px' }}>
+        <button 
+            onClick={cerrarModalEliminar} 
+            style={{
+                position: 'absolute', 
+                top: '0px', 
+                right: '8px', 
+                border: 'none', 
+                background: 'transparent', 
+                cursor: 'pointer', 
+                color: 'red', 
+                fontSize: '24px'
+            }}
+        >
+            &times; {/* Este es el símbolo de "X" */}
+        </button>
+
+        <h2>Eliminar Vista</h2>
+        <div>
+            {opcionesDeVistas.map(vista => (
+                <div key={vista.value} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                    <span>{vista.label}</span>
+                    <button 
+                        onClick={() => handleDeleteClick(vista.value)}
+                        style={{ ...estiloBoton, backgroundColor: 'red' }}
+                    >
+                        <FontAwesomeIcon icon={faTrash} />
+                    </button>
+
+                </div>
+            ))}
+        </div>
+    </div>
+</Modal>
+
+
+
+
+
             <Modal
               isOpen={modalIsOpen}
               onRequestClose={cerrarModal}

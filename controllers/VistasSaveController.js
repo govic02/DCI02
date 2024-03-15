@@ -24,12 +24,24 @@ const obtenerVistaSave = async (req, res) => {
 };
 
 // Crear una nueva vista guardada
+// Crear una nueva vista guardada asegurándose de que esté asociada a una URN
 const crearVistaSave = async (req, res) => {
     try {
+        // Verificar que el cuerpo de la solicitud contiene una URN
+        if (!req.body.urn) {
+            return res.status(400).send("La URN es necesaria para crear una vista guardada.");
+        }
+
+        // Crear una nueva instancia de VistasSave con los datos recibidos
         const nuevaVista = new VistasSave(req.body);
+
+        // Guardar la nueva vista en la base de datos
         await nuevaVista.save();
+
+        // Responder con la nueva vista creada
         res.status(201).json(nuevaVista);
     } catch (error) {
+        // En caso de error, enviar una respuesta indicando el mensaje de error
         res.status(400).send(error.message);
     }
 };
