@@ -1,4 +1,4 @@
-import Pedido from '../models/Pedido.js';
+import Pedido from '../models/pedido.js';
 import AdicionalesPedidos from '../models/adicionalesPedidos.js';
 // Obtener todos los registros
 
