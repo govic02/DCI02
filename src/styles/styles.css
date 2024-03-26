@@ -38,6 +38,10 @@ line-height: normal;
     backgroundColor: #DA291C;
     borderColor: #DA291C;
 }
+.btn-custom {
+    background-color: #DA291C;
+    border-color: #DA291C;
+  }
 .buttonBase {
     margin-right: 5px;
     font-size: 8pt;
@@ -58,7 +62,20 @@ line-height: normal;
   .buttonBase:hover .icon, .buttonBase:active .icon, .buttonBase:focus .icon {
     color: white; /* Color cuando se pasa el mouse o se selecciona */
   }
+  .modal {
+    --bs-modal-width: auto; /* Ajusta el ancho del modal */
+    --bs-modal-height: auto; /* Ajusta el ancho del modal */
+    margin-top: 0px; /* Centra el modal horizontalmente */
+    top: 50% !important; /* Centra el modal verticalmente */
+    left: 50% !important; /* Centra el modal horizontalmente */
   
+    max-width: 50%; /* O cualquier ancho específico que prefieras */
+    max-height: 60%;
+   
+}
+.custom-modal-style{
+    
+}
 .modal-button:focus {
     color: hsl(0, 0%, 100%);
     backgroundColor: #DA291C;

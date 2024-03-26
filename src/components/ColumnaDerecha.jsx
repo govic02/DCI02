@@ -72,7 +72,7 @@ const ColumnaDerecha = ({ isCollapsed, token, urn, selectedIds, onCameraChange, 
                             <TabsComponent  urnBuscada={urnSelected} /> {/* Instanciar TabsComponent */}
                         </div>
                         <AdministradorDeVistas   identificadoresActual={identificadoresActual} urnBuscada={urnSelected} /> {/* Pasar la ref a AdministradorDeVistas */}
-                        <Paleta /> {/* Instanciar Paleta aquí */}
+                        <Paleta  urnBuscada={urnSelected} /> {/* Instanciar Paleta aquí */}
                     </div>
 
             </ActionsProvider>

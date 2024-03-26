@@ -13,6 +13,25 @@ export const ActionsProvider = ({ children, viewerRef }) => {
     const [pesoTotal, setPesoTotal] = useState(0);
     const [largoTotal, setLargoTotal] = useState(0);
     const [totalBarras, setTotalBarras] = useState(0);
+    const [selectedObjectProps, setSelectedObjectProps] = useState([]);
+
+    const [resultadoFierros, setResultadoFierros] = useState([]);
+    const [seleccionActual, setSeleccionActual] = useState([]);
+
+
+    const actualizarResultadoFierros = (nuevosFierros) => {
+        setResultadoFierros(nuevosFierros);
+    };
+
+    const actualizarSeleccionActual = (nuevaSeleccion) => {
+        setSeleccionActual(nuevaSeleccion);
+    };
+
+
+    const updateSelectedObjectProps = (props) => {
+        setSelectedObjectProps(props);
+    };
+
     const registerAction = (actionName, actionFunction) => {
         setActions((prevActions) => ({ ...prevActions, [actionName]: actionFunction }));
     };
@@ -54,7 +73,13 @@ export const ActionsProvider = ({ children, viewerRef }) => {
                                     largoTotal,
                                     updateLargoTotal,
                                     totalBarras,
-                                    updateTotalBarras 
+                                    updateTotalBarras,
+                                    selectedObjectProps,
+                                    updateSelectedObjectProps,
+                                    resultadoFierros,
+                                    actualizarResultadoFierros,
+                                    seleccionActual,
+                                    actualizarSeleccionActual 
                     }}>
             {children}
         </ActionsContext.Provider>

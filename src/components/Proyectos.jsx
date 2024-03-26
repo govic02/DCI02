@@ -103,7 +103,7 @@ const Proyectos = ({ token, selectedIds, onCameraChange, onSelectionChange, refV
                                   onCameraChange={onCameraChange}
                                   onSelectionChange={onSelectionChange}
                                   ref={refViewer}
-                                  refViewer2={refViewer}
+                                 
 
                               />
                           </div>

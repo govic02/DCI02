@@ -12,6 +12,9 @@ const { BucketsApi, ObjectsApi, PostBucketsPayload } = forgeSDK;
 import { obtenerFiltros } from '../controllers/filtrosController.js';
 import {crearPedido,eliminarPedido,obtenerPedidos } from '../controllers/pedidoController.js';
 import  {actualizarUsuarioProyectoAsignadoPorIdUsuario,obtenerUsuarioProyectoAsignadoPorIdUsuario } from '../controllers/usuarioProyectoAsignadoController.js'; 
+import { manipularConfiguracionViewer,obtenerConfiguracionViewer} from '../controllers/ConfiguracionViewerController.js'; // Asegúrate de que la ruta sea correcta
+import { buscarCrearActualizarObjetoProyectoPlan, obtenerObjetosPorUrn ,CrearObjetoProyectoPlan,obtenerPorDbIdYUrn,procesarObjetosProyectoPlanMasivamente} from '../controllers/ObjetoProyectoPlanController.js';
+
 import {
   crearFiltroOpcionesProyecto,crearFiltroOpcionesProyectoSiNoExiste,
   obtenerFiltrosOpcionesProyecto,
@@ -23,7 +26,6 @@ import {
 import { crearAdicionalPedido,obtenerAdicionalesPorPedidoId ,eliminarAdicionalPedido} from '../controllers/pedidoController.js';
 import { 
   obtenerVistasSave, obtenerVistaSave,obtenerVistasPorUrn,crearVistaSave, eliminarVistaSave} from '../controllers/VistasSaveController.js'; // Importar los controladores de las vistas guardadas
-
 
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
@@ -274,9 +276,18 @@ app.get('/api/vistasGuardadasPorUrn/:urn', obtenerVistasPorUrn);
 app.get('/api/filtrosPorUrn/:urn', obtenerFiltrosOpcionesProyectoPorUrn);
 app.get('/api/listPedidos', obtenerPedidos); //
 
+app.post('/api/configuracionViewer',  manipularConfiguracionViewer); //
+app.get('/api/configuracionViewer',  obtenerConfiguracionViewer);
+
 app.get('/api/getadicionalesPedido/:pedidoId', obtenerAdicionalesPorPedidoId);
 
 app.delete('/api/adicionalesPedido/eliminar/:id', eliminarAdicionalPedido);
+
+app.post('/api/objetoProyectoPlan', buscarCrearActualizarObjetoProyectoPlan);
+app.post('/api/objetoProyectoPlanMasivo', procesarObjetosProyectoPlanMasivamente);
+app.post('/api/crearobjetoProyectoPlan', CrearObjetoProyectoPlan);
+app.get('/api/objetoProyectoPlan/:urn', obtenerObjetosPorUrn);//
+app.get('/api/objetos/:dbId/:urn', obtenerPorDbIdYUrn);
 
 app.get('/', (req, res) => {
     res.json({ message: 'We are working for you!' });

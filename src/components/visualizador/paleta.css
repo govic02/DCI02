@@ -1,0 +1,68 @@
+.modal {
+    position: fixed; /* o 'absolute' si es necesario para tu diseño */
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 300px; /* o el ancho que prefieras */
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 100500 !important; /* Aumenta este valor si es necesario */
+    opacity: 1; /* Asegúrate de que no sea 0 */
+    visibility: visible; /* Asegúrate de que no sea 'hidden' */
+    display: block !important;
+}
+.draggable-div {
+    width: 200px;
+    height: 100px;
+    position: fixed;
+    background-color: lightgrey;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #fff !important;
+    /* La propiedad cursor se manejará dinámicamente en el componente */
+}
+.list-group-item {
+    border: 1px solid #cccccc; /* Borde gris */
+    margin-bottom: -1px; /* Para que los bordes se superpongan entre elementos y no se dupliquen */
+}
+
+.list-group-item:first-child {
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
+.list-group-item:last-child {
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+    margin-bottom: 0; /* Para evitar el margen extra en el último elemento */
+}
+.draggable-div.grabbing {
+    cursor: grabbing;
+}
+
+.draggable-div.grab {
+    cursor: grab;
+}
+.modal-header {
+    display: flex;
+    justify-content: flex-end;
+    cursor: move;
+}
+
+.close-btn {
+    cursor: pointer;
+    padding: 0 5px;
+}
+
+.draggable-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    cursor: move;
+    z-index: 1000; /* Justo debajo de la ventana modal para capturar eventos de mouse mientras se arrastra */
+}

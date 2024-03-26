@@ -193,6 +193,7 @@ const TabComponent = ({ urnBuscada }) => {
     const handCleanClick = () => {
         cleanModel();
         setSelectedParticionHA([]);
+        
         setSelectedPiso([]);
         updatePesoTotal(0);
         updateLargoTotal(0);
@@ -240,7 +241,7 @@ const TabComponent = ({ urnBuscada }) => {
          setOpcionesPiso(opciones2);
      }
 
-      }, [datosFiltro1]);
+      }, [datosFiltro1,datosFiltro2]);
 
     useEffect(() => {
         const fetchFiltros = async () => {
@@ -394,6 +395,29 @@ const TabComponent = ({ urnBuscada }) => {
         paddingBottom: '520px',
         overflowY: 'hidden'
     };
+    const modalStyle = {
+       
+          position: 'block',
+          width:'100px',
+          top: '500px !important',
+          left: '35% !important',
+          transform: 'translateY(-50%)',
+          zIndex: 1000,
+          width: '150px',
+          height: '200px',
+          overflow: 'auto',
+          paddingBottom: '250px',
+          overflowY: 'hidden',
+          border: '1px solid #ccc',
+          background: '#fff',
+          borderRadius: '4px',
+          outline: 'none',
+          padding: '20px',
+          border: '2px solid white', // Agrega un borde blanco
+          borderRadius: '10px', // Redondea los bordes del select
+       
+       
+      };
 
     const tabContentStyle = {
         backgroundColor: 'white',
@@ -543,7 +567,7 @@ const TabComponent = ({ urnBuscada }) => {
               </div></div>
                 </Tab>
             </Tabs>
-            <Modal show={modalInfo.show} onHide={() => setModalInfo({ ...modalInfo, show: false })} centered>
+            <Modal show={modalInfo.show} onHide={() => setModalInfo({ ...modalInfo, show: false })}      className="custom-modal-style" >
                 <Modal.Header closeButton>
                     <Modal.Title>{modalInfo.data.nombre_pedido}</Modal.Title>
                 </Modal.Header>
