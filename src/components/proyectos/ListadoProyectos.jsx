@@ -208,9 +208,10 @@ const ListadoProyectos = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) 
   }, [proyectos]);
   
   const handleFileUpload = () => {
+    
     console.log(bucketKey);
     console.log("entro");
-    toast.success(` Inicio de proceso de carga`);
+  
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = '.pdf,.dwg'; // Ajusta los tipos de archivo según tu necesidad
@@ -226,6 +227,7 @@ const ListadoProyectos = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) 
       formData.append('bucketKey', bucketKey); // Ajusta esto según tu lógica de obtención de la clave del bucket
 
       try {
+        toast.success(` Inicio de proceso de carga, el proceso puede tardar algunos minutos. Te notificaremos una vez esté listo`);
         const response = await fetch('http://localhost:3001/api/objects', {
           method: 'POST',
           body: formData,
@@ -237,19 +239,20 @@ const ListadoProyectos = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) 
         if (response.ok) {
           // Aquí puedes actualizar la interfaz o mostrar un mensaje de éxito
           console.log('Archivo subido exitosamente');
-          toast.success(`Se ha cargado exitosamente`);
+          toast.success(`Se ha guardado y cargado exitosamente el nuevo proyecto`);
           fetchFilters();
         } else {
           // Aquí puedes manejar el caso de error
           console.error('Error al subir el archivo:', response.statusText);
-          toast.error(` Error en el proceso de carga`);
+          toast.error(` Error en el proceso de carga, vuelva a intentarlo`);
         }
       } catch (error) {
         console.error('Error al subir el archivo:', error);
-        toast.error(` Error en el proceso de carga`);
+        toast.error(` Error en el proceso de carga , vuelva a intentarlo`);
       }
     };
     input.click();
+    toast.success(` Carga en proceso , puede demorar algunos minutos`);
   };
 
   const translateObject = async (node) => {
@@ -260,6 +263,7 @@ const ListadoProyectos = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) 
     console.log(bucketKey);
     console.log(objectKey);
     try {
+      toast.success(` Proceso de traducción  iniciado , el proceso tomará algunos minutos`);
       const response = await fetch('http://localhost:3001/api/jobs', {
         method: 'POST',
         headers: {
@@ -269,12 +273,14 @@ const ListadoProyectos = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) 
       });
       console.log(response);
       if (response.ok) {
-     
+      
        console.log('Traducción Iniciada, espere unos instantes..');
       } else {
+        toast.success(` Error al intentar traducir , intente nuevamente`);
         console.error('Error al intentar traducir:', response.statusText);
       }
     } catch (error) {
+      toast.success(` Error al intentar traducir , intente nuevamente`);
       console.error('Error al intentar traducir:', error);
     }
   };

@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 import { Tabs, Tab, Form, Button } from 'react-bootstrap';
-
+import { toast } from 'react-toastify';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { useActions } from '../../context/ProyectoContext';
 const AdministracionProyecto = () => {
     const [activeKey, setActiveKey] = useState('informacionGeneral');
     const [nombreProyecto, setNombreProyecto] = useState('');
     const [descripcionProyecto, setDescripcionProyecto] = useState('');
-
+    const { generarTotalPesoPisos } = useActions();
     const onSelect = (k) => {
         setActiveKey(k);
     };
@@ -18,7 +21,7 @@ const AdministracionProyecto = () => {
         marginTop: '20px',
        
         marginLeft: '20px',
-        height: '385px',
+        height: '485px',
         width:'450px',
         overflow: 'auto'
     };
@@ -46,7 +49,10 @@ const AdministracionProyecto = () => {
         marginBotom: '35px',
         paddingBotom: '35px'
     };
-
+    const guardarDatosModelo =()=>{
+        console.log('El nombre del proyecto es:');
+        generarTotalPesoPisos();
+    }
     return (
         <div style={tabStyle}>
             <Tabs defaultActiveKey="informacionGeneral" id="tab-administracion-proyecto" onSelect={onSelect} style={tabHeaderStyle}>
@@ -61,7 +67,8 @@ const AdministracionProyecto = () => {
                             <Form.Control as="textarea" rows={3} value={descripcionProyecto} onChange={(e) => setDescripcionProyecto(e.target.value)} />
                         </Form.Group>
                         <Button style={botonEstilo}>TRANSFERIR DATOS</Button>
-                        <p></p> <p></p> <p></p><br></br>
+                        <p></p>   <Button onClick={guardarDatosModelo} style={{...botonEstilo, marginTop: '10px'}}>Mostrar Nombre del Proyecto</Button><p></p> <p></p><br></br>
+                        
                     </div>
                 </Tab>
                 <Tab eventKey="configuracionAdicional" title={<span><img src={getTabImage('configuracionAdicional')} alt="" /> Usuarios</span>}>

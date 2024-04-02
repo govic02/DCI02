@@ -4,6 +4,8 @@ import HeaderApp from './HeaderApp';
 import ListadoProyectos from './proyectos/ListadoProyectos';
 import AdministracionProyectos from './proyectos/AdministracionProyecto';
 import API_BASE_URL from '../config';
+import { ProyectoProvider } from '../context/ProyectoContext'; // Asegúrate de que la ruta es correcta
+
 const Proyectos = ({ token, selectedIds, onCameraChange, onSelectionChange, refViewer }) => {
     const [proyectoSeleccionado, setProyectoSeleccionado] = useState(null);
     const [proyectoKeySeleccionado, setProyectoKeySeleccionado] = useState(null);
@@ -82,39 +84,42 @@ const Proyectos = ({ token, selectedIds, onCameraChange, onSelectionChange, refV
     return (
       <div>
       <HeaderApp proyectoKey={proyectoKeySeleccionado} />
-      <div style={estiloProyectos}>
+      <ProyectoProvider>
+        <div style={estiloProyectos}>
+    
+            <div className='row'>
 
-          <div className='row'>
+                <div className='col-4'>
+                    <ListadoProyectos onProyectoSeleccionado={handleProyectoSeleccionado}
+                        onProyectoKeySeleccionado={setProyectoKeySeleccionado}
+                    />
+                </div>
+                <div className='col-8'>
+                    <div className='row'>
+                        <div className='col-6' style={estiloViewerContainer}>
+                            <div >
+                                <ViewerProyectos
+                                    className="custom-viewer"
+                                    runtime={{ accessToken: token }}
+                                    urn={urnSelected}
+                                    selectedIds={selectedIds}
+                                    onCameraChange={onCameraChange}
+                                    onSelectionChange={onSelectionChange}
+                                    ref={refViewer}
+                                    
 
-              <div className='col-4'>
-                  <ListadoProyectos onProyectoSeleccionado={handleProyectoSeleccionado}
-                      onProyectoKeySeleccionado={setProyectoKeySeleccionado}
-                  />
-              </div>
-              <div className='col-8'>
-                  <div className='row'>
-                      <div className='col-6' style={estiloViewerContainer}>
-                          <div >
-                              <ViewerProyectos
-                                  className="custom-viewer"
-                                  runtime={{ accessToken: token }}
-                                  urn={urnSelected}
-                                  selectedIds={selectedIds}
-                                  onCameraChange={onCameraChange}
-                                  onSelectionChange={onSelectionChange}
-                                  ref={refViewer}
-                                 
-
-                              />
-                          </div>
-                      </div>
-                      <div className='col-6' style={estiloAdministracionProyecto}>
-                          <AdministracionProyectos />
-                      </div>
-                  </div>
-              </div>
-          </div>
-      </div>
+                                />
+                            </div>
+                        </div>
+                        <div className='col-6' style={estiloAdministracionProyecto}>
+                            <AdministracionProyectos />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+      </ProyectoProvider>
   </div>
     );
 };

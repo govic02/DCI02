@@ -14,6 +14,9 @@ import {crearPedido,eliminarPedido,obtenerPedidos } from '../controllers/pedidoC
 import  {actualizarUsuarioProyectoAsignadoPorIdUsuario,obtenerUsuarioProyectoAsignadoPorIdUsuario } from '../controllers/usuarioProyectoAsignadoController.js'; 
 import { manipularConfiguracionViewer,obtenerConfiguracionViewer} from '../controllers/ConfiguracionViewerController.js'; // Asegúrate de que la ruta sea correcta
 import { buscarCrearActualizarObjetoProyectoPlan, obtenerObjetosPorUrn ,CrearObjetoProyectoPlan,obtenerPorDbIdYUrn,procesarObjetosProyectoPlanMasivamente} from '../controllers/ObjetoProyectoPlanController.js';
+import {guardarSumaPisosGeneral,obtenerRegistroPorUrn} from '../controllers/RespuestaSumaPesosController.js';
+
+import {guardarActualizarRespuesta,obtenerRespuestaPorUrn} from '../controllers/SumaPesosPorDiametroController.js';
 
 import {
   crearFiltroOpcionesProyecto,crearFiltroOpcionesProyectoSiNoExiste,
@@ -288,6 +291,14 @@ app.post('/api/objetoProyectoPlanMasivo', procesarObjetosProyectoPlanMasivamente
 app.post('/api/crearobjetoProyectoPlan', CrearObjetoProyectoPlan);
 app.get('/api/objetoProyectoPlan/:urn', obtenerObjetosPorUrn);//
 app.get('/api/objetos/:dbId/:urn', obtenerPorDbIdYUrn);
+
+// Datos Estadísticas // 
+app.post('/api/sumaTotalpiso', guardarSumaPisosGeneral);
+app.get('/api/registro/:urn', obtenerRegistroPorUrn);
+
+// Ruta para guardar o actualizar una respuesta
+app.post('/api/respuestasDiametros', guardarActualizarRespuesta);
+app.get('/api/respuestasDiametros/:urn', obtenerRespuestaPorUrn);
 
 app.get('/', (req, res) => {
     res.json({ message: 'We are working for you!' });
