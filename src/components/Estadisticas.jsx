@@ -1,7 +1,9 @@
 import React, { useEffect, useState, useRef } from 'react';
 import GraficoPesosPorValor from './estadisticas/GraficoPesosPorValor';
 import GraficoPesosPorDiametroEnPiso from './estadisticas/GraficoPesosPorDiametroEnPiso';
-import GraficoLineasPesosPorDiametro from './estadisticas/GraficoLineasPesosPorDiametro'
+import GraficoLineasPesosPorDiametro from './estadisticas/GraficoLineasPesosPorDiametro';
+import  GraficoPedidosTotal from './estadisticas/GraficoPedidosTotal';
+import GraficosPedidoDiametro from './estadisticas/GraficosPedidoDiametro';
 import HeaderApp from './HeaderApp';
 import ControlEstadisticas from './estadisticas/ControlEstadisticas';
 import API_BASE_URL from '../config'; // Asegúrate de que la ruta sea correcta
@@ -53,9 +55,21 @@ const Estadisticas = () => {
                     <div className='col-6'>
                         <GraficoLineasPesosPorDiametro urn={urnSelected} />
                     </div>
-                    {/* Otros gráficos y componentes */}
+                    {/* Otros gráficos y componentes 
+                         
+                    */}
                 </div>
-                {/* Repite para más filas de gráficos si es necesario */}
+                <div className='row'>
+                    <div className='col-6'>
+                        <GraficoPedidosTotal urn={urnSelected} />
+                    </div>
+                    <div className='col-6'>
+                        <GraficosPedidoDiametro urn={urnSelected} />
+                    </div>
+                </div>
+                {/* Repite para más filas de gráficos si es necesario 
+                    
+                */}
             </div>
         </div>
     );

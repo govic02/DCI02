@@ -146,7 +146,7 @@ class ViewerProyectos extends React.Component {
         // Agrupar y sumar los pesos por el valor de filtro2 (ejemplo: AEC Piso)
         const sumaPesos = idsBarras.reduce((acumulador, barraActual) => {
             // Usar el valor de filtro2 como clave
-            const clave = barraActual[this.state.filtro2]; // Asume que filtro2 es una variable o constante que contiene la cadena 'AEC Piso'
+            const clave = barraActual.nombreFiltro2; // Asume que filtro2 es una variable o constante que contiene la cadena 'AEC Piso'
             const pesoActual = barraActual.pesoLineal * barraActual.longitudTotal / 100; // Convertir longitud en metros y calcular peso
     
             if (!acumulador[clave]) {
@@ -164,7 +164,7 @@ class ViewerProyectos extends React.Component {
     const resultadosPorPiso = {};
 
     idsBarras.forEach(barra => {
-        const piso = barra[this.state.filtro2];
+        const piso = barra.nombreFiltro2;
         const diametro = barra.diametroBarra;
         const peso = barra.pesoLineal * (barra.longitudTotal / 100); // Asume que longitudTotal está en mm, convertido a m
 
@@ -215,6 +215,7 @@ class ViewerProyectos extends React.Component {
         };
         console.log("datos para enviar pesos pisos",datosParaEnviar);
 
+       
         // Enviar los datos al servidor
         const url = `${API_BASE_URL}/api/sumaTotalpiso`; // Asegúrate de que API_BASE_URL esté definido
         const respuesta = await fetch(url, {
@@ -247,16 +248,32 @@ class ViewerProyectos extends React.Component {
         
             if (!respuesta.ok) throw new Error('Error al enviar datos al servidor para pesos por diámetro en piso');
         
-            console.log('Datos de pesos por diámetro en piso guardados con éxito:', await respuesta.json());
-            console.log("Datos desde server",respuestaDiametros);
+           // console.log('Datos de pesos por diámetro en piso guardados con éxito:', await respuesta.json());
+           // console.log("Datos desde server",respuestaDiametros);
         } catch (error) {
             console.error("Error al enviar total de peso por diámetro en piso:", error);
         }
 
-        if (!respuestaDiametros.ok) {
-            throw new Error('Error al enviar datos al servidor con diametros');
-        }
+      
+
+
+        const datosParaInsertar = {
+            urn: this.props.urn, // Utiliza la URN desde las props
+            lista: idsBarras.map(barra => ({ // Asegúrate de que este mapeo coincide con lo esperado por tu backend
+                nombreFiltro1: barra.nombreFiltro1, // Ajusta según tus datos
+                nombreFiltro2: barra.nombreFiltro2,
+                diametroBarra: barra.diametroBarra,
+                fecha: barra.fecha,
+                id: barra.id,
+                longitudTotal: barra.longitudTotal,
+                pesoLineal: barra.pesoLineal,
+            }))
+        };
+        console.log("pre barras insertadas",datosParaInsertar);
+        const urlBarras = `${API_BASE_URL}/api/barraurn`; 
+        const barrasInsertadas = await axios.post(urlBarras, datosParaInsertar);
         console.log("PESOS POR diametro piso", diametroPiso);
+        console.log("Barras insertadas",barrasInsertadas);
        
     } catch (error) {
         console.error("Error generando total de peso por pisos:", error);
@@ -292,8 +309,8 @@ class ViewerProyectos extends React.Component {
     
                         return {
                             id: element.dbId,
-                            [filtro1]: propFiltro1,
-                            [filtro2]: propFiltro2,
+                            nombreFiltro1: propFiltro1,
+                            nombreFiltro2: propFiltro2,
                             pesoLineal: parseFloat(pesoLineal),
                             longitudTotal: parseFloat(longitudTotal),
                             diametroBarra: parseFloat(diametroBarra),

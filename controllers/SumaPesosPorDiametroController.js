@@ -4,8 +4,7 @@ import RespuestaSumaPesosPorDiametro from '../models/pesosPorDiametroSchema.js';
 const guardarActualizarRespuesta = async (req, res) => {
     const { urn, nombreFiltro2, pesosPorPiso } = req.body;
     console.log("LLAMANDO A GUARDAR/ACTUALIZAR RESPUESTA POR DIAMETRO " + nombreFiltro2 + " para URN: " + urn);
-    console.log("pesos diametro" + pesosPorPiso );
-
+   
     try {
         // Buscar si ya existe un registro para la URN dada
         const registroExistente = await RespuestaSumaPesosPorDiametro.findOne({ urn });
@@ -27,7 +26,7 @@ const guardarActualizarRespuesta = async (req, res) => {
         res.json({ mensaje: 'Envío correcto', registro: nuevoRegistro });
     } catch (error) {
         console.error("Error al guardar/actualizar la respuesta por diametro para la URN:", error);
-        res.status(500).json({ mensaje: 'Error al guardar/actualizar la respuesta.' });
+        res.json({ mensaje: 'Error al guardar/actualizar la respuesta.' });
     }
 };
 

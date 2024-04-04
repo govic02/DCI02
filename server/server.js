@@ -16,6 +16,8 @@ import { manipularConfiguracionViewer,obtenerConfiguracionViewer} from '../contr
 import { buscarCrearActualizarObjetoProyectoPlan, obtenerObjetosPorUrn ,CrearObjetoProyectoPlan,obtenerPorDbIdYUrn,procesarObjetosProyectoPlanMasivamente} from '../controllers/ObjetoProyectoPlanController.js';
 import {guardarSumaPisosGeneral,obtenerRegistroPorUrn} from '../controllers/RespuestaSumaPesosController.js';
 
+import { insertarObjetoConDetalles, obtenerRegistroPorUrnBarras } from '../controllers/BarraUrnControlller.js';
+
 import {guardarActualizarRespuesta,obtenerRespuestaPorUrn} from '../controllers/SumaPesosPorDiametroController.js';
 
 import {
@@ -291,6 +293,14 @@ app.post('/api/objetoProyectoPlanMasivo', procesarObjetosProyectoPlanMasivamente
 app.post('/api/crearobjetoProyectoPlan', CrearObjetoProyectoPlan);
 app.get('/api/objetoProyectoPlan/:urn', obtenerObjetosPorUrn);//
 app.get('/api/objetos/:dbId/:urn', obtenerPorDbIdYUrn);
+
+// Insertar barras URN
+// 
+app.post('/api/barraurn', insertarObjetoConDetalles);
+
+// Ruta para obtener un registro por urn
+app.get('/api/barraurn/:urn', obtenerRegistroPorUrnBarras);
+
 
 // Datos Estadísticas // 
 app.post('/api/sumaTotalpiso', guardarSumaPisosGeneral);
