@@ -1,7 +1,19 @@
-import React from 'react';
+import React,{useEffect,useState} from 'react';
 import styles from '../styles/Visualizador.module.css';
 import { Link } from 'react-router-dom';
 const ColumnaIzquierda = ({ isCollapsed, handleCollapse }) => {
+    const [tipoUsuario, setTipoUsuario] = useState('');
+    useEffect(() => {
+        // Desplegar por consola el objeto token cada vez que el componente se carga o el token cambia
+        const tipo = localStorage.getItem('tipo');
+        
+        const userId = localStorage.getItem('userId');
+        const username = localStorage.getItem('username');
+        console.log("Token cargado:", tipo);
+        console.log("Token cargado:", userId);
+        console.log("Token cargado:", username);
+        setTipoUsuario(tipo);
+    }, []);
     const estiloLiNormal = {
         fontSize: '14px',
         height: '20px',
@@ -111,23 +123,32 @@ const liNormal = {
                                 Estadísticas 
                               </Link>
                             </li>
+
+                     
+                            {(tipoUsuario === 'administrador' || tipoUsuario === 'Administrador') && (
                             <li style={isCollapsed ? liNormalColap : liNormal}>
-                            <Link to="/ConfiguracionVisualizador" style={{ textDecoration: 'none', color: 'inherit' }}>
-                                <img src={isCollapsed ? "images/configuracion.svg" : "images/configuracion.svg"} alt="Estadísticas" style={isCollapsed ?imgStylesColap:imgStyles} />
-                              Configuración Visualizador
-                              </Link>
+                                <Link to="/ConfiguracionVisualizador" style={{ textDecoration: 'none', color: 'inherit' }}>
+                                    <img src={isCollapsed ? "images/configuracion.svg" : "images/configuracion.svg"} alt="Configuración" style={isCollapsed ? imgStylesColap : imgStyles} />
+                                    Configuración Visualizador
+                                </Link>
                             </li>
+                        )}
+                           
+                           
                             <li style={isCollapsed ? tituloLiColap : tituloLi}>
                                 {isCollapsed ? 'Administración': 'Administración'}
                                
                             </li>
                             {/* ... otros elementos <li> */}
+
+                            {(tipoUsuario === 'administrador' || tipoUsuario === 'Administrador') && (
                             <li style={isCollapsed ? liNormalColap : liNormal}>
                             <Link to="/proyectos" style={{ textDecoration: 'none', color: 'inherit' }}>
                                 <img src={isCollapsed ? "images/proyectos.svg" : "images/proyectos.svg"} alt="Estadísticas" style={isCollapsed ?imgStylesColap:imgStyles} />
                                 {isCollapsed ? <><br/><span>Proyectos</span></> : 'Proyectos'}
                                 </Link>
                             </li>
+                            )}
                             <li style={isCollapsed ? liNormalColap : liNormal}>
                             <Link to="/Perfil" style={{ textDecoration: 'none', color: 'inherit' }}>
                                 <img src={isCollapsed ? "images/micuenta.svg" : "images/micuenta.svg"} alt="Estadísticas" style={isCollapsed ?imgStylesColap:imgStyles} />
@@ -135,12 +156,16 @@ const liNormal = {
                                 {isCollapsed ? <><br/><span>Perfil</span></> : 'Perfil'}
                                 </Link>
                             </li>
+
+                            {(tipoUsuario === 'administrador' || tipoUsuario === 'Administrador') && (
                             <li style={isCollapsed ? liNormalColap : liNormal}>
                             <Link to="/AdministracionCuentas" style={{ textDecoration: 'none', color: 'inherit' }}>
                                 <img src={isCollapsed ? "images/administracioncuentas.svg" : "images/administracioncuentas.svg"} alt="Estadísticas" style={isCollapsed ?imgStylesColap:imgStyles} />
                                Administracion Cuentas
                             </Link>
                             </li>
+
+                            )}
                             {/* ... otros elementos <li> ... */}
                         </ul>
                     </div>

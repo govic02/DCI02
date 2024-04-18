@@ -18,7 +18,7 @@ const AdministradorDeVistas = ({ tabsRef,identificadoresActual,refViewer2 , urnB
     const abrirModal = () => setModalIsOpen(true);
     const cerrarModal = () => setModalIsOpen(false);
     const [modalEliminarIsOpen, setModalEliminarIsOpen] = useState(false);
-
+    const[esAdministradorEditor,setAdministradorEditor] = useState('');
     const { despliegaSavedVista, identificadoresActuales } = useActions(); // Ahora también accedes a identificadoresActuales aquí
     const urn = urnBuscada;
     
@@ -108,6 +108,9 @@ const AdministradorDeVistas = ({ tabsRef,identificadoresActual,refViewer2 , urnB
         }
     };
     useEffect(() => {
+        const tipoUsuario = localStorage.getItem('tipo'); 
+        const esAdministradorEditor = tipoUsuario === 'Administrador' || tipoUsuario === 'administrador'|| tipoUsuario === 'Editor';
+        setAdministradorEditor(esAdministradorEditor);
         cargarVistasGuardadas();
         // Otros efectos que necesiten ejecutarse en el montaje vendrían aquí
     }, [urn]); 
@@ -219,12 +222,16 @@ const AdministradorDeVistas = ({ tabsRef,identificadoresActual,refViewer2 , urnB
         <div style={estiloDelComponente}>
             <div style={estiloCabecera}>
                 <span>Administrador de Vistas</span>
+
+                {esAdministradorEditor && (
                 <button  onClick={abrirModal} style={estiloBoton}>
                     <img src="images/masVista.svg" alt="Nueva Vista"   style={estiloImagenBoton}/> Guardar 
-                </button>
+                </button>)}
+                {esAdministradorEditor && (
                 <button onClick={abrirModalEliminar} style={estiloBoton}>
                 <FontAwesomeIcon icon={faTrash} style={estiloImagenBoton}/> Eliminar
-        </button>
+                </button>)}
+                
 
             </div>
             <Select

@@ -12,6 +12,8 @@ const Proyectos = ({ token, selectedIds, onCameraChange, onSelectionChange, refV
     const [urnSelected, setUrnSelected] = useState('');
     const [idUsuarioSelected, setIdUsuarioSelected] = useState('');
     const [proyectoKeySelected, setProyectoKeySelected] = useState('');
+    const[esAdministrador,setAdministrador] = useState('');
+    const userId = localStorage.getItem('userId'); // ID del usuario
     const estiloProyectos = {
         backgroundColor: '#D8D8D8',
         padding: '10px',
@@ -32,6 +34,14 @@ const Proyectos = ({ token, selectedIds, onCameraChange, onSelectionChange, refV
         
     };
     useEffect(() => {
+        const tipoUsuario = localStorage.getItem('tipo'); 
+        const esAdministrador = tipoUsuario === 'Administrador' || tipoUsuario === 'administrador';
+        setAdministrador(esAdministrador);
+        console.log("tipo usuario",tipoUsuario);
+    }, []);
+    
+    useEffect(() => {
+ 
         const obtenerUsuarioProyecto = async () => {
           try {
             const response = await fetch(API_BASE_URL+'/api/getUserProyectId', {
@@ -40,12 +50,13 @@ const Proyectos = ({ token, selectedIds, onCameraChange, onSelectionChange, refV
                 'Content-Type': 'application/json'
               },
     
-              body: JSON.stringify({ idUsuario: '10' }) // Envía el ID del usuario en el cuerpo de la solicitud
+              body: JSON.stringify({ idUsuario: userId }) // Envía el ID del usuario en el cuerpo de la solicitud
             });
             const data = await response.json();
-            console.log(data);
-            setUrnSelected(data.urn); // Establecer el estado de urnSelected con la urn obtenida
-            setProyectoKeySeleccionado(data.proyectoKey);
+            console.log("DATOS ASOCIADOS A USUARIO",data);
+            console.log(data[0]);
+            setUrnSelected(data[0].urn); // Establecer el estado de urnSelected con la urn obtenida
+            setProyectoKeySeleccionado(data[0].proyectoKey);
           } catch (error) {
             console.error('Error al obtener el usuario-proyecto asignado:', error);
             toast.error('Error al obtener el usuario-proyecto asignado');
@@ -59,8 +70,11 @@ const Proyectos = ({ token, selectedIds, onCameraChange, onSelectionChange, refV
     console.log(proyectoKeySelected);
     const handleProyectoSeleccionado = (proyectoKey, urn) => {
         setProyectoSeleccionado({ proyectoKey, urn });
+        setUrnSelected( urn);
+        setProyectoKeySeleccionado(proyectoKey);
     };
-
+   
+ 
     useEffect(() => {
         const actualizarEstiloViewer = () => {
             const viewerElement = document.querySelector('.adsk-viewing-viewer');
@@ -80,7 +94,14 @@ const Proyectos = ({ token, selectedIds, onCameraChange, onSelectionChange, refV
             window.removeEventListener('resize', actualizarEstiloViewer); // Limpiar event listener al desmontar el componente
         };
     }, []);
-
+    if (!esAdministrador) {
+        return (
+            <div>
+                <HeaderApp />
+                <p>Ud no tiene los permisos necesarios para ver esta sección</p>
+            </div>
+        );
+    }
     return (
       <div>
       <HeaderApp proyectoKey={proyectoKeySeleccionado} />
@@ -112,7 +133,7 @@ const Proyectos = ({ token, selectedIds, onCameraChange, onSelectionChange, refV
                             </div>
                         </div>
                         <div className='col-6' style={estiloAdministracionProyecto}>
-                            <AdministracionProyectos />
+                            <AdministracionProyectos proyectoKey={proyectoKeySeleccionado}  urn={urnSelected} />
                         </div>
                     </div>
                 </div>

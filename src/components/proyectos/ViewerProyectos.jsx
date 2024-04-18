@@ -39,14 +39,40 @@ class ViewerProyectos extends React.Component {
             })
             .then(() => {
                 this.setupViewer();
+                this.checkDataAndGenerateWeights();
             })
             .catch(err => console.error(err));
 
             this.context.registerAction('generarTotalPesoPisos', this.generarTotalPesoPisos);
-          
+           
     }
 
-  
+    checkDataAndGenerateWeights = async () => {
+        const urn = this.props.urn; // Asegúrate de que urn esté disponible en el contexto
+        if (!urn) return; // Si no hay urn, no continuar
+    
+        try {
+            console.log("ingreso ");
+            const url = `${API_BASE_URL}/api/barraurn/${encodeURIComponent(urn)}`;
+            const response = await fetch(url);
+    
+            if (!response.ok) throw new Error('Failed to fetch bar data');
+    
+            const result = await response.json();
+    
+            if (!result.detalles || result.detalles.length === 0) {
+                // Si no hay detalles o están vacíos, ejecuta generarTotalPesoPisos
+                console.log('No se encontraron detalles, generando pesos totales de pisos...');
+                this.generarTotalPesoPisos();
+            } else {
+                console.log('Detalles recibidos:', result.detalles);
+            }
+        } catch (error) {
+            console.error('Error checking data:', error);
+            // Opcionalmente podrías intentar llamar a generarTotalPesoPisos incluso en caso de error
+            this.generarTotalPesoPisos();
+        }
+    }
     getForgeToken = () => {
         const url = `${API_BASE_URL}/api/gettoken`;
         return fetch(url)
@@ -91,11 +117,15 @@ class ViewerProyectos extends React.Component {
     }
     
     componentDidUpdate(prevProps) {
+       
         console.log("nueva urn a cargar");
         console.log(this.props.urn);
-       
+        
         if (this.viewer && (this.props.urn !== prevProps.urn || this.props.idUsuario !== prevProps.idUsuario || this.props.proyectoKey !== prevProps.proyectoKey)) {
             try {
+                this.viewer = new Autodesk.Viewing.GuiViewer3D(this.container.current);
+                this.viewer.start();
+                this.updateViewerState({})
                 Autodesk.Viewing.Document.load(
                     'urn:' + this.props.urn,
                     (doc) => {
@@ -162,7 +192,7 @@ class ViewerProyectos extends React.Component {
   // Asumiendo que obtenerIdsBarras y sumarPesosPorFiltro2 están definidas en el mismo ámbito
   sumarPesosPorDiametroEnPiso = async(idsBarras) => {
     const resultadosPorPiso = {};
-
+    console.log("sumo pesos por diametro desde visualizador");
     idsBarras.forEach(barra => {
         const piso = barra.nombreFiltro2;
         const diametro = barra.diametroBarra;
@@ -198,11 +228,12 @@ class ViewerProyectos extends React.Component {
 
 
    generarTotalPesoPisos = async () => {
+    console.log("llaman a generador de pisos");
     try {
         const idsBarras = await this.obtenerIdsBarras();
         // Asumiendo que sumarPesosPorFiltro2 devuelve directamente el resultado,
         // sin necesidad de esperar una promesa.
-        const resultado = this.sumarPesosPorFiltro2(idsBarras);
+        const resultado = await this.sumarPesosPorFiltro2(idsBarras);
         
         console.log("PESOS POR PISO", resultado); // Esto imprimirá un objeto con los totales de peso por cada valor de 'AEC Piso'
 
@@ -502,10 +533,15 @@ class ViewerProyectos extends React.Component {
             // Actualiza el estado con los resultados obtenidos.
             this.setState({ idsConFecha, idsSinFecha });
             this.cargarConfiguracion();
+
             await this.obtenerFiltros(this.props.urn).then(async () => {
                 try {
                     const idsBarras = await this.obtenerIdsBarras();
+                    if(!idsBarras.length ==0){
+                        await this.generarTotalPesoPisos();
                     console.log("IDs de barras obtenidos:", idsBarras);
+                    }
+                    
                 } catch (error) {
                     console.error("Error al obtener IDs de barras:", error);
                 }

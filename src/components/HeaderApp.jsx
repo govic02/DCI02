@@ -1,13 +1,45 @@
-import React from 'react';
+import React, { useState } from 'react';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
+import Button from '@mui/material/Button';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import BandejaDeEntrada from './header/BandejaDeEntrada';
+import { useAuth } from '../context/AuthContext';
+import ReportProblemIcon from '@mui/icons-material/ReportProblem'; // Ícono de exclamación
 
 const headerHeight = '64px';
 
 const HeaderApp = ({ proyectoKey }) => {
+    const [anchorEl, setAnchorEl] = useState(null);
+    const { logout } = useAuth();
+    const [bandejaVisible, setBandejaVisible] = useState(false);
     console.log("Proyecto seleccionado Header:", proyectoKey);
+
+    const handleOpenBandeja = () => {
+        setBandejaVisible(true);
+    };
+
+    const handleCloseBandeja = () => {
+        setBandejaVisible(false);
+    };
+    const handleClick = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleClose = () => {
+        setAnchorEl(null);
+    };
+
+    const handleLogout = () => {
+        handleClose(); // Cierra el menú
+        logout();
+        window.location.reload();
+        console.log("cerrando sesión");
+    };
+
     return (
         <AppBar position="static" style={{ backgroundColor: 'white', color: '#222223', minHeight: headerHeight, zIndex: '1000' }}>
             <Toolbar>
@@ -15,7 +47,14 @@ const HeaderApp = ({ proyectoKey }) => {
                 <Typography variant="h6" style={{ flexGrow: 1 }}>
                   {proyectoKey}
                 </Typography>
-                <img src="/images/campana.svg" alt="Imagen" style={{ width: '30px', marginRight: '15px' }} /> {/* Imagen adicional a la izquierda del círculo */}
+                <Button  onClick={handleOpenBandeja} variant="text"  style={{
+                    color: '#DA291C',
+                    marginRight: '20px'
+                }}>
+                      <img src="/images/campana.svg" alt="Imagen" style={{ width: '30px', marginRight: '15px' }} />
+                   <b> RDI</b>
+                </Button>
+              
                 <div style={{
                     display: 'flex',
                     justifyContent: 'center',
@@ -26,10 +65,21 @@ const HeaderApp = ({ proyectoKey }) => {
                     width: '40px',
                     height: '40px',
                     fontSize: '18px',
-                    fontWeight: 'bold'
-                }}>
+                    fontWeight: 'bold',
+                    cursor: 'pointer'
+                }} onClick={handleClick}>
                     DF
                 </div>
+                <Menu
+                    id="simple-menu"
+                    anchorEl={anchorEl}
+                    keepMounted
+                    open={Boolean(anchorEl)}
+                    onClose={handleClose}
+                >
+                    <MenuItem onClick={handleLogout}>Logout</MenuItem>
+                </Menu>
+                <BandejaDeEntrada open={bandejaVisible} onClose={handleCloseBandeja} />
             </Toolbar>
         </AppBar>
     );

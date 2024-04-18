@@ -14,6 +14,25 @@ const obtenerPedido = async (req, res) => {
         res.status(500).send(error.message);
     }
 };
+const obtenerAdicionalesPorUrn = async (req, res) => {
+    try {
+        const { urn } = req.query; // Recibe la URN como parámetro de consulta
+        if (!urn) {
+            return res.status(400).send('Se requiere una URN para buscar pedidos adicionales');
+        }
+
+        // Buscar todos los pedidos adicionales que coincidan con la URN dada
+        const adicionales = await AdicionalesPedidos.find({ urn }).populate('pedidoId', 'nombre_pedido');
+        if (!adicionales.length) {
+            return res.status(204).send('No se encontraron pedidos adicionales para la URN proporcionada');
+        }
+
+        res.json(adicionales);
+    } catch (error) {
+        console.error('Error al obtener pedidos adicionales por URN:', error);
+        res.status(500).send(error.message);
+    }
+};
 const crearAdicionalPedido = async (req, res) => {
     try {
         console.log("Entro a pedidos adicionales");
@@ -183,5 +202,6 @@ export {
     eliminarPedido,
     crearAdicionalPedido,
     obtenerAdicionalesPorPedidoId,
-    eliminarAdicionalPedido
+    eliminarAdicionalPedido,
+    obtenerAdicionalesPorUrn
 };

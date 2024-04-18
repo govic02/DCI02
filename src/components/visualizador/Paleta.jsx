@@ -16,7 +16,7 @@ const Paleta =  ({ urnBuscada })  => {
     const [fechaPlan, setFechaPlan] = useState('');
     const [fechaInstalacion, setFechaInstalacion] = useState('');
     const { selectedObjectProps,resultadoFierros, seleccionActual,obtenerIdsConFecha, obtenerIdsSinFecha,buscaBarrasHormigon,cleanModel,gestionarYpintarIds} = useContext(ActionsContext); // Aquí usas useContext para acceder al contexto
-    
+    const[esAdministradorEditor,setAdministradorEditor] = useState('');
 
   
     
@@ -77,6 +77,9 @@ const Paleta =  ({ urnBuscada })  => {
         
     };
     useEffect(() => {
+        const tipoUsuario = localStorage.getItem('tipo'); 
+        const esAdministradorEditor = tipoUsuario === 'Administrador' || tipoUsuario === 'administrador'|| tipoUsuario === 'Editor';
+        setAdministradorEditor(esAdministradorEditor);
         console.log("Fierros buscados desde paleta", resultadoFierros);
         console.log("Seleccion actual desde Paleta", seleccionActual);
     }, [resultadoFierros,seleccionActual]); // Dependencia del efecto
@@ -243,14 +246,14 @@ const Paleta =  ({ urnBuscada })  => {
         )}
   {selectedObjectProps.properties && selectedObjectProps.properties.length > 0 && (
         <div style={{ display: 'flex', justifyContent: 'center', marginTop: '10px' }}>
-          
+           {esAdministradorEditor && (
                 <button 
                     style={{ backgroundColor: '#DA291C', color: 'white', padding: '10px 20px', borderRadius: '5px', border: 'none', cursor: 'pointer', fontSize: '10PT', marginRight: '10px' }} 
                     onClick={handleEditarFechasClick}
                 >
                     Editar Fechas
                 </button>
-           
+           )}
             
             <button 
                 style={{ backgroundColor: '#DA291C', color: 'white', padding: '10px 20px', borderRadius: '5px', border: 'none', cursor: 'pointer', fontSize: '10PT' }}

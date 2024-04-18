@@ -41,7 +41,7 @@ const obtenerRegistroPorUrnBarras = async (req, res) => {
 
     try {
         const registro = await BarraUrn.findOne({ urn });
-        console.log()
+        console.log("barras generales",registro )
         if (!registro) {
             return  res.json("No existen Registros");
         }

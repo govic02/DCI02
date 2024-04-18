@@ -17,7 +17,7 @@ const ListadoProyectos = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) 
   const [urnSelected, setUrnSelected] = useState(''); // Variable para almacenar la urn
   const [idUsuarioSelected, setIdUsuarioSelected] = useState(''); // Variable para almacenar el id de usuario
   const [proyectoKeySelected, setProyectoKeySelected] = useState(''); // Variable para almacenar el proyectoKey
-
+  const userId = localStorage.getItem('userId'); // ID del usuario
 
   const cardStyle = {
     marginTop: '25px',
@@ -73,6 +73,8 @@ const ListadoProyectos = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) 
     toast.info('Abriendo Proyecto...'); // Duración en milisegundos
     setProyectoSeleccionado(proyectoKey);
     console.log("URN del proyecto:", urn);
+    console.log("Nombre de  proyecto:", proyectoKey);
+    setUrnSelected(urn);
     onProyectoSeleccionado(proyectoKey, urn); // Llamar a la función onProyectoSeleccionado
 
     // Llamar a translateObject para forzar la traducción del archivo
@@ -85,7 +87,7 @@ const ListadoProyectos = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) 
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ idUsuario: '10', urn, proyectoKey })
+        body: JSON.stringify({ idUsuario: userId, urn, proyectoKey })
         
       });
       const data = await response.json();
@@ -189,13 +191,21 @@ const ListadoProyectos = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) 
             'Content-Type': 'application/json'
           },
 
-          body: JSON.stringify({ idUsuario: '10' }) // Envía el ID del usuario en el cuerpo de la solicitud
+          body: JSON.stringify({ idUsuario: userId }) // Envía el ID del usuario en el cuerpo de la solicitud
         });
         const data = await response.json();
-        setUrnSelected(data.urn);
-        setIdUsuarioSelected(data.idUsuario);
-        setProyectoKeySelected(data.proyectoKey);
-        seleccionarProyectoPorNombre(data.proyectoKey);
+
+        if (data.length > 0) {  // Asegúrate de que data es un arreglo y tiene al menos un elemento
+          setUrnSelected(data[0].urn);
+          setIdUsuarioSelected(data[0].idUsuario);
+          setProyectoKeySelected(data[0].proyectoKey);
+          seleccionarProyectoPorNombre(data[0].proyectoKey); // Toma el proyectoKey del primer proyecto
+          console.log("Urn seleccionada en useEffect:", data[0].urn);
+          console.log("Proyecto Key seleccionado en useEffect:", data[0].proyectoKey);
+        } else {
+          console.log("No hay proyectos asignados al usuario");
+        }
+        
       } catch (error) {
         console.error('Error al obtener el usuario-proyecto asignado:', error);
         toast.error('Error al obtener el usuario-proyecto asignado');

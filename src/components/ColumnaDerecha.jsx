@@ -6,8 +6,10 @@ import AdministradorDeVistas from './visualizador/AdministradorDeVistas';
 import Paleta from './visualizador/Paleta';
 import HeaderApp from './HeaderApp';
 import { ActionsProvider } from '../context/ActionContext';
+import { useAuth } from '../context/AuthContext';
 import API_BASE_URL from '../config';
 const ColumnaDerecha = ({ isCollapsed, token, urn, selectedIds, onCameraChange, onSelectionChange, refViewer }) => {
+  const { token: tokenContexto } = useAuth();
     const [urnSelected, setUrnSelected] = useState('');
     const [proyectoKeySeleccionado, setProyectoKeySeleccionado] = useState('');
     const estiloColapsado = {
@@ -27,23 +29,43 @@ const ColumnaDerecha = ({ isCollapsed, token, urn, selectedIds, onCameraChange, 
     const guardarIdentificadores = (identificadores) => {
         setIdentificadoresActual(identificadores);
     };
+
+    
     useEffect(() => {
       const obtenerUsuarioProyecto = async () => {
+        console.log("token desde jwt",tokenContexto);
+        const tipo = localStorage.getItem('tipo');
+        
+        const userId = localStorage.getItem('userId');
+        const username = localStorage.getItem('username');
+        console.log("token desde jwt",userId);
+        console.log("token desde jwt",username);
         try {
           const response = await fetch(API_BASE_URL+'/api/getUserProyectId', {
             method: 'POST',
             headers: {
-              'Content-Type': 'application/json'
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${tokenContexto}`
             },
   
-            body: JSON.stringify({ idUsuario: '10' }) // Envía el ID del usuario en el cuerpo de la solicitud
+            body: JSON.stringify({ idUsuario: userId }) // Envía el ID del usuario en el cuerpo de la solicitud
           });
-          const data = await response.json();
-          setUrnSelected(data.urn); 
-          setProyectoKeySeleccionado(data.proyectoKey);
-          console.log("Urn seleccionada en useEffect:", urnSelected);
-          console.log("Urn recibida en la respuesta:", data.urn);
-          console.log("Urn recibida en la respuesta:", urnSelected);
+          if (response.ok) {
+            const data = await response.json();
+            console.log("listado de proyectos asignados al usuario", data);
+            
+            if (data.length > 0) {  // Asegúrate de que data es un arreglo y tiene al menos un elemento
+              setUrnSelected(data[0].urn); // Toma el URN del primer proyecto
+              setProyectoKeySeleccionado(data[0].proyectoKey); // Toma el proyectoKey del primer proyecto
+              console.log("Urn seleccionada en useEffect:", data[0].urn);
+              console.log("Proyecto Key seleccionado en useEffect:", data[0].proyectoKey);
+            } else {
+              console.log("No hay proyectos asignados al usuario");
+            }
+          } else {
+            const errorData = await response.text(); // O response.json() dependiendo de cómo el servidor envía errores
+            throw new Error(errorData || 'Error al obtener los proyectos');
+          }
         } catch (error) {
           console.error('Error al obtener el usuario-proyecto asignado:', error);
           toast.error('Error al obtener el usuario-proyecto asignado');

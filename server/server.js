@@ -3,7 +3,7 @@ import cors from 'cors';
 import fetch from 'node-fetch';
 import multer from 'multer';
 import stream from 'stream';
-
+import jwt from 'jsonwebtoken';
 import { getPublicToken,getInternalToken ,getClient} from './oauth.js'; // Ruta corregida
 import forgeSDK from 'forge-apis'; // Importa todo el paquete forge-apis
 const { DerivativesApi, JobPayload, JobPayloadInput, JobPayloadOutput, JobSvfOutputPayload } = forgeSDK; // Extrae los objetos que necesitas
@@ -15,10 +15,12 @@ import  {actualizarUsuarioProyectoAsignadoPorIdUsuario,obtenerUsuarioProyectoAsi
 import { manipularConfiguracionViewer,obtenerConfiguracionViewer} from '../controllers/ConfiguracionViewerController.js'; // Asegúrate de que la ruta sea correcta
 import { buscarCrearActualizarObjetoProyectoPlan, obtenerObjetosPorUrn ,CrearObjetoProyectoPlan,obtenerPorDbIdYUrn,procesarObjetosProyectoPlanMasivamente} from '../controllers/ObjetoProyectoPlanController.js';
 import {guardarSumaPisosGeneral,obtenerRegistroPorUrn} from '../controllers/RespuestaSumaPesosController.js';
-
+import{ obtenerUsuario, obtenerUsuarios,crearUsuario,actualizarUsuario,eliminarUsuario} from '../controllers/usersController.js'
 import { insertarObjetoConDetalles, obtenerRegistroPorUrnBarras } from '../controllers/BarraUrnControlller.js';
-
+import {crearUsuarioProyectoAsignado, obtenerUsuariosProyectoAsignadoPorUrn,eliminarUsuarioProyectoAsignado} from '../controllers/usuarioProyectoAsignadoController.js'
 import {guardarActualizarRespuesta,obtenerRespuestaPorUrn} from '../controllers/SumaPesosPorDiametroController.js';
+import { crearActualizarDiametroEquivalente, obtenerDiametroPorUrn } from '../controllers/DiametroEquivalenteController.js';
+import { crearActualizarPesoPromedio,obtenerPesoPromedioPorUrn } from '../controllers/PesosPromedioController.js';
 
 import {
   crearFiltroOpcionesProyecto,crearFiltroOpcionesProyectoSiNoExiste,
@@ -28,14 +30,18 @@ import {
   actualizarFiltroOpcionesProyecto,
   eliminarFiltroOpcionesProyecto
 } from '../controllers/FiltrosOpcionesProyectoController.js'; 
-import { crearAdicionalPedido,obtenerAdicionalesPorPedidoId ,eliminarAdicionalPedido} from '../controllers/pedidoController.js';
+import { crearAdicionalPedido,obtenerAdicionalesPorPedidoId ,eliminarAdicionalPedido,obtenerAdicionalesPorUrn} from '../controllers/pedidoController.js';
+import {crearActualizarLongitudPromedio ,obtenerLongitudPromedioPorUrn,eliminarLongitudPromedioPorUrn} from '../controllers/LongitudesPromedioController.js';
+import {crearActualizarPesosTotalversusPedidos, obtenerPesosTotalversusPedidosPorUrn} from '../controllers/PesosTotalversusPedidosController.js';
+
+
 import { 
   obtenerVistasSave, obtenerVistaSave,obtenerVistasPorUrn,crearVistaSave, eliminarVistaSave} from '../controllers/VistasSaveController.js'; // Importar los controladores de las vistas guardadas
-
+import Users from '../models/users.js';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 dotenv.config();
-
+const JWT_SECRET = process.env.JWT_SECRET || 'Yb8+6Wxw9QFgJP9+R+7c31aD+aRfR2jCJCatX6Q8fgM=';
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('Conexión exitosa a MongoDB'))
   .catch(err => console.error('No se pudo conectar a MongoDB:', err));
@@ -49,7 +55,62 @@ app.use(async (req, res, next) => {
   req.oauth_client = getClient();
   next();
 });
+// Middleware de autenticación
+const authenticateJWT = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  if (authHeader) {
+      const token = authHeader.split(' ')[1];
 
+      jwt.verify(token, JWT_SECRET, (err, user) => {
+          if (err) {
+              return res.sendStatus(403);
+          }
+
+          req.user = user;
+          next();
+      });
+  } else {
+      res.sendStatus(401);
+  }
+};
+app.post('/api/login', async (req, res) => {
+  const { username, password } = req.body;
+  console.log(username);
+  console.log(password);
+  try {
+      // Buscar el usuario por username
+      const usuario = await Users.findOne({ username });
+      console.log("respuesta usuario consulta");
+      console.log(usuario);
+      if (!usuario) {
+          console.log("no hay log");
+          return res.status(200).json({ error: 'Usuario no encontrado' });
+      }else{
+        console.log("si hay un usuario con este");
+        if (password !== usuario.password) {
+          console.log("no hay log");
+          return res.status(200).json({ error: 'Contraseña incorrecta' });
+         }
+         else{
+          const token = jwt.sign({ userId: usuario.idUsu, username: usuario.username,  tipoUsuario: usuario.tipoUsuario }, JWT_SECRET, { expiresIn: '1h' });
+          console.log("ok si hay log");
+          console.log(token);
+          res.json({ message: 'Autenticación exitosa', token,userData: {
+                    userId: usuario.idUsu, 
+                    username: usuario.username, 
+                    tipoUsuario: usuario.tipoUsuario
+                } });
+
+         }
+
+      }
+
+     
+      
+  } catch (error) {
+      res.status(500).json({ error: error.message });
+  }
+});
 
 
 function randomString(length) {
@@ -86,6 +147,14 @@ app.get('/api/gettoken', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
+//*******Gestion de usuarios */
+app.get('/api/usuarios', obtenerUsuarios); // Obtener todos los usuarios
+app.get('/api/usuarios/:idUsu', obtenerUsuario); // Obtener un usuario por idUsu
+app.post('/api/usuarios', crearUsuario); // Crear un nuevo usuario
+app.put('/api/usuarios/:idUsu', actualizarUsuario); // Actualizar un usuario por idUsu
+app.delete('/api/usuarios/:idUsu',eliminarUsuario); // Eliminar un usuario por idUsu
+//
 app.get('/api/bucketsProyectos', async (req, res, next) => {
   const bucket_name = req.query.id;
   const opc = req.query.opc;
@@ -257,8 +326,11 @@ app.post('/api/deleteObject', async (req, res, next) => {
       }
   
 });
-
-
+// Gestión asignaciones usuario a proyecto 
+app.post('/api/asignarUsuarioProyecto', crearUsuarioProyectoAsignado);
+app.get('/api/usuariosProyectoAsignado/:urn',obtenerUsuariosProyectoAsignadoPorUrn);
+app.delete('/api/usuariosProyectoAsignado/:urn/:idUsuario', eliminarUsuarioProyectoAsignado);
+/////
 app.post('/api/filtrosOpcionesProyecto', crearFiltroOpcionesProyectoSiNoExiste);
 app.get('/api/vistasGuardadas', obtenerVistasSave); // Obtener todas las vistas guardadas
 
@@ -272,11 +344,10 @@ app.post('/api/getUserProyectId',  obtenerUsuarioProyectoAsignadoPorIdUsuario  )
 app.post('/api/setproyectoAdmin',  actualizarUsuarioProyectoAsignadoPorIdUsuario );// buscar proyectoasignado, en caso de que no crea una colección y le ingresa la urn
 app.post('/api/pedido', crearPedido);
 app.post('/api/adicionalesPedido', crearAdicionalPedido);
+app.get('/api/obtenerAdicionalesPorUrn/:urn',obtenerAdicionalesPorUrn);
 
 app.get('/api/filtros', obtenerFiltros );
-app.get('/api/data', (req, res) => {
-    res.json({ mensaje: 'Datos de ejemplo' });
-});
+
 app.get('/api/vistasGuardadasPorUrn/:urn', obtenerVistasPorUrn);
 app.get('/api/filtrosPorUrn/:urn', obtenerFiltrosOpcionesProyectoPorUrn);
 app.get('/api/listPedidos', obtenerPedidos); //
@@ -304,7 +375,22 @@ app.get('/api/barraurn/:urn', obtenerRegistroPorUrnBarras);
 
 // Datos Estadísticas // 
 app.post('/api/sumaTotalpiso', guardarSumaPisosGeneral);
-app.get('/api/registro/:urn', obtenerRegistroPorUrn);
+app.get('/api/pesosTotales/:urn', obtenerRegistroPorUrn);
+
+  // estadisticas - diametro equivalente
+app.post('/api/diametroequivalente', crearActualizarDiametroEquivalente);
+app.get('/api/diametroequivalente/:urn', obtenerDiametroPorUrn);
+  // estadisticas longitudes promedio      
+app.post('/api/crearLongitudPromedio', crearActualizarLongitudPromedio);
+app.get('/api/getLongitudPromedio/:urn', obtenerLongitudPromedioPorUrn);
+  // estadistica pesos promedio   
+app.post('/api/crearPesoPromedio', crearActualizarPesoPromedio);
+app.get('/api/getPesoPromedio/:urn',obtenerPesoPromedioPorUrn);
+
+  // estadisticas pesos total vs pedidos , 
+  app.post('/api/crearPesovsPedidos', crearActualizarPesosTotalversusPedidos);
+  app.get('/api/getPesovsPedidos/:urn',obtenerPesosTotalversusPedidosPorUrn);
+
 
 // Ruta para guardar o actualizar una respuesta
 app.post('/api/respuestasDiametros', guardarActualizarRespuesta);

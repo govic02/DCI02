@@ -44,6 +44,7 @@ const TabComponent = ({ urnBuscada }) => {
     const [adicionales, setAdicionales] = useState([]);
     const [selectedButtons, setSelectedButtons] = useState({});
     const { updateIdentificadoresActuales } = useActions();
+    const[esAdministradorEditor,setAdministradorEditor] = useState('');
     const handleOpenModalWithInfo = async (pedido) => {
         setModalInfo({ show: true, data: pedido });
         await cargarAdicionales(pedido._id); // Llama a cargarAdicionales aquí
@@ -111,7 +112,7 @@ const TabComponent = ({ urnBuscada }) => {
             if (Array.isArray(response.data)) {
                 setAdicionales(response.data);
             } else {
-                console.error("La respuesta no es un arreglo", response.data);
+                console.error("No hay datos", response.data);
                 setAdicionales([]);
             }
         } catch (error) {
@@ -132,7 +133,7 @@ const TabComponent = ({ urnBuscada }) => {
             console.log(modalInfo.data._id);
             console.log(modalInfo);
           // Envía el adicional al servidor, asumiendo que modalInfo.data._id es el ID del pedido actual
-          await axios.post(API_BASE_URL+`/api/adicionalesPedido`, { ...adicional, pedidoId: modalInfo.data._id });
+          await axios.post(API_BASE_URL+`/api/adicionalesPedido`, { ...adicional, pedidoId: modalInfo.data._id , urn:urnBuscada});
       
           // Llama a cargarAdicionales para actualizar la lista de adicionales
           await cargarAdicionales(modalInfo.data._id);
@@ -354,6 +355,11 @@ const TabComponent = ({ urnBuscada }) => {
     };
     
     useEffect(() => {
+
+        const tipoUsuario = localStorage.getItem('tipo'); 
+        const esAdministradorEditor = tipoUsuario === 'Administrador' || tipoUsuario === 'administrador'|| tipoUsuario === 'Editor';
+        setAdministradorEditor(esAdministradorEditor);
+ 
         const cargarAdicionales = async () => {
           if(modalInfo.data._id) { // Asegúrate de que hay un pedido seleccionado
             try {
@@ -524,9 +530,10 @@ const TabComponent = ({ urnBuscada }) => {
                         </div>
             {/* Columna 4 con botón */}
                         <div style={{ flex: 1, textAlign: 'center' }}>
+                        {esAdministradorEditor && (
                             <Button  onClick={handleOpenModal} variant="contained" style={{ backgroundColor: '#DA291C', color: 'white' }}>
                                 Nuevo Pedido
-                            </Button>
+                            </Button>)}
                         </div>
                   </div>
                   <div style={{  flexWrap: 'wrap', justifyContent: 'space-between' ,width:'100%'}}>
@@ -578,7 +585,10 @@ const TabComponent = ({ urnBuscada }) => {
                         <input type="text" placeholder="Diámetro" value={adicional.diametro} onChange={e => setAdicional({ ...adicional, diametro: e.target.value })} style={{  width:'5px',margin: '0 5px', flex: 1 }} />
                         <input type="text" placeholder="Cantidad" value={adicional.cantidad} onChange={e => setAdicional({ ...adicional, cantidad: e.target.value })} style={{ width:'5px', margin: '0 5px', flex: 1 }} />
                         <input type="text" placeholder="Largo" value={adicional.largo} onChange={e => setAdicional({ ...adicional, largo: e.target.value })} style={{ width:'5px',margin: '0 5px', flex: 1 }} />
+                     
+                        {esAdministradorEditor && (
                         <Button onClick={agregarAdicional} style={{ margin: '0 5px',backgroundColor: '#DA291C',borderColor: '#DA291C' }}><FontAwesomeIcon icon={faPlus} /></Button>
+                        )}
                     </div>
                     <br></br>
                     <ul className="list-group">
@@ -591,24 +601,28 @@ const TabComponent = ({ urnBuscada }) => {
                                 <span> | </span>
                                 <span className="fw-bold">Largo:</span> <span style={{ color: '#DA291C'  }}>{adicional.largo}&nbsp;Mtrs</span>
                             </div>
+                            {esAdministradorEditor && (
                             <Button variant="outline-danger" onClick={() => borrarAdicional(adicional._id)}>
                                 <FontAwesomeIcon icon={faTrash} />
-                            </Button>
+                            </Button>)}
                             </li>
                         ))}
                       </ul>
 
                     </Modal.Body>
                 <Modal.Footer>
+                {esAdministradorEditor && (
                 <Button variant="outline-danger" className="modal-button" onClick={() => handleDeleteConfirmation(modalInfo.data)}>
                     Borrar
-                </Button>
-                <Button variant="outline-danger" className="modal-button" onClick={() => console.log('Agregar nuevos elementos')}>
+                </Button>)}
+                {esAdministradorEditor && (
+                <Button variant="outline-danger" className="modal-button" onClick={() => agregarAdicional()}>
                     Agregar nuevos elementos
-                </Button>
+                </Button>)}
+                {esAdministradorEditor && (
                 <Button variant="outline-danger" className="modal-button" onClick={() => setModalInfo({ ...modalInfo, show: false })}>
                     Cerrar
-                </Button>
+                </Button>)}
                 </Modal.Footer>
             </Modal>
             <Modal show={showModal} onHide={handleCloseModal} centered>

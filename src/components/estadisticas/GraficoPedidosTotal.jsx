@@ -6,6 +6,7 @@ import Typography from '@mui/material/Typography';
 import { Pie } from 'react-chartjs-2'; // Importar Pie para el gráfico de torta
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import API_BASE_URL from '../../config';
+import { Height } from '@mui/icons-material';
 
 // Registramos los componentes necesarios de ChartJS para un gráfico de torta
 ChartJS.register(ArcElement, Tooltip, Legend);
@@ -13,9 +14,17 @@ ChartJS.register(ArcElement, Tooltip, Legend);
 const GraficoPedidosTotal = ({ urn }) => {
     const [datosGrafico, setDatosGrafico] = useState({
         labels: [],
+        maintainAspectRatio: false,
         datasets: [],
+       
+       
     });
-
+    const options = {
+       
+        aspectRatio: 2, // Forzar que el gráfico sea siempre cuadrado (opcional)
+        responsive: true, // Hacer que el gráfico se redimensione con el contenedor
+       
+    };
     useEffect(() => {
         const fetchDatos = async () => {
             try {
@@ -56,17 +65,17 @@ const GraficoPedidosTotal = ({ urn }) => {
         marginLeft: '40px',
         marginRight: '40px',
         marginTop: '40px',
-        borderRadius: '20px',
+        borderRadius: '20px'
     };
 
     return (
         <Card style={cardStyle}>
-            <CardContent>
+            <CardContent >
                 <Typography variant="h5" component="h2" style={{ fontSize: 14 }}>
                     Distribución del Peso Total por Pedido
                 </Typography>
-                <div>
-                    <Pie data={datosGrafico} />
+                <div style={{ height: '50%' }}>
+                    <Pie data={datosGrafico}   options={options}/>
                 </div>
             </CardContent>
         </Card>
