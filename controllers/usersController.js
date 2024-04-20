@@ -18,6 +18,25 @@ const obtenerUsuarios = async (req, res) => {
     }
 };
 
+const obtenerUsuariosAdministradores = async (req, res) => {
+  try {
+    console.log("busco administradores");
+      // Utilizamos una expresión regular para ignorar mayúsculas o minúsculas en la búsqueda
+      const usuariosAdministradores = await Users.find(
+          { tipoUsuario: /^administrador$/i }, 
+          '-password' // Excluir la contraseña de los resultados
+      );
+      if (usuariosAdministradores.length === 0) {
+          return res.status(404).send('No se encontraron usuarios administradores.');
+      }
+      console.log("Resultado administradores", usuariosAdministradores);
+      res.json(usuariosAdministradores);
+  } catch (error) {
+      console.error("Error al obtener usuarios administradores:", error);
+      res.status(500).send(error.message);
+  }
+};
+
 // Obtener un usuario por idUsu
 const obtenerUsuario = async (req, res) => {
     try {
@@ -118,5 +137,6 @@ export  {
     obtenerUsuario,
     crearUsuario,
     actualizarUsuario,
-    eliminarUsuario
+    eliminarUsuario,
+    obtenerUsuariosAdministradores
 };

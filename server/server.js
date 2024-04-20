@@ -15,12 +15,20 @@ import  {actualizarUsuarioProyectoAsignadoPorIdUsuario,obtenerUsuarioProyectoAsi
 import { manipularConfiguracionViewer,obtenerConfiguracionViewer} from '../controllers/ConfiguracionViewerController.js'; // Asegúrate de que la ruta sea correcta
 import { buscarCrearActualizarObjetoProyectoPlan, obtenerObjetosPorUrn ,CrearObjetoProyectoPlan,obtenerPorDbIdYUrn,procesarObjetosProyectoPlanMasivamente} from '../controllers/ObjetoProyectoPlanController.js';
 import {guardarSumaPisosGeneral,obtenerRegistroPorUrn} from '../controllers/RespuestaSumaPesosController.js';
-import{ obtenerUsuario, obtenerUsuarios,crearUsuario,actualizarUsuario,eliminarUsuario} from '../controllers/usersController.js'
+import{ obtenerUsuario, obtenerUsuarios,crearUsuario,actualizarUsuario,eliminarUsuario,obtenerUsuariosAdministradores} from '../controllers/usersController.js'
 import { insertarObjetoConDetalles, obtenerRegistroPorUrnBarras } from '../controllers/BarraUrnControlller.js';
 import {crearUsuarioProyectoAsignado, obtenerUsuariosProyectoAsignadoPorUrn,eliminarUsuarioProyectoAsignado} from '../controllers/usuarioProyectoAsignadoController.js'
 import {guardarActualizarRespuesta,obtenerRespuestaPorUrn} from '../controllers/SumaPesosPorDiametroController.js';
 import { crearActualizarDiametroEquivalente, obtenerDiametroPorUrn } from '../controllers/DiametroEquivalenteController.js';
 import { crearActualizarPesoPromedio,obtenerPesoPromedioPorUrn } from '../controllers/PesosPromedioController.js';
+import { crearConversacion,
+  agregarMensaje,
+  eliminarMensaje,
+  eliminarConversacion,
+  editarConversacion,
+  editarMensaje,
+  obtenerConversacionesPorParticipante,
+  obtenerConversacionPorId } from '../controllers/RDImensajesController.js';
 
 import {
   crearFiltroOpcionesProyecto,crearFiltroOpcionesProyectoSiNoExiste,
@@ -150,6 +158,7 @@ app.get('/api/gettoken', async (req, res) => {
 
 //*******Gestion de usuarios */
 app.get('/api/usuarios', obtenerUsuarios); // Obtener todos los usuarios
+app.get('/api/usuariosAdministradores',obtenerUsuariosAdministradores);
 app.get('/api/usuarios/:idUsu', obtenerUsuario); // Obtener un usuario por idUsu
 app.post('/api/usuarios', crearUsuario); // Crear un nuevo usuario
 app.put('/api/usuarios/:idUsu', actualizarUsuario); // Actualizar un usuario por idUsu
@@ -395,6 +404,29 @@ app.get('/api/getPesoPromedio/:urn',obtenerPesoPromedioPorUrn);
 // Ruta para guardar o actualizar una respuesta
 app.post('/api/respuestasDiametros', guardarActualizarRespuesta);
 app.get('/api/respuestasDiametros/:urn', obtenerRespuestaPorUrn);
+
+
+// Mensajes  
+// Endpoint for creating a new conversation
+app.post('/api/conversaciones', crearConversacion);
+
+// Endpoint for adding a message to a conversation
+app.post('/api/conversaciones/mensajes', agregarMensaje);
+
+// Endpoint for deleting a specific message from a conversation
+app.delete('/api/conversaciones/:conversationId/mensajes/:mensajeId', eliminarMensaje);
+
+// Endpoint for deleting an entire conversation
+app.delete('/api/conversaciones/:conversationId', eliminarConversacion);
+
+// Endpoint for editing the participants of a conversation
+app.put('/api/conversaciones/:conversationId', editarConversacion);
+
+// Endpoint for editing a specific message within a conversation
+app.put('/api/conversaciones/:conversationId/mensajes/:mensajeId', editarMensaje);
+
+app.get('/api/conversaciones/participante/:participant', obtenerConversacionesPorParticipante); // Ruta para obtener conversaciones por participante
+app.get('/api/conversaciones/:conversationId', obtenerConversacionPorId);
 
 app.get('/', (req, res) => {
     res.json({ message: 'We are working for you!' });

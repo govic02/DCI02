@@ -190,7 +190,8 @@ class Viewer extends React.Component {
                 resolve(data);
                 resolve(data);
             }, (error) => {
-                reject(error);
+                console.log(error);
+                //reject(error);
             });
         });
     };

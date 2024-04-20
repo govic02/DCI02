@@ -108,8 +108,8 @@ const actualizarUsuarioProyectoAsignadoPorIdUsuario = async (req, res) => {
 const obtenerUsuarioProyectoAsignadoPorIdUsuario = async (req, res) => {
   try {
     const { idUsuario } = req.body;
-    console.log("usuario asignacion");
-    console.log(idUsuario);
+    //console.log("usuario asignacion");
+   // console.log(idUsuario);
 
     const usuarioProyectosAsignados = await UsuarioProyectoAsignado.find({ idUsuario })
       .sort({ fecha: -1, hora: -1 }) // Ordena primero por fecha y luego por hora, ambos en orden descendente
@@ -119,7 +119,7 @@ const obtenerUsuarioProyectoAsignadoPorIdUsuario = async (req, res) => {
       return res.status(404).json({ mensaje: 'No se encontraron registros' });
     }
 
-    console.log("Proyectos asignados ordenados:", usuarioProyectosAsignados);
+    //console.log("Proyectos asignados ordenados:", usuarioProyectosAsignados);
     res.status(200).json(usuarioProyectosAsignados);
   } catch (error) {
     console.error('Error al buscar los proyectos asignados:', error);

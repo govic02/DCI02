@@ -35,7 +35,7 @@ const Perfil = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) => {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ idUsuario: '10' })
+                body: JSON.stringify({ idUsuario:userId })
             });
             const data = await response.json();
             setUrnSelected(data.urn);
@@ -53,7 +53,7 @@ const Perfil = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) => {
 
     return (
         <div style={estiloPerfil}>
-               <HeaderApp proyectoKey={proyectoKeySeleccionado}/> {/* Instancia el componente HeaderApp */}
+               <HeaderApp proyectoKey={proyectoKeySeleccionado} urn={urnSelected}/> {/* Instancia el componente HeaderApp */}
            <div class='row'>
                 <div class='col-11'>
                         <DatosPerfil />

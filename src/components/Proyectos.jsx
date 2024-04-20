@@ -104,7 +104,7 @@ const Proyectos = ({ token, selectedIds, onCameraChange, onSelectionChange, refV
     }
     return (
       <div>
-      <HeaderApp proyectoKey={proyectoKeySeleccionado} />
+      <HeaderApp proyectoKey={proyectoKeySeleccionado} urn={urnSelected}/>
       <ProyectoProvider>
         <div style={estiloProyectos}>
     

@@ -78,7 +78,7 @@ const ColumnaDerecha = ({ isCollapsed, token, urn, selectedIds, onCameraChange, 
     return (
         <div style={estiloActual}>
         
-            <HeaderApp proyectoKey={proyectoKeySeleccionado} /> {/* Instancia el componente HeaderApp aquí */}
+            <HeaderApp proyectoKey={proyectoKeySeleccionado}  urn={urnSelected}/> {/* Instancia el componente HeaderApp aquí */}
             <ActionsProvider  viewerRef={refViewer}>
                     <div style={{ position: 'fixed', top: '64px', width: '100%', height: '88%', marginBottom: '30px' }}>
                         <Viewer                            runtime={{ accessToken: token }}

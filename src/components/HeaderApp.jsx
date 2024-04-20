@@ -12,7 +12,7 @@ import ReportProblemIcon from '@mui/icons-material/ReportProblem'; // Ícono de 
 
 const headerHeight = '64px';
 
-const HeaderApp = ({ proyectoKey }) => {
+const HeaderApp = ({ proyectoKey,urn }) => {
     const [anchorEl, setAnchorEl] = useState(null);
     const { logout } = useAuth();
     const [bandejaVisible, setBandejaVisible] = useState(false);
@@ -79,7 +79,7 @@ const HeaderApp = ({ proyectoKey }) => {
                 >
                     <MenuItem onClick={handleLogout}>Logout</MenuItem>
                 </Menu>
-                <BandejaDeEntrada open={bandejaVisible} onClose={handleCloseBandeja} />
+                <BandejaDeEntrada open={bandejaVisible} onClose={handleCloseBandeja} urn={urn} />
             </Toolbar>
         </AppBar>
     );
