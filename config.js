@@ -14,4 +14,4 @@ const scopes = {
 export default {
     credentials,
     scopes
-};
+}; 
