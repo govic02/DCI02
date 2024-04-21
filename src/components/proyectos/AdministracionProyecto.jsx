@@ -10,11 +10,12 @@ const AdministracionProyecto = (proyectoKey,urn) => {
     const [activeKey, setActiveKey] = useState('informacionGeneral');
     const [nombreProyecto, setNombreProyecto] = useState('');
     const [descripcionProyecto, setDescripcionProyecto] = useState('');
-    
+    const actions = useActions();
     const [usuariosNoAdmin, setUsuariosNoAdmin] = useState([]);
     const [usuariosAsignados, setUsuariosAsignados] = useState([]);
     const [usuariosAsignadosProyecto, setUsuariosAsignadosProyecto] = useState([]);
     const [usuarioSeleccionado, setUsuarioSeleccionado] = useState('');
+    const [barrasActual,setBarras] =  useState([]);
     const onSelect = (k) => {
         setActiveKey(k);
     };
@@ -232,161 +233,24 @@ const AdministracionProyecto = (proyectoKey,urn) => {
         }
     };
     
-    const PesoPromedio = async (urn) => {
-        try {
-            const response = await fetch(`${API_BASE_URL}/api/barraurn/${encodeURIComponent(urn)}`);
-            if (!response.ok) {
-                throw new Error('Failed to fetch bar data');
-            }
-            const { detalles } = await response.json();
-            const resultados = {};
-            if(detalles != undefined){
-                detalles.forEach(barra => {
-                    const { nombreFiltro2, pesoLineal, longitudTotal } = barra;
-                    // Convertir longitud de milímetros a metros si es necesario
-                    const longitudEnMetros = longitudTotal / 1000;
-                    const pesoTotal = pesoLineal * longitudEnMetros;  // Aquí se calcula el peso total
-        
-                    if (!resultados[nombreFiltro2]) {
-                        resultados[nombreFiltro2] = { totalPeso: 0, count: 0 };
-                    }
-                    resultados[nombreFiltro2].totalPeso += pesoTotal;  // Suma el peso calculado
-                    resultados[nombreFiltro2].count++;
-                });
-        
-                // Calcular el promedio de peso para cada nombreFiltro2
-                const promedios = {};
-                Object.keys(resultados).forEach(key => {
-                    const { totalPeso, count } = resultados[key];
-                    promedios[key] = totalPeso / count;  // Calcula el promedio de peso
-                });
-        
-                console.log("Promedios de peso por nombreFiltro2:", promedios);
-                const saveResponse = await fetch(`${API_BASE_URL}/api/crearPesoPromedio`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ urn, pesos: promedios })
-                });
-        
-                if (!saveResponse.ok) {
-                    throw new Error('Failed to save weight averages');
-                }
-        
-                const saveResult = await saveResponse.json();
-                console.log('Saved weight averages:', saveResult);
-                return promedios;
-            }
-            // Agrupar y calcular el peso total multiplicando peso lineal por longitud total
-            
-    
-        } catch (error) {
-            console.error("Error fetching or processing bar data:", error);
-            throw error; // Re-throw to handle it in the calling function
-        }
-    };
-    
-    const porcentajePedidoTotal = async (urn) => {
-        try {
-            // Fetch bar data
-            const barResponse = await fetch(`${API_BASE_URL}/api/barraurn/${encodeURIComponent(urn)}`);
-            if (!barResponse.ok) throw new Error('Failed to fetch bar data');
-            
-            const barData = await barResponse.json();
-            if (!barData || !barData.detalles || barData.detalles.length === 0) {
-                console.log("No bar details available");
-                return; // Salir temprano si no hay detalles o están vacíos
-            }
-    
-            const detalles = barData.detalles;
-            let pesoTotalProyecto = 0;
-            detalles.forEach(barra => {
-                const pesoTotalBarra = (barra.longitudTotal / 100) * barra.pesoLineal;
-                pesoTotalProyecto += pesoTotalBarra;
-            });
-    
-            // Fetch order data
-            const orderResponse = await fetch(`${API_BASE_URL}/api/listPedidos?urn=${encodeURIComponent(urn)}`);
-            if (!orderResponse.ok) throw new Error('Failed to fetch order data');
-            const pedidos = await orderResponse.json();
-    
-            let pesoTotalPedidos = 0;
-            pedidos.forEach(pedido => {
-                pesoTotalPedidos += parseFloat(pedido.pesos);
-            });
-    
-            // Output results to the console
-            console.log("Peso total del proyecto:", pesoTotalProyecto);
-            console.log("Peso total de pedidos:", pesoTotalPedidos);
-            const porcentaje = (pesoTotalPedidos / pesoTotalProyecto) * 100;
-            console.log(`Porcentaje del peso de los pedidos sobre el total del proyecto: ${porcentaje.toFixed(2)}%`);
-    
-            const saveResponse = await fetch(`${API_BASE_URL}/api/crearPesovsPedidos`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    urn,
-                    pesoTotalProyecto,
-                    pesoTotalPedidos
-                })
-            });
-    
-            if (!saveResponse.ok) throw new Error('Failed to save weight data');
-            const saveResult = await saveResponse.json();
-            console.log('Saved weight data:', saveResult);
-    
-        } catch (error) {
-            console.error("Error in porcentajePedidoTotal:", error);
-        }
-    };
     
     
-    const generarTotalPesoPisos = async (urn) => {
-        try {
-            const url = `${API_BASE_URL}/api/barraurn/${encodeURIComponent(urn)}`;
-            const response = await fetch(url);
+   
+   
     
-            if (!response.ok) throw new Error('Failed to fetch bar data');
-            
-            const { detalles } = await response.json();
-            console.log("datos de proyecto",detalles);
-            let pesosPorFiltro = {};
-    
-            detalles.forEach(barra => {
-                const { nombreFiltro2, longitudTotal, pesoLineal } = barra;
-                // Convertir la longitud de milímetros a metros si es necesario
-                // Asumiendo que longitudTotal viene en milímetros y queremos trabajar en metros
-                const longitudEnMetros = longitudTotal / 1000;
-                const pesoTotal = longitudEnMetros * pesoLineal;
-    
-                if (!pesosPorFiltro[nombreFiltro2]) {
-                    pesosPorFiltro[nombreFiltro2] = 0;
-                }
-    
-                pesosPorFiltro[nombreFiltro2] += pesoTotal;
-            });
-    
-            // Mostrar el resultado
-            console.log("Pesos totales por filtro:", pesosPorFiltro);
-            return pesosPorFiltro;
-            
-        } catch (error) {
-            console.error("Error generating total floor weight:", error);
-        }
-    };
-    
+  
     
     const guardarDatosModelo =async()=>{
         console.log('El nombre del proyecto es:');
-        await porcentajePedidoTotal(proyectoKey.urn);
-        await PesoPromedio(proyectoKey.urn);
+    
+       const val = await actions.generarTotalPesoPisos(proyectoKey.urn);
+        console.log("resultado generar TotalPisos",val);
+        await actions.porcentajePedidoTotal(proyectoKey.urn);
+       await actions.PesoPromedio(proyectoKey.urn);
         const promediosLongitud = await LongitudPromedio(proyectoKey.urn);
-        //console.log("Promedios de longitud por nombreFiltro2:", promediosLongitud);
+        console.log("Promedios de longitud por nombreFiltro2:", promediosLongitud);
         const resultadoDiametro = await DiametroEquivalenteLargosIguales(proyectoKey.urn);
-        //console.log("Resultados de Diametro Equivalente por Largos Iguales:", resultadoDiametro);
+       console.log("Resultados de Diametro Equivalente por Largos Iguales:", resultadoDiametro);
       
         //const resultadotTotalPiso = await generarTotalPesoPisos();
        // console.log("Resultados pesoTotalPiso:", resultadotTotalPiso);

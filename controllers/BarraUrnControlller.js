@@ -2,8 +2,9 @@ import BarraUrn from '../models/barraUrnSchema.js'; // Asegúrate de que la ruta
 
 const insertarObjetoConDetalles = async (req, res) => {
     const { urn, lista } = req.body;
+    console.log("INTENTO DE CARGA DE BARRAS PROYECTO",urn);
     const registroExistente = await BarraUrn.findOne({ urn });
-    console.log("previo inserción barras");
+    console.log("previo inserción barras",lista[0]);
     if (registroExistente) {
         await BarraUrn.deleteOne({ urn });
     }

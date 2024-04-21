@@ -22,7 +22,8 @@ class ViewerProyectos extends React.Component {
             idsSinFecha: [], // Guarda los IDs sin fecha
             nombreParametroFecha: '',
             filtro1: '',
-            filtro2: ''
+            filtro2: '',
+            idsBarraActual:[]
         },
         this.container = React.createRef();
         this.viewer = null;
@@ -44,6 +45,8 @@ class ViewerProyectos extends React.Component {
             .catch(err => console.error(err));
 
             this.context.registerAction('generarTotalPesoPisos', this.generarTotalPesoPisos);
+            this.context.registerAction('PesoPromedio', this.PesoPromedio);
+            this.context.registerAction('porcentajePedidoTotal', this.porcentajePedidoTotal);
            
     }
 
@@ -116,7 +119,7 @@ class ViewerProyectos extends React.Component {
         }
     }
     
-    componentDidUpdate(prevProps) {
+    componentDidUpdate(prevProps, prevState) {
        
         console.log("nueva urn a cargar");
         console.log(this.props.urn);
@@ -149,6 +152,10 @@ class ViewerProyectos extends React.Component {
                 console.error("Error al cargar la URN:", error);
                 toast.info('Error al cargar. Verifica la URN e intenta nuevamente.');
             }
+        }
+        if (prevState.idsBarras !== this.state.idsBarras) {
+            console.log("idsBarras ha cambiado, enviando a la base de datos...");
+            this.guardarIdsBarras();
         }
     }
     
@@ -264,6 +271,7 @@ class ViewerProyectos extends React.Component {
         const datosRespuesta = await respuesta.json();
         console.log('Datos guardados con éxito:', datosRespuesta);
         const diametroPiso = await this.sumarPesosPorDiametroEnPiso(idsBarras);
+        console.log("diametros por piso",diametroPiso);
         const datosParaEnviarDiametros = {
             urn: this.props.urn,
             nombreFiltro2: this.state.filtro2,
@@ -285,36 +293,185 @@ class ViewerProyectos extends React.Component {
             console.error("Error al enviar total de peso por diámetro en piso:", error);
         }
 
+        try {
+            const datosParaInsertar = {
+                urn: this.props.urn, // Utiliza la URN desde las props
+                lista: idsBarras.map(barra => ({ // Asegúrate de que este mapeo coincide con lo esperado por tu backend
+                    nombreFiltro1: barra.nombreFiltro1, // Ajusta según tus datos
+                    nombreFiltro2: barra.nombreFiltro2,
+                    diametroBarra: barra.diametroBarra,
+                    fecha: barra.fecha,
+                    id: barra.id,
+                    longitudTotal: barra.longitudTotal,
+                    pesoLineal: barra.pesoLineal,
+                }))
+            };
+            console.log("pre barras insertadas",datosParaInsertar);
+            const urlBarras = `${API_BASE_URL}/api/barraurn`; 
+            const barrasInsertadas = await axios.post(urlBarras, datosParaInsertar);
+            console.log("PESOS POR diametro piso", diametroPiso);
+            console.log("Barras insertadas",barrasInsertadas);
+        }
+        catch(error){
+            console.log("error en envvío",error);
+        }
+
+
       
-
-
-        const datosParaInsertar = {
-            urn: this.props.urn, // Utiliza la URN desde las props
-            lista: idsBarras.map(barra => ({ // Asegúrate de que este mapeo coincide con lo esperado por tu backend
-                nombreFiltro1: barra.nombreFiltro1, // Ajusta según tus datos
-                nombreFiltro2: barra.nombreFiltro2,
-                diametroBarra: barra.diametroBarra,
-                fecha: barra.fecha,
-                id: barra.id,
-                longitudTotal: barra.longitudTotal,
-                pesoLineal: barra.pesoLineal,
-            }))
-        };
-        console.log("pre barras insertadas",datosParaInsertar);
-        const urlBarras = `${API_BASE_URL}/api/barraurn`; 
-        const barrasInsertadas = await axios.post(urlBarras, datosParaInsertar);
-        console.log("PESOS POR diametro piso", diametroPiso);
-        console.log("Barras insertadas",barrasInsertadas);
        
     } catch (error) {
         console.error("Error generando total de peso por pisos:", error);
     }
 };
 
+PesoPromedio = async (urn) => {
+    try {
+      
+        const { idsBarras } = this.state;
+       // const detalles = await this.obtenerIdsBarras();
+       // console.log("pesos promedio",detalles);
+        console.log("supuestas barras",this.state);
+        console.log("supuestas barras",idsBarras);
+        const resultados = {};
+        if(idsBarras != undefined){
+            idsBarras.forEach(barra => {
+                const { nombreFiltro2, pesoLineal, longitudTotal } = barra;
+                // Convertir longitud de milímetros a metros si es necesario
+                const longitudEnMetros = longitudTotal / 1000;
+                const pesoTotal = pesoLineal * longitudEnMetros;  // Aquí se calcula el peso total
+    
+                if (!resultados[nombreFiltro2]) {
+                    resultados[nombreFiltro2] = { totalPeso: 0, count: 0 };
+                }
+                resultados[nombreFiltro2].totalPeso += pesoTotal;  // Suma el peso calculado
+                resultados[nombreFiltro2].count++;
+            });
+    
+            // Calcular el promedio de peso para cada nombreFiltro2
+            const promedios = {};
+            Object.keys(resultados).forEach(key => {
+                const { totalPeso, count } = resultados[key];
+                promedios[key] = totalPeso / count;  // Calcula el promedio de peso
+            });
+    
+            console.log("Promedios de peso por nombreFiltro2:", promedios);
+            const saveResponse = await fetch(`${API_BASE_URL}/api/crearPesoPromedio`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ urn:urn, pesos: promedios })
+            });
+    
+            if (!saveResponse.ok) {
+          console.log("respuesta desde inserción",saveResponse);
+            }
+    
+            const saveResult = await saveResponse.json();
+            console.log('Saved weight averages:', saveResult);
+            return promedios;
+        }
+        // Agrupar y calcular el peso total multiplicando peso lineal por longitud total
+        
+
+    } catch (error) {
+        console.error("Error fetching or processing bar data:", error);
+        throw error; // Re-throw to handle it in the calling function
+    }
+};
+
+porcentajePedidoTotal = async (urn) => {
+
+    try {
+        // Fetch bar data
+        const { idsBarras } = this.state;
+       // const barResponse = await fetch(`${API_BASE_URL}/api/barraurn/${encodeURIComponent(urn)}`);
+        //if (!barResponse.ok) throw new Error('Failed to fetch bar data');
+      
+        //const barData = await barResponse.json();
+        console.log("datos de barros desde Admin pr2",idsBarras);
+        
+
+        //const detalles = idsBarras.detalles;
+        let pesoTotalProyecto = 0;
+        idsBarras.forEach(barra => {
+            const pesoTotalBarra = (barra.longitudTotal / 100) * barra.pesoLineal;
+            pesoTotalProyecto += pesoTotalBarra;
+        });
+
+        // Fetch order data
+        const orderResponse = await fetch(`${API_BASE_URL}/api/listPedidos?urn=${encodeURIComponent(urn)}`);
+       // if (!orderResponse.ok) throw new Error('Failed to fetch order data');
+       console.log("respuesta desde servidor ordenes pedidos",orderResponse);
+       const pedidos = await orderResponse.json();
+        console.log("pedidos asignados a proyecto",pedidos);
+        let pesoTotalPedidos = 0;
+        pedidos.forEach(pedido => {
+            pesoTotalPedidos += parseFloat(pedido.pesos);
+        });
+
+        // Output results to the console
+        console.log("Peso total del proyecto:", pesoTotalProyecto);
+        console.log("Peso total de pedidos:", pesoTotalPedidos);
+        const porcentaje = (pesoTotalPedidos / pesoTotalProyecto) * 100;
+        console.log(`Porcentaje del peso de los pedidos sobre el total del proyecto: ${porcentaje.toFixed(2)}%`);
+
+        const saveResponse = await fetch(`${API_BASE_URL}/api/crearPesovsPedidos`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                urn,
+                pesoTotalProyecto,
+                pesoTotalPedidos
+            })
+        });
+
+        if (!saveResponse.ok) throw new Error('Failed to save weight data');
+        const saveResult = await saveResponse.json();
+        console.log('Saved weight data:', saveResult);
+
+    } catch (error) {
+        console.error("Error in porcentajePedidoTotal:", error);
+    }
+};
+
+
+    guardarIdsBarras = async () => {
+        const { idsBarras } = this.state;
+        const { urn } = this.props;
+        console.log("objeto con barras",idsBarras);
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/barraurn`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    urn: urn,
+                    lista: idsBarras
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error('Error al guardar los datos de barras');
+            }
+
+            const responseData = await response.json();
+            console.log("Datos de barras guardados con éxito:", responseData);
+            toast.success('Datos de barras guardados con éxito');
+        } catch (error) {
+            console.error("Error al guardar los datos de barras:", error);
+            toast.error('Error al guardar los datos de barras: ' + error.message);
+        }
+    }
 // Asegúrate de llamar a generarTotalPesoPisos en el lugar adecuado de tu aplicación
 
     obtenerIdsBarras = async () => {
         console.log("inicio busqueda de barras", this.state);
+        console.log();
+        await this.obtenerFiltros(this.props.urn);
         return new Promise(async (resolve, reject) => {
             if (!this.viewer || !this.viewer.model) {
                 return reject(new Error("El modelo del visualizador no está cargado."));
@@ -351,7 +508,7 @@ class ViewerProyectos extends React.Component {
     
                     // Guarda los resultados en el estado o maneja como prefieras
                     this.setState({ idsBarras });
-    
+                   
                     // Resolver la promesa con los IDs de barras encontrados
                     resolve(idsBarras);
                 });
@@ -540,6 +697,7 @@ class ViewerProyectos extends React.Component {
                     if(!idsBarras.length ==0){
                         await this.generarTotalPesoPisos();
                     console.log("IDs de barras obtenidos:", idsBarras);
+                    this.setState.idsBarraActual = idsBarras
                     }
                     
                 } catch (error) {

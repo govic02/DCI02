@@ -3,6 +3,7 @@ import cors from 'cors';
 import fetch from 'node-fetch';
 import multer from 'multer';
 import stream from 'stream';
+
 import jwt from 'jsonwebtoken';
 import { getPublicToken,getInternalToken ,getClient} from './oauth.js'; // Ruta corregida
 import forgeSDK from 'forge-apis'; // Importa todo el paquete forge-apis
@@ -56,13 +57,18 @@ mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopol
 
 const app = express();
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '500mb' }));
+app.use(express.urlencoded({ limit: '500mb', extended: true }));
 app.use(async (req, res, next) => {
   const token = await getInternalToken();
   req.oauth_token = token;
   req.oauth_client = getClient();
   next();
 });
+
+
+// Middleware para analizar cuerpos de formularios URL-encoded
+
 // Middleware de autenticación
 const authenticateJWT = (req, res, next) => {
   const authHeader = req.headers.authorization;

@@ -19,10 +19,11 @@ const GraficoPedidovsPedir = ({ urn }) => {
     useEffect(() => {
         const fetchDatos = async () => {
             try {
+                console.log("URN QUE ESTOY SOLICITANDO",urn);
                 const url = `${API_BASE_URL}/api/getPesovsPedidos/${urn}`;
                 const respuesta = await axios.get(url);
                 const data = respuesta.data;
-
+                console.log("datos recibidos",data);
                 setDatosGrafico(prev => ({
                     ...prev,
                     datasets: [{

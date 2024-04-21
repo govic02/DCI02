@@ -1,4 +1,4 @@
-import Pedido from '../models/Pedido.js';
+import Pedido from '../models/pedido.js';
 import AdicionalesPedidos from '../models/adicionalesPedidos.js';
 // Obtener todos los registros
 
@@ -112,7 +112,7 @@ const obtenerPedidos = async (req, res) => {
     try {
         // Verificar si se proporcionó un urn en la consulta
         const urn = req.query.urn;
-
+        console.log("recibo solicitud para urn",urn);
         let pedidos;
         if (urn) {
             // Buscar pedidos que coincidan con el urn proporcionado
@@ -128,6 +128,7 @@ const obtenerPedidos = async (req, res) => {
         }
 
         // Enviar una respuesta con los pedidos encontrados
+        console.log("envio pedidos",pedidos);
         res.json(pedidos);
     } catch (error) {
         // Enviar una respuesta de error si ocurre algún problema
