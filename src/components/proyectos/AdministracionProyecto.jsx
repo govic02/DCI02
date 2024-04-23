@@ -1,5 +1,5 @@
 import React, { useState,useEffect } from 'react';
-import { Tabs, Tab, Form, Button, Table } from 'react-bootstrap';
+import { Tabs, Tab, Form, Button, Table, Alert } from 'react-bootstrap';
 
 import { toast } from 'react-toastify';
 import { ToastContainer } from 'react-toastify';
@@ -16,6 +16,7 @@ const AdministracionProyecto = (proyectoKey,urn) => {
     const [usuariosAsignadosProyecto, setUsuariosAsignadosProyecto] = useState([]);
     const [usuarioSeleccionado, setUsuarioSeleccionado] = useState('');
     const [barrasActual,setBarras] =  useState([]);
+    const [tickets, setTickets] = useState({});
     const onSelect = (k) => {
         setActiveKey(k);
     };
@@ -239,23 +240,27 @@ const AdministracionProyecto = (proyectoKey,urn) => {
    
     
   
-    
-    const guardarDatosModelo =async()=>{
+    const guardarDatosModelo = async () => {
         console.log('El nombre del proyecto es:');
-    
-       const val = await actions.generarTotalPesoPisos(proyectoKey.urn);
-        console.log("resultado generar TotalPisos",val);
+
+        const val = await actions.generarTotalPesoPisos(proyectoKey.urn);
+        console.log("resultado generar TotalPisos", val);
+        setTickets(prev => ({ ...prev, "Peso por Piso": "Completado" }));
+        
         await actions.porcentajePedidoTotal(proyectoKey.urn);
-       await actions.PesoPromedio(proyectoKey.urn);
+        setTickets(prev => ({ ...prev, "Porcentaje Pedidos": "Completado" }));
+        
+        await actions.PesoPromedio(proyectoKey.urn);
+        setTickets(prev => ({ ...prev, "Pesos Promedio": "Completado" }));
+        
         const promediosLongitud = await LongitudPromedio(proyectoKey.urn);
         console.log("Promedios de longitud por nombreFiltro2:", promediosLongitud);
+        setTickets(prev => ({ ...prev, "Longitud Promedio": "Completado" }));
+        
         const resultadoDiametro = await DiametroEquivalenteLargosIguales(proyectoKey.urn);
-       console.log("Resultados de Diametro Equivalente por Largos Iguales:", resultadoDiametro);
-      
-        //const resultadotTotalPiso = await generarTotalPesoPisos();
-       // console.log("Resultados pesoTotalPiso:", resultadotTotalPiso);
-
-    }
+        console.log("Resultados de Diametro Equivalente por Largos Iguales:", resultadoDiametro);
+        setTickets(prev => ({ ...prev, "Diametro Equivalente": "Completado" }));
+    };
 
     const asignarUsuarioAProyecto = (e) => {
         setUsuarioSeleccionado(e.target.value);
@@ -359,7 +364,11 @@ const AdministracionProyecto = (proyectoKey,urn) => {
                         <Button style={botonEstilo}>Transferir Datos</Button>
                         <p></p>  
                          <Button onClick={guardarDatosModelo} style={{...botonEstilo, marginTop: '10px'}}>Calcular  Estadísticas</Button><p></p> <p></p><br></br>
-                        
+                         {Object.entries(tickets).map(([task, status]) => (
+                            <Alert key={task} variant="success">
+                                {task}: {status}
+                            </Alert>
+                        ))}
                     </div>
                 </Tab>
                 <Tab eventKey="configuracionAdicional" title={<span><img src={getTabImage('configuracionAdicional')} alt="" /> Usuarios</span>}>

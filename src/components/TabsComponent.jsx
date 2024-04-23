@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Tabs, Tab, Button,Modal,Form  } from 'react-bootstrap';
+import Table from 'react-bootstrap/Table';
 import Select from 'react-select';
 import { useVisibility } from '../context/VisibilityContext';
 import { useActions } from '../context/ActionContext';
@@ -353,7 +354,20 @@ const TabComponent = ({ urnBuscada }) => {
             return activeKey === 'barrasPedidos' ? 'images/barrasred.svg' : 'images/barraswhite.svg';
         }
     };
-    
+    window.onunhandledrejection = function (event) {
+        console.error("Unhandled rejection (promise):", event.promise, "reason:", event.reason);
+        return true; // Previene la propagación y la consola del navegador mostrando el error
+      };
+      self.onerror = function (event) {
+        console.error('Error en el worker:', event.message);
+        return true; // Previene el error de ser propagado
+    };
+    try {
+        worker.postMessage(largeData);
+      } catch (e) {
+        console.error('Failed to send data to worker:', e);
+        // Implementa la lógica para manejar este error, como dividir los datos.
+      }
     useEffect(() => {
 
         const tipoUsuario = localStorage.getItem('tipo'); 
@@ -579,37 +593,112 @@ const TabComponent = ({ urnBuscada }) => {
                     <Modal.Title>{modalInfo.data.nombre_pedido}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <p>Largo Total: <strong>{modalInfo.data.largos} Mts</strong> | Peso Total: <strong>{modalInfo.data.pesos} kg</strong></p>
-                    <p>Estado: <span style={{ height: '15px', width: '15px', backgroundColor: '#DA291C', borderRadius: '50%', display: 'inline-block' }}></span></p>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <input type="text" placeholder="Diámetro" value={adicional.diametro} onChange={e => setAdicional({ ...adicional, diametro: e.target.value })} style={{  width:'5px',margin: '0 5px', flex: 1 }} />
-                        <input type="text" placeholder="Cantidad" value={adicional.cantidad} onChange={e => setAdicional({ ...adicional, cantidad: e.target.value })} style={{ width:'5px', margin: '0 5px', flex: 1 }} />
-                        <input type="text" placeholder="Largo" value={adicional.largo} onChange={e => setAdicional({ ...adicional, largo: e.target.value })} style={{ width:'5px',margin: '0 5px', flex: 1 }} />
-                     
-                        {esAdministradorEditor && (
-                        <Button onClick={agregarAdicional} style={{ margin: '0 5px',backgroundColor: '#DA291C',borderColor: '#DA291C' }}><FontAwesomeIcon icon={faPlus} /></Button>
-                        )}
-                    </div>
-                    <br></br>
-                    <ul className="list-group">
-                    {Array.isArray(adicionales) && adicionales.map((adicional, index) => (
-                            <li key={index} className="list-group-item d-flex justify-content-between align-items-center">
-                            <div className="flex-grow-1">
-                                <span className="fw-bold">Diámetro:</span> <span style={{ color: '#DA291C'  }}>{adicional.diametro}&nbsp;MM</span>
-                                <span> | </span>
-                                <span className="fw-bold">Cantidad:</span> <span style={{ color: '#DA291C'  }}>{adicional.cantidad}</span>
-                                <span> | </span>
-                                <span className="fw-bold">Largo:</span> <span style={{ color: '#DA291C'  }}>{adicional.largo}&nbsp;Mtrs</span>
-                            </div>
-                            {esAdministradorEditor && (
-                            <Button variant="outline-danger" onClick={() => borrarAdicional(adicional._id)}>
-                                <FontAwesomeIcon icon={faTrash} />
-                            </Button>)}
-                            </li>
-                        ))}
-                      </ul>
+    <p>Largo Total: <strong>{modalInfo.data.largos} Mts</strong> | Peso Total: <strong>{modalInfo.data.pesos} kg</strong></p>
+    <p>Estado: <span style={{ height: '15px', width: '15px', backgroundColor: '#DA291C', borderRadius: '50%', display: 'inline-block' }}></span></p>
+    
+    {/* Añadiendo la tabla de estados con iconos circulares */}
+    <Table striped bordered hover size="sm">
+    <thead>
+        <tr>
+            <th>Estado</th>
+            <th>Est</th>
+            <th>Fecha</th>
+            <th>Nombre de Usuario</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Paquetizado</td>
+            <td><span className="status-indicator" style={{backgroundColor: '#007bff'}}></span></td>
+            <td>{/* Fecha paquetizado */}</td>
+            <td>{/* Usuario paquetizado */}</td>
+        </tr>
+        <tr>
+            <td>Espera aprobación</td>
+            <td><span className="status-indicator" style={{backgroundColor: '#ffc107'}}></span></td>
+            <td>{/* Fecha solicitado en espera */}</td>
+            <td>{/* Usuario solicitado en espera */}</td>
+        </tr>
+        <tr>
+            <td> Rechazado</td>
+            <td><span className="status-indicator" style={{backgroundColor: '#dc3545'}}></span></td>
+            <td>{/* Fecha solicitado rechazado */}</td>
+            <td>{/* Usuario solicitado rechazado */}</td>
+        </tr>
+        <tr>
+            <td> Aceptado</td>
+            <td><span className="status-indicator" style={{backgroundColor: '#28a745'}}></span></td>
+            <td>{/* Fecha solicitado aceptado */}</td>
+            <td>{/* Usuario solicitado aceptado */}</td>
+        </tr>
+        <tr>
+            <td>En fabricación</td>
+            <td><span className="status-indicator" style={{backgroundColor: '#17a2b8'}}></span></td>
+            <td>{/* Fecha en fabricación */}</td>
+            <td>{/* Usuario en fabricación */}</td>
+        </tr>
+        <tr>
+            <td>En despacho</td>
+            <td><span className="status-indicator" style={{backgroundColor: '#6610f2'}}></span></td>
+            <td>{/* Fecha en despacho */}</td>
+            <td>{/* Usuario en despacho */}</td>
+        </tr>
+        <tr>
+            <td>Recepcionado</td>
+            <td><span className="status-indicator" style={{backgroundColor: '#6f42c1'}}></span></td>
+            <td>{/* Fecha recepcionado */}</td>
+            <td>{/* Usuario recepcionado */}</td>
+        </tr>
+        <tr>
+            <td>Instalado</td>
+            <td><span className="status-indicator" style={{backgroundColor: '#20c997'}}></span></td>
+            <td>{/* Fecha instalado */}</td>
+            <td>{/* Usuario instalado */}</td>
+        </tr>
+        <tr>
+            <td>Inspeccionado</td>
+            <td><span className="status-indicator" style={{backgroundColor: '#e83e8c'}}></span></td>
+            <td>{/* Fecha inspeccionado */}</td>
+            <td>{/* Usuario inspeccionado */}</td>
+        </tr>
+        <tr>
+            <td>Hormigonado</td>
+            <td><span className="status-indicator" style={{backgroundColor: '#fd7e14'}}></span></td>
+            <td>{/* Fecha hormigonado */}</td>
+            <td>{/* Usuario hormigonado */}</td>
+        </tr>
+    </tbody>
+</Table>
 
-                    </Modal.Body>
+
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <input type="text" placeholder="Diámetro" value={adicional.diametro} onChange={e => setAdicional({ ...adicional, diametro: e.target.value })} style={{ width:'5px', margin: '0 5px', flex: 1 }} />
+        <input type="text" placeholder="Cantidad" value={adicional.cantidad} onChange={e => setAdicional({ ...adicional, cantidad: e.target.value })} style={{ width:'5px', margin: '0 5px', flex: 1 }} />
+        <input type="text" placeholder="Largo" value={adicional.largo} onChange={e => setAdicional({ ...adicional, largo: e.target.value })} style={{ width:'5px', margin: '0 5px', flex: 1 }} />
+        
+        {esAdministradorEditor && (
+        <Button onClick={agregarAdicional} style={{ margin: '0 5px',backgroundColor: '#DA291C',borderColor: '#DA291C' }}><FontAwesomeIcon icon={faPlus} /></Button>
+        )}
+    </div>
+    <br />
+    <ul className="list-group">
+    {Array.isArray(adicionales) && adicionales.map((adicional, index) => (
+            <li key={index} className="list-group-item d-flex justify-content-between align-items-center">
+            <div className="flex-grow-1">
+                <span className="fw-bold">Diámetro:</span> <span style={{ color: '#DA291C'  }}>{adicional.diametro}&nbsp;MM</span>
+                <span> | </span>
+                <span className="fw-bold">Cantidad:</span> <span style={{ color: '#DA291C'  }}>{adicional.cantidad}</span>
+                <span> | </span>
+                <span className="fw-bold">Largo:</span> <span style={{ color: '#DA291C'  }}>{adicional.largo}&nbsp;Mtrs</span>
+            </div>
+            {esAdministradorEditor && (
+            <Button variant="outline-danger" onClick={() => borrarAdicional(adicional._id)}>
+                <FontAwesomeIcon icon={faTrash} />
+            </Button>)}
+            </li>
+        ))}
+      </ul>
+</Modal.Body>
                 <Modal.Footer>
                 {esAdministradorEditor && (
                 <Button variant="outline-danger" className="modal-button" onClick={() => handleDeleteConfirmation(modalInfo.data)}>

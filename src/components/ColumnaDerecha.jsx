@@ -29,8 +29,15 @@ const ColumnaDerecha = ({ isCollapsed, token, urn, selectedIds, onCameraChange, 
     const guardarIdentificadores = (identificadores) => {
         setIdentificadoresActual(identificadores);
     };
-
-    
+    window.onunhandledrejection = function (event) {
+      console.error("Unhandled rejection (promise):", event.promise, "reason:", event.reason);
+      return true; // Previene la propagación y la consola del navegador mostrando el error
+    };
+    self.onerror = function (event) {
+      console.error('Error en el worker:', event.message);
+      return true; // Previene el error de ser propagado
+  };
+  
     useEffect(() => {
       const obtenerUsuarioProyecto = async () => {
         console.log("token desde jwt",tokenContexto);

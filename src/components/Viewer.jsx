@@ -39,6 +39,7 @@ class Viewer extends React.Component {
         this.viewer = null;
        
     }
+    
     calculaSeleccionHormigon = (seleccionActual) => {
      
         this.setState({ procesandoSeleccion: true });
@@ -191,7 +192,7 @@ class Viewer extends React.Component {
                 resolve(data);
             }, (error) => {
                 console.log(error);
-                //reject(error);
+                reject(error);
             });
         });
     };
@@ -246,43 +247,40 @@ class Viewer extends React.Component {
     
 
     obtenerFiltros = async (urnBuscada) => {
-        return new Promise(async (resolve, reject) => {
-            try {
-                console.log("URN ANTES DE AXIOS");
-                console.log(this.props);
+        try {
+            console.log("URN antes de AXIOS:", urnBuscada);
+            const response = await axios.get(`${API_BASE_URL}/api/filtros`);
+            console.log("Respuesta Filtros:", response.data);
     
-                const response = await axios.get(`${API_BASE_URL}/api/filtros`);
-                console.log("Respuesta Filtros:", response.data);
+            const filtrado1 = response.data[0].filtro_1;
+            const filtrado2 = response.data[0].filtro_2;
     
-                let filtrado1 = response.data[0].filtro_1;
-                let filtrado2 = response.data[0].filtro_2;
+            // Actualiza el estado con los nuevos filtros y fierros.
+            await this.setStateAsync({ filtro1: filtrado1, filtro2: filtrado2, fierros: response.data[0].fierro });
     
-                // Actualiza el estado con los nuevos filtros y fierros.
-                this.setState({ filtro1: filtrado1, filtro2: filtrado2, fierros: response.data[0].fierro }, async () => {
-                    console.log("Filtros actualizados en el estado:", filtrado1, filtrado2);
+            console.log("Filtros actualizados en el estado:", filtrado1, filtrado2);
     
-                    // Después de actualizar el estado, procede con la consulta de filtros.
-                    try {
-                        const datosFiltro1 = await this.consultaFiltro([filtrado1]);
-                        this.context.updateDatosFiltro1(datosFiltro1);
-                        console.log("filtro datos 1",datosFiltro1);
-                        const datosFiltro2 = await this.consultaFiltro([filtrado2]);
-                        console.log("filtro datos 2",datosFiltro2);
-                        this.context.updateDatosFiltro2(datosFiltro2);
+            // Consulta de filtros después de actualizar el estado
+            const datosFiltro1 = await this.consultaFiltro([filtrado1]);
+            const datosFiltro2 = await this.consultaFiltro([filtrado2]);
     
-                        // Una vez completado todo, resuelve la promesa.
-                        resolve();
-                    } catch (error) {
-                        console.error("Error al consultar los filtros:", error);
-                        reject(error);
-                    }
-                });
-            } catch (error) {
-                console.error("Error al obtener los filtros:", error);
-                reject(error);
-            }
-        });
+            this.context.updateDatosFiltro1(datosFiltro1);
+            this.context.updateDatosFiltro2(datosFiltro2);
+    
+            console.log("filtro datos 1", datosFiltro1);
+            console.log("filtro datos 2", datosFiltro2);
+        } catch (error) {
+            console.error("Error en obtenerFiltros:", error);
+            throw error;  // Puedes lanzar el error si quieres manejarlo más arriba en la cadena de promesas
+        }
     };
+    
+    // Función auxiliar para convertir setState en una función que retorna una promesa
+    setStateAsync(state) {
+        return new Promise((resolve) => {
+            this.setState(state, resolve);
+        });
+    }
     
     initializeViewerRuntime = (options, token) => {
         const { runtime } = this.state;

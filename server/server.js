@@ -3,7 +3,7 @@ import cors from 'cors';
 import fetch from 'node-fetch';
 import multer from 'multer';
 import stream from 'stream';
-
+import nodemailer from 'nodemailer';
 import jwt from 'jsonwebtoken';
 import { getPublicToken,getInternalToken ,getClient} from './oauth.js'; // Ruta corregida
 import forgeSDK from 'forge-apis'; // Importa todo el paquete forge-apis
@@ -16,7 +16,7 @@ import  {actualizarUsuarioProyectoAsignadoPorIdUsuario,obtenerUsuarioProyectoAsi
 import { manipularConfiguracionViewer,obtenerConfiguracionViewer} from '../controllers/ConfiguracionViewerController.js'; // Asegúrate de que la ruta sea correcta
 import { buscarCrearActualizarObjetoProyectoPlan, obtenerObjetosPorUrn ,CrearObjetoProyectoPlan,obtenerPorDbIdYUrn,procesarObjetosProyectoPlanMasivamente} from '../controllers/ObjetoProyectoPlanController.js';
 import {guardarSumaPisosGeneral,obtenerRegistroPorUrn} from '../controllers/RespuestaSumaPesosController.js';
-import{ obtenerUsuario, obtenerUsuarios,crearUsuario,actualizarUsuario,eliminarUsuario,obtenerUsuariosAdministradores} from '../controllers/usersController.js'
+import{ obtenerUsuario, obtenerUsuarios, obtenerUsuarioPorUsername,crearUsuario,actualizarUsuario,eliminarUsuario,obtenerUsuariosAdministradores} from '../controllers/usersController.js'
 import { insertarObjetoConDetalles, obtenerRegistroPorUrnBarras } from '../controllers/BarraUrnControlller.js';
 import {crearUsuarioProyectoAsignado, obtenerUsuariosProyectoAsignadoPorUrn,eliminarUsuarioProyectoAsignado} from '../controllers/usuarioProyectoAsignadoController.js'
 import {guardarActualizarRespuesta,obtenerRespuestaPorUrn} from '../controllers/SumaPesosPorDiametroController.js';
@@ -66,7 +66,40 @@ app.use(async (req, res, next) => {
   next();
 });
 
+const mailTransport = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+      user: process.env.EMAIL_USERNAME,
+      pass: process.env.EMAIL_PASSWORD
+  }
+});
+const sendEmail = async (emailOptions) => {
+  try {
+      let info = await mailTransport.sendMail(emailOptions);
+      console.log('Message sent: %sa  asdsad', info.messageId);
+  } catch (error) {
+      console.error('Failed to send email', error);
+  }
+};
 
+app.post('/api/send-mail', async (req, res) => {
+  const { to, subject, text } = req.body;
+
+  const mailOptions = {
+      from: process.env.EMAIL_USERNAME, // sender address
+      to: to, // list of receivers
+      subject: subject, // Subject line
+      html: text, // plain text body
+      
+  };
+
+  try {
+      await sendEmail(mailOptions);
+      res.status(200).send('Email sent successfully');
+  } catch (error) {
+      res.status(500).send('Failed to send email');
+  }
+});
 // Middleware para analizar cuerpos de formularios URL-encoded
 
 // Middleware de autenticación
@@ -164,6 +197,7 @@ app.get('/api/gettoken', async (req, res) => {
 
 //*******Gestion de usuarios */
 app.get('/api/usuarios', obtenerUsuarios); // Obtener todos los usuarios
+app.get('/api/usuarios/username/:username', obtenerUsuarioPorUsername)
 app.get('/api/usuariosAdministradores',obtenerUsuariosAdministradores);
 app.get('/api/usuarios/:idUsu', obtenerUsuario); // Obtener un usuario por idUsu
 app.post('/api/usuarios', crearUsuario); // Crear un nuevo usuario

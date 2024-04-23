@@ -107,6 +107,10 @@ const AdministradorDeVistas = ({ tabsRef,identificadoresActual,refViewer2 , urnB
             console.error('Error al cargar las vistas guardadas:', error);
         }
     };
+    window.onunhandledrejection = function(event) {
+        console.error('Unhandled Rejection:', event.reason);
+        return true;
+    };
     useEffect(() => {
         const tipoUsuario = localStorage.getItem('tipo'); 
         const esAdministradorEditor = tipoUsuario === 'Administrador' || tipoUsuario === 'administrador'|| tipoUsuario === 'Editor';
