@@ -1,28 +1,63 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
-
+import axios from 'axios';
+import API_BASE_URL from '../../config';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 const DatosUsuario = () => {
-  const [nombreCompleto, setNombreCompleto] = useState('');
-  const [email, setEmail] = useState('');
+  const [nombreCompleto, setNombreCompleto] = useState(localStorage.getItem('fullname') || '');
+  const [email, setEmail] = useState(localStorage.getItem('username') || '');
   const [contrasena, setContrasena] = useState('');
+  const [repetirContrasena, setRepetirContrasena] = useState('');
+  const [mensajeError, setMensajeError] = useState('');
+  const userId = localStorage.getItem('userId');
 
-  const handleGuardar = () => {
-    // Acción de guardar
-    console.log('Guardando', { nombreCompleto, email, contrasena });
+  useEffect(() => {
+    if (!nombreCompleto || !email || !contrasena || !repetirContrasena) {
+      setMensajeError('Debe completar todos los campos');
+    } else if (contrasena !== repetirContrasena) {
+      setMensajeError('Las contraseñas deben coincidir');
+    } else {
+      setMensajeError('');
+    }
+  }, [nombreCompleto, email, contrasena, repetirContrasena]);
+
+  const handleGuardar = async () => {
+    if (!nombreCompleto || !email || !contrasena || !repetirContrasena) {
+      setMensajeError('Debe completar todos los campos');
+      return;
+    } else if (contrasena !== repetirContrasena) {
+      setMensajeError('Las contraseñas deben coincidir');
+      return;
+    }
+
+    try {
+      const datosActualizacion = {
+        fullname: nombreCompleto,
+        username: email,
+        password: contrasena
+      };
+
+      const response = await axios.put(`${API_BASE_URL}/api/usuarios/${userId}`, datosActualizacion);
+      console.log('Datos actualizados con éxito:', response.data);
+      toast.success('Datos actualizados con éxito!');
+      localStorage.setItem('fullname',nombreCompleto);
+      setMensajeError('');
+    } catch (error) {
+      console.error('Error al actualizar el usuario:', error);
+      setMensajeError('Error al actualizar los datos');
+    }
   };
 
   return (
-    <Card style={{ margin: '20px', padding: '20px', borderRadius: '20px' }}> {/* Bordes redondeados para el Card */}
+    <Card style={{ margin: '20px', padding: '20px', borderRadius: '20px' }}>
       <CardContent>
         <Typography variant="h5" style={{ marginBottom: '20px' }}>
           Datos de Usuario
-        </Typography>
-        <Typography variant="subtitle1" style={{ marginBottom: '5px' }}>
-          Nombre Completo
         </Typography>
         <TextField
           label="Nombre Completo"
@@ -32,9 +67,6 @@ const DatosUsuario = () => {
           onChange={(e) => setNombreCompleto(e.target.value)}
           style={{ marginBottom: '10px' }}
         />
-        <Typography variant="subtitle1" style={{ marginBottom: '5px' }}>
-          Email
-        </Typography>
         <TextField
           label="Email"
           type="email"
@@ -43,10 +75,8 @@ const DatosUsuario = () => {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           style={{ marginBottom: '10px' }}
+          disabled={!nombreCompleto || !contrasena || !repetirContrasena}
         />
-        <Typography variant="subtitle1" style={{ marginBottom: '5px' }}>
-          Contraseña
-        </Typography>
         <TextField
           label="Contraseña"
           type="password"
@@ -56,25 +86,30 @@ const DatosUsuario = () => {
           onChange={(e) => setContrasena(e.target.value)}
           style={{ marginBottom: '20px' }}
         />
-        <Typography variant="subtitle1" style={{ marginBottom: '5px' }}>
-         Repetir Contraseña
-        </Typography>
         <TextField
           label="Repetir Contraseña"
           type="password"
           variant="outlined"
           fullWidth
-          value={contrasena}
-          onChange={(e) => setContrasena(e.target.value)}
+          value={repetirContrasena}
+          onChange={(e) => setRepetirContrasena(e.target.value)}
           style={{ marginBottom: '20px' }}
-        />  <div style={{ textAlign: 'center', marginTop: '20px' }}> {/* Centrar el botón */}
-        <Button
-          variant="contained"
-          style={{ backgroundColor: '#DA291C', color: 'white' }}
-          onClick={handleGuardar}
-        >
-          Guardar
-        </Button></div>
+        />
+        {mensajeError && (
+          <Typography color="error" style={{ marginBottom: '10px' }}>
+            {mensajeError}
+          </Typography>
+        )}
+        <div style={{ textAlign: 'center', marginTop: '20px' }}>
+          <Button
+            variant="contained"
+            style={{ backgroundColor: '#DA291C', color: 'white' }}
+            onClick={handleGuardar}
+            disabled={!nombreCompleto || !email || !contrasena || !repetirContrasena || contrasena !== repetirContrasena}
+          >
+            Guardar
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );

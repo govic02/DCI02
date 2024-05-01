@@ -20,6 +20,7 @@ class Viewer extends React.Component {
             procesoCalculo: 0,
             token: this.props.token,
             identificadoresActual: [],
+            identificadoresActuales: [],
             idsConFecha: [], // Guarda los IDs con fecha
             idsSinFecha: [], // Guarda los IDs sin fecha
             idsBarras: [],
@@ -609,7 +610,10 @@ class Viewer extends React.Component {
         const viewer = this.viewer;
         const dbId = event.dbIdArray[0]; // Obtiene el primer elemento seleccionado
         const seleccionActual = this.viewer.getSelection();
-        
+        this.context.actualizarSeleccionActual(seleccionActual);
+        console.log("SELECCIONO ELEMENTO");
+        console.log(event.dbIdArray);
+        console.log(seleccionActual);
         if (this.state.procesandoSeleccion) {
             return;
           }

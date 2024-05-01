@@ -4,6 +4,7 @@ const DatosPerfil = ({ userName, companyName, imageUrl }) => {
     const tipo = localStorage.getItem('tipo'); // Tipo de usuario
     const userId = localStorage.getItem('userId'); // ID del usuario
     const username = localStorage.getItem('username');
+    const fullname = localStorage.getItem('fullname');
     const cardStyle = {
         borderRadius: '20px',
         display: 'flex',
@@ -53,7 +54,7 @@ const DatosPerfil = ({ userName, companyName, imageUrl }) => {
             <div>
                 <div style={textStyle}>
                     <img src="images/perfilIcn.svg" alt="Icono Usuario" style={iconStyle} />
-                    {userName || 'Nombre de Usuario'}
+                    {fullname || 'Nombre de Usuario'}
                 </div>
                 <div style={textBajada}>{username || 'Usuario de Prueba'}</div>
                 <div style={textStyle}>

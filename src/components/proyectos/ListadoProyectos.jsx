@@ -18,7 +18,7 @@ const ListadoProyectos = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) 
   const [idUsuarioSelected, setIdUsuarioSelected] = useState(''); // Variable para almacenar el id de usuario
   const [proyectoKeySelected, setProyectoKeySelected] = useState(''); // Variable para almacenar el proyectoKey
   const userId = localStorage.getItem('userId'); // ID del usuario
-
+  
   const cardStyle = {
     marginTop: '25px',
     marginLeft: '20px',
@@ -33,6 +33,7 @@ const ListadoProyectos = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) 
     marginRight: '5px',
     borderRadius: '10px'
   };
+  
   const fetchFilters = async () => {
     if (tokenVar) {
         try {
@@ -111,7 +112,7 @@ const ListadoProyectos = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) 
         console.log("datos borrado");
         console.log(bucketKey);
         console.log(objectKey);
-
+        handleListItemClick(proyectos[0].objectKey, proyectos[0].urn);
           fetch('http://localhost:3001/api/deleteObject', {
               method: 'POST',
               headers: {
@@ -129,15 +130,26 @@ const ListadoProyectos = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) 
           .then(data => {
               console.log('Éxito:', data);
               toast.success(`${objectKey} ha sido borrado exitosamente`);
-              fetchFilters();
+              fetchFilters(() => {
+                if (proyectos.length > 0) {
+                  setProyectoSeleccionado(proyectoKey);
+                  console.log("URN del proyecto:", urn);
+                  console.log("Nombre de  proyecto:", proyectoKey);
+                  setUrnSelected(urn);
+                  onProyectoSeleccionado(proyectoKey, urn); // Llamar a la función onProyectoSeleccionado
+                 
+                }
+            });
               // Aquí puedes agregar lógica adicional si es necesario
           })
+          
           .catch(error => {
               console.error('Error:', error);
               toast.error(`Error al intentar borrar ${objectKey}`);
               fetchFilters();
               // Aquí puedes agregar lógica adicional si es necesario
           });
+         
       }
           
       
@@ -224,14 +236,19 @@ const ListadoProyectos = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) 
   
     const input = document.createElement('input');
     input.type = 'file';
-    input.accept = '.pdf,.dwg'; // Ajusta los tipos de archivo según tu necesidad
+    input.accept = '.pdf,.dwg'; 
     input.onchange = async (event) => {
       const file = event.target.files[0];
       if (!file) return;
 
-      // Aquí puedes mostrar un mensaje de carga
-      //  showProgress("Ha iniciado el Proceso de carga.. Puede tardar algunos minutos","inprogress");
+      const fileName = file.name; // Obtiene el nombre del archivo sin la extensión
+      console.log("nombre archivo",fileName);
+      const proyectoExistente = proyectos.some(proyecto => proyecto.objectKey === fileName);
 
+      if (proyectoExistente) {
+            toast.error(`Ya existe un archivo con el nombre ${fileName}. Por favor, elige otro archivo.`);
+            return;
+      }
       const formData = new FormData();
       formData.append('fileToUpload', file);
       formData.append('bucketKey', bucketKey); // Ajusta esto según tu lógica de obtención de la clave del bucket

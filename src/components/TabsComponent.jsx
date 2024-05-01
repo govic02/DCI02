@@ -211,7 +211,7 @@ const TabComponent = ({ urnBuscada }) => {
                 console.log("PEDIDOS SERVER");
                 console.log(response.data);
                 setPedidos(response.data);
-            }
+            }else{ setPedidos([]);}
         } catch (error) {
             console.error('Error al obtener la lista de pedidos:', error);
         }

@@ -25,6 +25,7 @@ const Login = ({ onLoginSuccess }) => {
                 localStorage.setItem('tipo', data.userData.tipoUsuario);
                 localStorage.setItem('username', data.userData.username);
                 localStorage.setItem('userId', data.userData.userId);
+                localStorage.setItem('fullname', data.userData.fullname);
                 onLoginSuccess();
             } else {
                 setError('Los datos de usuario o contraseña son incorrectos.');

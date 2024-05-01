@@ -9,7 +9,7 @@ const BandejaDeEntrada = ({ open, onClose,urn }) => {
     const [messageText, setMessageText] = useState("");
     const [isNewMessage, setIsNewMessage] = useState(false);
     const [usuariosProyecto, setUsuariosProyecto] = useState([]);
-
+    const [envio,setEnvio] = useState([false]);
     const [newMessage, setNewMessage] = useState({
         destinatario: "",
         asunto: ""
@@ -41,7 +41,7 @@ const BandejaDeEntrada = ({ open, onClose,urn }) => {
             setUsuariosProyecto(combinedUsers);
         } catch (error) {
             console.error('Error al cargar usuarios', error);
-            setError('Error al cargar usuarios');
+            setError('cargando usuarios');
         }
     
         setIsLoading(false);
@@ -87,7 +87,7 @@ const BandejaDeEntrada = ({ open, onClose,urn }) => {
         };
     
         fetchConversations();
-    }, [userId]);
+    }, [userId,envio]);
     
 
     const handleMessageSelect = (mensaje) => {
@@ -125,7 +125,43 @@ const BandejaDeEntrada = ({ open, onClose,urn }) => {
             setError(`Error al enviar el mensaje: ${error.message}`);
         }
     };
+    const fetchConversations = async () => {
+        if (!userId) return;
+        setIsLoading(true);
     
+        try {
+            mensajes = [];
+            const response = await axios.get(`${API_BASE_URL}/api/conversaciones/participante/${userId}`);
+            console.log("mensajes recibidos", response.data);
+    
+            const conversationsWithUsernames = await Promise.all(response.data.map(async conversation => {
+                const participantsWithUsernames = await Promise.all(conversation.participants.map(async participantId => {
+                    try {
+                        const userResponse = await axios.get(`${API_BASE_URL}/api/usuarios/${participantId}`);
+                        return userResponse.data.username || participantId;
+                    } catch {
+                        return participantId;
+                    }
+                }));
+    
+                return {
+                    ...conversation,
+                    participants: participantsWithUsernames
+                };
+            }));
+    
+            setMensajes(conversationsWithUsernames.length > 0 ? conversationsWithUsernames : [{ id: 'dummy', asunto: 'Sin Mensajes', usuario: 'N/A' }]);
+        } catch (error) {
+            console.error('Error al cargar conversaciones', error);
+            setError('Error al cargar conversaciones');
+            setMensajes([{ }]);
+        }
+    
+        setIsLoading(false);
+    };
+    useEffect(() => {
+        fetchConversations();
+    }, [userId]);
     const handleAddMessageSend = async () => {
         if (!selectedMessage || !messageText.trim()) {
             console.log("No se seleccionó mensaje o el campo de mensaje está vacío.");
@@ -156,6 +192,8 @@ const BandejaDeEntrada = ({ open, onClose,urn }) => {
                 setMensajes(updatedMensajes);
                 setSelectedMessage({ ...selectedMessage, messages: updatedMessages });
                 setMessageText(""); // Limpiar el campo de texto después de enviar
+                setEnvio(true);
+                //fetchConversations(); 
             } else {
                 console.error("Error al enviar mensaje:", response.data);
             }
@@ -167,7 +205,36 @@ const BandejaDeEntrada = ({ open, onClose,urn }) => {
     const handleNewMessage = () => {
         setIsNewMessage(true);
     };
-
+    const reloadConversationUsernames = async (conversationId, updatedMensajes) => {
+        try {
+            const response = await axios.get(`${API_BASE_URL}/api/conversaciones/${conversationId}`);
+            const conversation = response.data;
+    
+            const participantsWithUsernames = await Promise.all(
+                conversation.participants.map(async participantId => {
+                    try {
+                        const userResponse = await axios.get(`${API_BASE_URL}/api/usuarios/${participantId}`);
+                        return userResponse.data.username || participantId;
+                    } catch {
+                        return participantId; // En caso de error, retorna el ID original
+                    }
+                })
+            );
+    
+            // Encontrar y actualizar la conversación con nombres de usuario nuevos
+            const index = updatedMensajes.findIndex(m => m.conversationId === conversationId);
+            updatedMensajes[index] = {
+                ...updatedMensajes[index],
+                participants: participantsWithUsernames
+            };
+    
+            // Actualizar el estado para reflejar los nombres de usuario actualizados
+            setMensajes(updatedMensajes);
+        } catch (error) {
+            console.error("Error al recargar nombres de usuario para la conversación:", error);
+        }
+    };
+    
     return (
         <Drawer anchor="right" open={open} onClose={onClose}>
             <div style={{ display: 'flex', width: '600px', height: '100%', flexDirection: 'column' }}>
@@ -179,20 +246,36 @@ const BandejaDeEntrada = ({ open, onClose,urn }) => {
                         </IconButton>
                         <List>
                             {mensajes.map((mensaje) => (
-                                <ListItem
-                                    button
-                                    key={mensaje.id}
-                                    onClick={() => handleMessageSelect(mensaje)}
-                                    style={{
-                                        backgroundColor: mensaje === selectedMessage ? '#DA291C' : 'transparent',
-                                        color: mensaje === selectedMessage ? 'white' : 'inherit'
-                                    }}
-                                >
-                                    
-                                    <ListItemText primary={mensaje.asunto} secondary={mensaje.participants && mensaje.participants.length > 0 ? mensaje.participants.join(', ') : ''} secondaryTypographyProps={{
-                                                    style: { fontSize: 11 }
-                                                }} />
-                                    </ListItem>
+                               <ListItem
+                               button
+                               key={mensaje.id}
+                               onClick={() => handleMessageSelect(mensaje)}
+                               style={{
+                                   backgroundColor: mensaje === selectedMessage ? '#DA291C' : 'transparent',
+                                   color: mensaje === selectedMessage ? 'white' : 'inherit'
+                               }}
+                           >
+                               <ListItemText 
+                                   primary={mensaje.asunto} 
+                                   primaryTypographyProps={{
+                                    style: { 
+                                        fontWeight: 'bold',  // Opcional, si quieres resaltar el asunto
+                                        whiteSpace: 'nowrap',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis'
+                                    }
+                                }}
+                                   secondary={mensaje.participants && mensaje.participants.length > 0 ? mensaje.participants.join(', ') : ''} 
+                                   secondaryTypographyProps={{
+                                       style: { 
+                                           fontSize: 10,
+                                           whiteSpace: 'nowrap',
+                                           overflow: 'hidden',
+                                           textOverflow: 'ellipsis'
+                                       }
+                                   }} 
+                               />
+                           </ListItem>
                             ))}
                         </List>
                     </div>

@@ -23,7 +23,10 @@ class ViewerProyectos extends React.Component {
             nombreParametroFecha: '',
             filtro1: '',
             filtro2: '',
-            idsBarraActual:[]
+            idsBarraActual:[],
+            cambioUrnCount: 0,
+            cambioUrnTimes: [],
+            bloquearCambios: false
         },
         this.container = React.createRef();
         this.viewer = null;
@@ -125,8 +128,31 @@ class ViewerProyectos extends React.Component {
         console.log(this.props.urn);
         
         if (this.viewer && (this.props.urn !== prevProps.urn || this.props.idUsuario !== prevProps.idUsuario || this.props.proyectoKey !== prevProps.proyectoKey)) {
+          
+            const now = Date.now();
+            const newTimes = [...this.state.cambioUrnTimes, now].filter(time => now - time <= 6000);
+            const cambioUrnCount = newTimes.length;
+            this.setState({ cambioUrnTimes: newTimes, cambioUrnCount });
+
+            if (cambioUrnCount > 4) {
+                if (!this.state.bloquearCambios) {
+                    alert("Por favor, espera que cargue la última selección antes de cambiar el proyecto.");
+                    this.setState({ bloquearCambios: true });
+                    if (this.alertTimeout) {
+                        clearTimeout(this.alertTimeout);
+                    }
+                    this.alertTimeout = setTimeout(() => {
+                        this.setState({ bloquearCambios: false });
+                    }, 5000 - (now - newTimes[0]));
+                }
+                return;  // Detener la carga si se excede el número de cambios
+            }
             try {
+                this.viewer.tearDown(); // Desmonta el modelo actual
+                this.viewer.finish(); // Finaliza y limpia el visor
+                this.viewer = null; // Elimina la referencia al visor
                 this.viewer = new Autodesk.Viewing.GuiViewer3D(this.container.current);
+              
                 this.viewer.start();
                 this.updateViewerState({})
                 Autodesk.Viewing.Document.load(

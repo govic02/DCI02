@@ -145,7 +145,8 @@ app.post('/api/login', async (req, res) => {
           res.json({ message: 'Autenticación exitosa', token,userData: {
                     userId: usuario.idUsu, 
                     username: usuario.username, 
-                    tipoUsuario: usuario.tipoUsuario
+                    tipoUsuario: usuario.tipoUsuario,
+                    fullname:usuario.fullname
                 } });
 
          }

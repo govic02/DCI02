@@ -1,12 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useContext, useState, useCallback } from 'react';
 import Select from 'react-select';
+import { ActionsContext,useActions } from '../../context/ActionContext'; 
 import { useVisibility } from '../../context/VisibilityContext';
-import { useActions } from '../../context/ActionContext'; 
+
 import Modal from 'react-modal';
 import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye,faPlus, faHandPointer,faTrash } from '@fortawesome/free-solid-svg-icons';
 import API_BASE_URL from '../../config';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer } from 'react-toastify';
 const AdministradorDeVistas = ({ tabsRef,identificadoresActual,refViewer2 , urnBuscada }) => {
     const { isVisible } = useVisibility();
     
@@ -19,7 +23,8 @@ const AdministradorDeVistas = ({ tabsRef,identificadoresActual,refViewer2 , urnB
     const cerrarModal = () => setModalIsOpen(false);
     const [modalEliminarIsOpen, setModalEliminarIsOpen] = useState(false);
     const[esAdministradorEditor,setAdministradorEditor] = useState('');
-    const { despliegaSavedVista, identificadoresActuales } = useActions(); // Ahora también accedes a identificadoresActuales aquí
+    const { despliegaSavedVista, identificadoresActuales } = useActions(); //  accedes a identificadoresActuales aquí
+    const { seleccionActual } = useContext(ActionsContext);
     const urn = urnBuscada;
     
     const guardarVista = async () => {
@@ -28,7 +33,8 @@ const AdministradorDeVistas = ({ tabsRef,identificadoresActual,refViewer2 , urnB
             console.log('Nombre de la vista:', nombreVista);
             console.log(identificadoresActuales);
             console.log(urn);
-            if(identificadoresActuales.length >0){
+            console.log("selc actual",seleccionActual);
+            if(identificadoresActuales.length >0 && identificadoresActuales){
                 const nuevaVista = {
                     nombre: nombreVista,
                     ids: identificadoresActuales,
@@ -47,7 +53,31 @@ const AdministradorDeVistas = ({ tabsRef,identificadoresActual,refViewer2 , urnB
                     // Aquí puedes manejar el caso de que ocurra un error al guardar la vista
                 }
             }
+            else{
+                if(seleccionActual.length >0){
+                    const nuevaVista = {
+                        nombre: nombreVista,
+                        ids: seleccionActual,
+                        urn: urn
+                    };
             
+                    // Realizar la solicitud HTTP para guardar la vista
+                    const response = await axios.post(API_BASE_URL+'/api/vistasGuardadas', nuevaVista);
+                    if (response.status === 201) {
+                        console.log('Vista guardada exitosamente:', response.data);
+                        cargarVistasGuardadas();
+                        // Aquí puedes realizar cualquier acción adicional después de guardar la vista, como cerrar el modal
+                        cerrarModal(); // Cerrar el modal después de guardar
+                    } else {
+                        console.error('Error al guardar la vista:', response.data);
+                        // Aquí puedes manejar el caso de que ocurra un error al guardar la vista
+                    }
+                }else{
+                    console.log("sin identificadores");
+                    toast.error(` No hay elementos seleccionados, debe seleccionar elementos usando los filtros, click izquierdo del mouse o shift+click izquierdo de mouse`);
+                }
+              
+            }
     
             // Comprobar si la vista se guardó correctamente
             

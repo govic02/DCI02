@@ -7,6 +7,7 @@ import Radio from '@mui/material/Radio';
 import RadioGroup from '@mui/material/RadioGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Button from '@mui/material/Button';
+import  {Modal, Box}  from '@mui/material';
 import API_BASE_URL from '../../config';
 const BarraNuevaCuenta = () => {
   const [nombre, setNombre] = useState('');
@@ -14,7 +15,18 @@ const BarraNuevaCuenta = () => {
     const [contrasena, setContrasena] = useState('');
     const [tipoUsuario, setTipoUsuario] = useState('');
     const [esFormularioValido, setEsFormularioValido] = useState(false);
-
+    const [modalOpen, setModalOpen] = useState(false);
+    
+const modalStyle = {
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  width: 400,
+  bgcolor: 'background.paper',
+  boxShadow: 24,
+  p: 4,
+};
   const titleStyle = {
     color: '#E30613', // Color rojo para el título "¡Iniciemos!"
     alignItems: 'center'
@@ -37,7 +49,26 @@ const BarraNuevaCuenta = () => {
     const esFormularioValido = nombre && esEmailValido && contrasena && tipoUsuario;
     setEsFormularioValido(esFormularioValido);
 }, [nombre, email, contrasena, tipoUsuario]);
+const verificarUsuarioExistente = async () => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/usuarios/username/${email}`);
+    if (response.ok) {
+      const data = await response.json();
+      if (data) {
+        setModalOpen(true);
+        return true;
+      }
+    }
+    return false;
+  } catch (error) {
+    console.error('Error checking user existence:', error);
+    return false;
+  }
+};
 const crearCuenta = async () => {
+  if (await verificarUsuarioExistente()) {
+    return;
+  }
   try {
     const usuario = {
       fullname: nombre,
@@ -118,6 +149,17 @@ const crearCuenta = async () => {
             </Button>
           </div>
         </div>
+        <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
+          <Box sx={modalStyle}>
+            <Typography variant="h6" component="h2">
+              Usuario Existente
+            </Typography>
+            <Typography sx={{ mt: 2 }}>
+              Ya existe un usuario con el mismo e-mail asignado.
+            </Typography>
+            <Button onClick={() => setModalOpen(false)}>Cerrar</Button>
+          </Box>
+        </Modal>
       </CardContent>
     </Card>
   );
