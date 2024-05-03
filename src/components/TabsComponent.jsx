@@ -158,8 +158,9 @@ const TabComponent = ({ urnBuscada }) => {
                 // Asumiendo que urnBuscada contiene la URN que quieres buscar
                 const urn = urnBuscada; // Asegúrate de que esta variable contiene la URN correcta
                 const url = API_BASE_URL+`/api/listPedidos?urn=${urn}`;
-                
+              
                 const response = await axios.get(url);
+                console.log("lista pedidos",response);
                 if (response.status === 200) {
                     console.log("PEDIDOS SERVER");
                     console.log(response.data);

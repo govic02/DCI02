@@ -7,21 +7,25 @@ import nodemailer from 'nodemailer';
 import jwt from 'jsonwebtoken';
 import { getPublicToken,getInternalToken ,getClient} from './oauth.js'; // Ruta corregida
 import forgeSDK from 'forge-apis'; // Importa todo el paquete forge-apis
-const { DerivativesApi, JobPayload, JobPayloadInput, JobPayloadOutput, JobSvfOutputPayload } = forgeSDK; // Extrae los objetos que necesitas
+const { DerivativesApi, JobPayload, JobPayloadInput, JobPayloadOutput, JobSvfOutputPayload } = forgeSDK; // Extrae los objetos 
 
 const { BucketsApi, ObjectsApi, PostBucketsPayload } = forgeSDK;
 import { obtenerFiltros } from '../controllers/filtrosController.js';
 import {crearPedido,eliminarPedido,obtenerPedidos } from '../controllers/pedidoController.js';
 import  {actualizarUsuarioProyectoAsignadoPorIdUsuario,obtenerUsuarioProyectoAsignadoPorIdUsuario } from '../controllers/usuarioProyectoAsignadoController.js'; 
-import { manipularConfiguracionViewer,obtenerConfiguracionViewer} from '../controllers/ConfiguracionViewerController.js'; // Asegúrate de que la ruta sea correcta
+import { manipularConfiguracionViewer,obtenerConfiguracionViewer} from '../controllers/ConfiguracionViewerController.js'; 
 import { buscarCrearActualizarObjetoProyectoPlan, obtenerObjetosPorUrn ,CrearObjetoProyectoPlan,obtenerPorDbIdYUrn,procesarObjetosProyectoPlanMasivamente} from '../controllers/ObjetoProyectoPlanController.js';
 import {guardarSumaPisosGeneral,obtenerRegistroPorUrn} from '../controllers/RespuestaSumaPesosController.js';
 import{ obtenerUsuario, obtenerUsuarios, obtenerUsuarioPorUsername,crearUsuario,actualizarUsuario,eliminarUsuario,obtenerUsuariosAdministradores} from '../controllers/usersController.js'
-import { insertarObjetoConDetalles, obtenerRegistroPorUrnBarras } from '../controllers/BarraUrnControlller.js';
+import { insertarObjetoConDetalles, obtenerRegistroPorUrnBarras,obtenerBarrasPorUrneIds } from '../controllers/BarraUrnControlller.js';
 import {crearUsuarioProyectoAsignado, obtenerUsuariosProyectoAsignadoPorUrn,eliminarUsuarioProyectoAsignado} from '../controllers/usuarioProyectoAsignadoController.js'
 import {guardarActualizarRespuesta,obtenerRespuestaPorUrn} from '../controllers/SumaPesosPorDiametroController.js';
+import { crearActualizarDiametroPromedioGeneral, obtenerDiametroPromedioGeneralPorUrn } from '../controllers/DiametroPromedioBarraGeneralController.js';
+
 import { crearActualizarDiametroEquivalente, obtenerDiametroPorUrn } from '../controllers/DiametroEquivalenteController.js';
 import { crearActualizarPesoPromedio,obtenerPesoPromedioPorUrn } from '../controllers/PesosPromedioController.js';
+import { crearActualizarPesoPromedioGeneral, obtenerPesoPromedioGeneralPorUrn } from '../controllers/PesosPromedioGeneralController.js'; 
+
 import { crearConversacion,
   agregarMensaje,
   eliminarMensaje,
@@ -327,6 +331,9 @@ app.post('/api/objects',  multer({ storage: multer.memoryStorage() }).single('fi
               // username
               sendCompletionEmail( username);
              res.status(200).json({ok:true});
+
+
+             
           } else {
               console.log('Error en la respuesta:', response.data); 
               console.log(response.statusCode);
@@ -438,7 +445,7 @@ app.get('/api/filtros', obtenerFiltros );
 
 app.get('/api/vistasGuardadasPorUrn/:urn', obtenerVistasPorUrn);
 app.get('/api/filtrosPorUrn/:urn', obtenerFiltrosOpcionesProyectoPorUrn);
-app.get('/api/listPedidos', obtenerPedidos); //
+app.get('/api/listPedidos', obtenerPedidos); 
 
 app.post('/api/configuracionViewer',  manipularConfiguracionViewer); //
 app.get('/api/configuracionViewer',  obtenerConfiguracionViewer);
@@ -468,6 +475,19 @@ app.get('/api/pesosTotales/:urn', obtenerRegistroPorUrn);
   // estadisticas - diametro equivalente
 app.post('/api/diametroequivalente', crearActualizarDiametroEquivalente);
 app.get('/api/diametroequivalente/:urn', obtenerDiametroPorUrn);
+  // indicadores peso Promedio
+app.post('/api/pesoPromedioGeneral', crearActualizarPesoPromedioGeneral);
+app.get('/api/pesoPromedioGeneral/:urn', obtenerPesoPromedioGeneralPorUrn); 
+// Indicador promedio diametro Barras
+// Rutas para el manejo del diámetro promedio de barras general
+app.post('/api/diametroPromedioGeneral', crearActualizarDiametroPromedioGeneral);
+app.get('/api/diametroPromedioGeneral/:urn', obtenerDiametroPromedioGeneralPorUrn);
+
+// Pedidos/barras/maestroFierros
+
+app.post('/api/barrasPorUrneIds/:urn', obtenerBarrasPorUrneIds);
+
+
   // estadisticas longitudes promedio      
 app.post('/api/crearLongitudPromedio', crearActualizarLongitudPromedio);
 app.get('/api/getLongitudPromedio/:urn', obtenerLongitudPromedioPorUrn);

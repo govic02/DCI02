@@ -10,7 +10,7 @@ import BandejaDeEntrada from './header/BandejaDeEntrada';
 import { useAuth } from '../context/AuthContext';
 import ReportProblemIcon from '@mui/icons-material/ReportProblem'; // Ícono de exclamación
 
-const headerHeight = '64px';
+const headerHeight = '60px';
 
 const HeaderApp = ({ proyectoKey,urn }) => {
     const [anchorEl, setAnchorEl] = useState(null);

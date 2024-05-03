@@ -53,9 +53,34 @@ const obtenerRegistroPorUrnBarras = async (req, res) => {
        
     }
 };
+const obtenerBarrasPorUrneIds = async (req, res) => {
+    const { urn } = req.params; // Asume que la urn se pasa como parámetro en la URL
+    const { ids } = req.body; // Recibe una lista de IDs de barras como parte del cuerpo de la solicitud
 
+    try {
+        const registro = await BarraUrn.findOne({ urn });
+        if (!registro) {
+            console.log("sin coincidencias barras");
+            return res.status(404).json({ mensaje: "No se encontró un registro con la URN proporcionada" });
+        }
+
+        // Filtra los detalles para devolver solo las barras que coinciden con los IDs dados
+        const detallesFiltrados = registro.detalles.filter(barra => ids.includes(barra.id.toString()));
+        if (detallesFiltrados.length === 0) {
+            console.log("sin coincidencias barras");
+            return res.status(404).json({ mensaje: "No se encontraron barras con los IDs proporcionados" });
+        }
+        console.log("si hay coincidencias");
+        console.log(detallesFiltrados);
+        res.json(detallesFiltrados);
+    } catch (error) {
+        console.error("Error al buscar barras por URN e IDs:", error);
+        res.status(500).send(error.message);
+    }
+};
 
 export {
     insertarObjetoConDetalles,
-    obtenerRegistroPorUrnBarras
+    obtenerRegistroPorUrnBarras,
+    obtenerBarrasPorUrneIds 
 };

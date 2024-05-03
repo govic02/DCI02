@@ -252,9 +252,17 @@ const AdministracionProyecto = (proyectoKey,urn) => {
         
         await actions.PesoPromedio(proyectoKey.urn);
         setTickets(prev => ({ ...prev, "Pesos Promedio": "Completado" }));
-        
+
+        await actions.PesoPromedioGeneral(proyectoKey.urn);
+        setTickets(prev => ({ ...prev, "Pesos Promedio General": "Completado" }));
+
+
+        await actions.diametroPromedioGeneral(proyectoKey.urn);
+        setTickets(prev => ({ ...prev, "diametro Promedio barras General": "Completado" }));
+        //
         const promediosLongitud = await LongitudPromedio(proyectoKey.urn);
         console.log("Promedios de longitud por nombreFiltro2:", promediosLongitud);
+
         setTickets(prev => ({ ...prev, "Longitud Promedio": "Completado" }));
         
         const resultadoDiametro = await DiametroEquivalenteLargosIguales(proyectoKey.urn);

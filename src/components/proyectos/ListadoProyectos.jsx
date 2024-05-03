@@ -83,7 +83,7 @@ const ListadoProyectos = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) 
     onProyectoSeleccionado(proyectoKey, urn); // Llamar a la función onProyectoSeleccionado
 
     // Llamar a translateObject para forzar la traducción del archivo
-    translateObject({ id: urn, parents: [bucketKey] });
+
     onProyectoKeySeleccionado(proyectoKey);
 
     try {
@@ -298,6 +298,10 @@ const ListadoProyectos = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) 
     toast.success(` Carga en proceso , puede demorar algunos minutos`);
   };
 
+  const handleFileTranslate = async ()=>{
+    console.log("busco traducir"+bucketKey ,urnSelected);
+    translateObject({ id: urnSelected, parents: [bucketKey] });
+  }
   const translateObject = async (node) => {
 
    
@@ -347,8 +351,8 @@ const ListadoProyectos = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) 
             <img src="images/uploadIcn.svg" alt="Upload" style={{ marginRight: '5px' }} />
             Upload
           </Button>
-          <Button variant="contained" style={buttonStyle}>
-            <img src="images/uploadIcn.svg" alt="Traducir" style={{ marginRight: '5px' }} />
+          <Button variant="contained" style={buttonStyle}  onClick={handleFileTranslate}>
+            <img src="images/uploadIcn.svg" alt="Traducir"  style={{ marginRight: '5px' }} />
             Traducir
           </Button>
           <Button variant="contained" style={buttonStyle} onClick={handleDeleteButtonClick}>

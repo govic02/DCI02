@@ -48,7 +48,9 @@ class ViewerProyectos extends React.Component {
             .catch(err => console.error(err));
 
             this.context.registerAction('generarTotalPesoPisos', this.generarTotalPesoPisos);
-            this.context.registerAction('PesoPromedio', this.PesoPromedio);
+            this.context.registerAction('PesoPromedio', this.PesoPromedio);//PesoPromedioGeneral
+            this.context.registerAction('PesoPromedioGeneral', this.PesoPromedioGeneral); // 
+            this.context.registerAction('diametroPromedioGeneral', this.diametroPromedioGeneral);
             this.context.registerAction('porcentajePedidoTotal', this.porcentajePedidoTotal);
            
     }
@@ -347,6 +349,99 @@ class ViewerProyectos extends React.Component {
        
     } catch (error) {
         console.error("Error generando total de peso por pisos:", error);
+    }
+};
+
+
+
+diametroPromedioGeneral = async (urn) => {
+    try {
+        let totalDiametro = 0;
+        let totalBarras = 0;
+        const { idsBarras } = this.state;
+        console.log("barras previo diametro general");
+        idsBarras.forEach(barra => {
+            const { diametroBarra } = barra;
+            totalDiametro += diametroBarra;  // Suma acumulativa de todos los diámetros
+            totalBarras++;  // Contador de barras
+        });
+
+        if (totalBarras > 0) {
+            const diametroPromedio = totalDiametro / totalBarras;  // Calcula el diámetro promedio del proyecto
+            console.log(`Diámetro promedio del proyecto: ${diametroPromedio} unidades`);
+
+            // Realiza la llamada a la API para guardar el resultado
+            const response = await fetch(`${API_BASE_URL}/api/diametroPromedioGeneral`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ urn, diametroPromedio })
+            });
+
+            if (!response.ok) {
+                console.error("Error en la inserción", response.statusText);
+                return;
+            }
+
+            const saveResult = await response.json();
+            console.log('Saved project average diameter:', saveResult);
+            return { diametroPromedioProyecto: diametroPromedio };
+        } else {
+            console.log("No hay barras para calcular el promedio");
+            return { diametroPromedioProyecto: 0 };
+        }
+    } catch (error) {
+        console.error("Error al procesar los datos de las barras:", error);
+        throw error;  // Re-lanza el error para manejarlo en la función que llama
+    }
+};
+
+PesoPromedioGeneral = async (urn) => {
+    try {
+        const { idsBarras } = this.state;
+        console.log("Datos de barras actuales", idsBarras);
+        let totalPesoProyecto = 0;
+        let totalBarras = 0;
+
+        if (idsBarras !== undefined) {
+            idsBarras.forEach(barra => {
+                const { pesoLineal, longitudTotal } = barra;
+                const longitudEnMetros = longitudTotal / 1000;
+                const pesoTotal = pesoLineal * longitudEnMetros; // Calcula el peso total para la barra actual
+
+                totalPesoProyecto += pesoTotal; // Suma acumulativa de todos los pesos
+                totalBarras++; // Contador de barras
+            });
+
+            if (totalBarras > 0) {
+                const pesoPromedioGeneral = totalPesoProyecto / totalBarras; // Calcula el peso promedio del proyecto
+                console.log(`Peso promedio del proyecto: ${pesoPromedioGeneral} kg`);
+
+                const response = await fetch(`${API_BASE_URL}/api/pesoPromedioGeneral`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ urn, pesoPromedioGeneral })
+                });
+
+                if (!response.ok) {
+                    console.error("Error en la inserción", response.statusText);
+                    return;
+                }
+
+                const saveResult = await response.json();
+                console.log('Saved project average weight:', saveResult);
+                return { pesoPromedioProyecto: pesoPromedioGeneral };
+            } else {
+                console.log("No hay barras para calcular el promedio");
+                return { pesoPromedioProyecto: 0 };
+            }
+        }
+    } catch (error) {
+        console.error("Error al procesar los datos de las barras:", error);
+        throw error; // Re-lanza el error para manejarlo en la función que llama
     }
 };
 

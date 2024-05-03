@@ -113,23 +113,24 @@ const obtenerPedidos = async (req, res) => {
         // Verificar si se proporcionó un urn en la consulta
         const urn = req.query.urn;
         console.log("recibo solicitud para urn",urn);
-        let pedidos;
+       
         if (urn) {
             // Buscar pedidos que coincidan con el urn proporcionado
-            pedidos = await Pedido.find({ urn_actual: urn });
+            let pedidos = await Pedido.find({ urn_actual: urn });
+            console.log("respuesta pedidos");
+            console.log(pedidos);
+           
+    
+            // Enviar una respuesta con los pedidos encontrados
+            console.log("envio pedidos",pedidos);
+           return  res.status(200).json(pedidos);
         } else {
             // Buscar todos los documentos en la colección "Pedidos" si no se proporcionó urn
             return res.status(204).send();
         }
 
         // Si no hay pedidos, enviar una respuesta vacía
-        if (!pedidos.length) {
-            return res.status(204).send();
-        }
-
-        // Enviar una respuesta con los pedidos encontrados
-        console.log("envio pedidos",pedidos);
-        res.json(pedidos);
+       
     } catch (error) {
         // Enviar una respuesta de error si ocurre algún problema
         res.status(500).send(error.message);
