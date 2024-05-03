@@ -236,6 +236,79 @@ const ListadoProyectos = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) 
   }, [proyectos]);
   
   const handleFileUpload = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.rvt,.ifc';
+    input.onchange = async (event) => {
+      const file = event.target.files[0];
+      if (!file) {
+        toast.error("Seleccione un archivo para subir.");
+        return;
+      }
+  
+      const fileName = file.name;
+      const fileExtension = fileName.slice(((fileName.lastIndexOf(".") - 1) >>> 0) + 2);
+      console.log("File name:", fileName);
+      console.log("File extension:", fileExtension);
+  
+      if (!['rvt', 'ifc'].includes(fileExtension.toLowerCase())) {
+        toast.error('solamente puede subir .rvt y .ifc .');
+        return;
+      }
+  
+      const isExistingProject = proyectos.some(proyecto => proyecto.objectKey === fileName);
+      if (isExistingProject) {
+        toast.error(`Ya existe un archivo con el nombre ${fileName} Por favor modifique y vuelva a intentarlo.`);
+        return;
+      }
+  
+      const chunkSize = 5 * 1024 * 1024; // 5 MB
+      const totalChunks = Math.ceil(file.size / chunkSize);
+      let currentChunk = 0;
+  
+      while (currentChunk < totalChunks) {
+        const start = currentChunk * chunkSize;
+        const end = Math.min((currentChunk + 1) * chunkSize, file.size);
+        const chunk = file.slice(start, end);
+  
+        const formData = new FormData();
+        formData.append('fileToUpload', chunk);
+        formData.append('chunkNumber', currentChunk + 1);
+        formData.append('totalChunks', totalChunks);
+        formData.append('originalname', file.name);
+        formData.append('bucketKey', bucketKey);
+        formData.append('username', localStorage.getItem('username'));
+  
+        console.log(`Uploading chunk ${currentChunk + 1} of ${totalChunks}`);
+        try {
+          const response = await fetch(`${API_BASE_URL}/api/objects`, {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${tokenVar}`
+            },
+            body: formData
+          });
+          if (!response.ok) throw new Error('Failed to upload chunk.');
+          console.log(`Chunk ${currentChunk + 1} uploaded successfully.`);
+          currentChunk++;
+        } catch (error) {
+          console.error('Error uploading chunk:', error);
+          toast.error(`Error uploading chunk ${currentChunk + 1}.`);
+          return;
+        }
+      }
+  
+      console.log('proceso terminado de subida.');
+      toast.success('Archivo subido completamente.');
+      fetchFilters(); 
+    };
+  
+    input.click();
+    toast.success(` Carga en proceso , puede demorar algunos minutos`);
+  };
+  
+  /*
+  const handleFileUpload = () => {
     
     console.log(bucketKey);
     console.log("entro");
@@ -297,7 +370,7 @@ const ListadoProyectos = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) 
     input.click();
     toast.success(` Carga en proceso , puede demorar algunos minutos`);
   };
-
+*/
   const handleFileTranslate = async ()=>{
     console.log("busco traducir"+bucketKey ,urnSelected);
     translateObject({ id: urnSelected, parents: [bucketKey] });

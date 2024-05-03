@@ -3,8 +3,11 @@ import cors from 'cors';
 import fetch from 'node-fetch';
 import multer from 'multer';
 import stream from 'stream';
+import fs from 'fs';
 import nodemailer from 'nodemailer';
 import jwt from 'jsonwebtoken';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { getPublicToken,getInternalToken ,getClient} from './oauth.js'; // Ruta corregida
 import forgeSDK from 'forge-apis'; // Importa todo el paquete forge-apis
 const { DerivativesApi, JobPayload, JobPayloadInput, JobPayloadOutput, JobSvfOutputPayload } = forgeSDK; // Extrae los objetos 
@@ -58,7 +61,10 @@ const JWT_SECRET = process.env.JWT_SECRET || 'Yb8+6Wxw9QFgJP9+R+7c31aD+aRfR2jCJC
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('Conexión exitosa a MongoDB'))
   .catch(err => console.error('No se pudo conectar a MongoDB:', err));
-
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const app = express();
 app.use(cors());
 app.use(express.json({ limit: '500mb' }));
@@ -281,8 +287,76 @@ app.get('/api/bucketsProyectos', async (req, res, next) => {
   
 });
 
+app.post('/api/objects', upload.single('fileToUpload'), async (req, res) => {
+  const file = req.file;
+  const { originalname, username, bucketKey } = req.body;
+
+  if (!file) {
+      return res.status(400).json({ error: 'No se ha proporcionado un archivo válido' });
+  }
+
+  const tempDir = path.join(__dirname, 'temp');
+  if (!fs.existsSync(tempDir)) {
+      fs.mkdirSync(tempDir, { recursive: true });
+  }
+  // Nombre temporal para el archivo ensamblado
+  const tempFilePath = path.join(tempDir, file.originalname);
+  fs.appendFileSync(tempFilePath, file.buffer);
+
+  const totalChunks = req.body.totalChunks;  // Total de fragmentos esperados
+  const receivedChunkNumber = req.body.chunkNumber;  // Número del fragmento recibido
+
+  // Verificar si es el último fragmento
+  if (receivedChunkNumber == totalChunks - 1) {
+      // Proceso para cuando todos los fragmentos han sido recibidos
+      const assembledFilePath = tempFilePath;  // El archivo ensamblado está completo
+
+      // tamaño del nuevo fragmento para la API externa
+      const chunkSize = 350 * 1024 * 1024;  // 350 MB por fragmento
+      const fileSize = fs.statSync(assembledFilePath).size;
+      const buffer = fs.readFileSync(assembledFilePath);
+      
+      const nbChunks = Math.ceil(fileSize / chunkSize);
+
+      for (let i = 0; i < nbChunks; i++) {
+          const start = i * chunkSize;
+          const end = Math.min(start + chunkSize, fileSize);
+          const chunkBuffer = buffer.slice(start, end);
+
+          // stream para enviar
+          const memoryStream = new stream.Readable();
+          memoryStream.push(chunkBuffer);
+          memoryStream.push(null);
+
+          const range = `bytes ${start}-${end - 1}/${fileSize}`;
+          const sessionId = randomString(12);  // Asume una función que genera una cadena aleatoria
+
+          try {
+              const response = await new ObjectsApi().uploadChunk(
+                  bucketKey, originalname,
+                  end - start, range, sessionId,
+                  memoryStream, {}, { autoRefresh: false }, req.oauth_token
+              );
+
+              if (response.statusCode !== 200 && response.statusCode !== 202) {
+                  throw new Error(`Error al subir el fragmento: ${response.statusCode}`);
+              }
+          } catch (error) {
+              console.error('Error al subir el fragmento:', error);
+              return res.status(500).json({ error: 'Error interno del servidor' });
+          }
+      }
+
+      // Eliminar archivo temporal
+      fs.unlinkSync(assembledFilePath);
+      res.status(200).json({ message: 'Archivo completo subido y procesado exitosamente' });
+  } else {
+      res.status(202).json({ message: `Fragmento ${receivedChunkNumber + 1} de ${totalChunks} recibido` });
+  }
+});
 
 
+/*
 app.post('/api/objects',  multer({ storage: multer.memoryStorage() }).single('fileToUpload'), async (req, res, next) => {
     
   console.log("tamaño archivo");
@@ -347,6 +421,8 @@ app.post('/api/objects',  multer({ storage: multer.memoryStorage() }).single('fi
   
 
 });
+
+*/
 async function sendCompletionEmail(userEmail) {
   const mailOptions = {
       from: process.env.EMAIL_USERNAME,
