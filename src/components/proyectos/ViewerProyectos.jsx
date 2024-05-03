@@ -102,7 +102,7 @@ class ViewerProyectos extends React.Component {
     }
 
     setupViewer = () => {
-        this.viewer = new Autodesk.Viewing.GuiViewer3D(this.container.current);
+        this.viewer = new Autodesk.Viewing.GuiViewer3D(this.container.current, { extensions: ['Autodesk.DocumentBrowser'] });
         this.viewer.start();
    
         this.viewer.loadExtension('HandleSelectionExtension');

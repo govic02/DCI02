@@ -386,7 +386,7 @@ app.post('/api/jobs', async (req, res, next) => {
     console.log(job);
     // Submit a translation job using [DerivativesApi](https://github.com/Autodesk-Forge/forge-api-nodejs-client/blob/master/docs/DerivativesApi.md#translate).
     await new DerivativesApi().translate(job, {}, req.oauth_client, req.oauth_token);
-    sendCompletionEmail(username);
+    sendCompletioTranslatenEmail(username);
     res.status(200).end();
   } catch (err) {
     next(err);

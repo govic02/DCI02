@@ -7,7 +7,8 @@ import GraficosPedidoDiametro from './estadisticas/GraficosPedidoDiametro';
 import GraficoLongitudPromedio from './estadisticas/GraficoLongitudPromedio';
 import GraficoPesosPromedio from './estadisticas/GraficoPesosPromedio';
 import GraficoPedidovsPedir from './estadisticas/GraficoPedidovsPedir';
-// 
+import IndicadorTotalPeso from './estadisticas/IndicadorTotalPeso';
+
 import HeaderApp from './HeaderApp';
 import ControlEstadisticas from './estadisticas/ControlEstadisticas';
 import API_BASE_URL from '../config'; 
@@ -60,13 +61,13 @@ const Estadisticas = () => {
                 {/* Contenido y otros componentes */}
                 <div className='row'>
                         <div className='col-4'>
-                        
+                        <IndicadorTotalPeso urn={urnSelected} />
                         </div>
                         <div className='col-4'>
 
                         </div>
                         <div className='col-4'>
-                            
+
                         </div>
                 </div>
                 <div className='row'>
