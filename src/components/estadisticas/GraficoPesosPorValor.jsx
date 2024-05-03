@@ -5,9 +5,6 @@ import Typography from '@mui/material/Typography';
 import { Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
 import API_BASE_URL from '../../config';
-import { jsPDF } from 'jspdf';
-import 'jspdf-autotable';
-import html2canvas from 'html2canvas';
 import axios from 'axios';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
@@ -22,26 +19,19 @@ const GraficoPesosPorValor = ({ urn }) => {
   useEffect(() => {
     const fetchDatos = async () => {
       try {
-
-        const response = await fetch(`${API_BASE_URL}/api/barraurn/${encodeURIComponent(urn)}`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch bar data');
-      }
-        const { detalles } = await response.json();
-        console.log("detalles para pesos pedido",detalles);
         const urlBarras = `${API_BASE_URL}/api/pesosTotales/${encodeURIComponent(urn)}`;
         const respuestaBarras = await axios.get(urlBarras);
 
-        console.log("barras pesos totales respuesta",respuestaBarras);
+        console.log("barras pesos totales respuesta", respuestaBarras.data);
 
-        const { data } = respuestaBarras;
-        console.log("datos Pesos Totales piso respuesta", data);
-        
+        // Ordenar los datos por valor numérico ascendente
+        const pesosOrdenados = respuestaBarras.data.pesosPorValor.sort((a, b) => parseFloat(a.valor) - parseFloat(b.valor));
+
         setDatosGrafico({
-          labels: data.pesosPorValor.map(item => item.valor),
+          labels: pesosOrdenados.map(item => item.valor),
           datasets: [{
-            label: data.nombreFiltro2,
-            data: data.pesosPorValor.map(item => item.sumaPeso),
+            label: respuestaBarras.data.nombreFiltro2,
+            data: pesosOrdenados.map(item => item.sumaPeso),
             backgroundColor: ['#E04C41', '#737373', '#EE736A', '#41E0E0', '#E0E041'],
           }],
         });
@@ -64,7 +54,6 @@ const GraficoPesosPorValor = ({ urn }) => {
     marginTop: '40px',
     borderRadius: '20px',
   };
-
 
   return (
     <Card style={cardStyle}>

@@ -81,12 +81,14 @@ const GraficoLineasPesosPorDiametro = ({ urn }) => {
         const respuesta = await fetch(url);
         if (!respuesta.ok) throw new Error('Respuesta no satisfactoria del servidor');
         const { pesosPorPiso } = await respuesta.json();
-
+       var  pesosPorPisoOrd = pesosPorPiso.sort((a, b) => parseInt(a.piso, 10) - parseInt(b.piso, 10));
+        console.log("pesos por piso ordenados", pesosPorPisoOrd);
+    
         // Preparar los datos para el gráfico de líneas
-        const labels = pesosPorPiso.map(item => item.piso);
+        const labels = pesosPorPisoOrd.map(item => item.piso);
         let datasetMap = {}; // Mapa para mantener los datasets organizados por diámetro
 
-        pesosPorPiso.forEach(piso => {
+        pesosPorPisoOrd.forEach(piso => {
           piso.diametros.forEach(({ diametro, pesoTotal }) => {
             if (!datasetMap[`Diametro ${diametro} mm`]) {
               datasetMap[`Diametro ${diametro} mm`] = {

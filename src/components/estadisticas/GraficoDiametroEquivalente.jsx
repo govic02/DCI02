@@ -22,9 +22,12 @@ const GraficoDiametroEquivalente = ({ urn }) => {
         if (!respuesta.ok) throw new Error('Respuesta no satisfactoria del servidor');
         const { filtros2 } = await respuesta.json();
 
+        // Ordenar los datos por nombreFiltro2 asumiendo que son numéricos
+        const filtros2Ordenados = filtros2.sort((a, b) => parseFloat(a.nombreFiltro2) - parseFloat(b.nombreFiltro2));
+
         // Preparar los datos para el gráfico
-        const labels = filtros2.map(item => item.nombreFiltro2);
-        const data = filtros2.map(item => ({
+        const labels = filtros2Ordenados.map(item => item.nombreFiltro2);
+        const data = filtros2Ordenados.map(item => ({
           x: item.nombreFiltro2,
           y: item.grupos.map(grupo => grupo.diametroEquivalente)
         }));

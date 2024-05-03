@@ -6,10 +6,13 @@ import { useVisibility } from '../context/VisibilityContext';
 import { useActions } from '../context/ActionContext';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer } from 'react-toastify';
 import Card from 'react-bootstrap/Card';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye,faPlus, faHandPointer,faTrash } from '@fortawesome/free-solid-svg-icons';
 import API_BASE_URL from '../config';
+
 const customStyles = {
     multiValue: (base) => ({
         ...base,
@@ -233,6 +236,8 @@ const TabComponent = ({ urnBuscada }) => {
             }));
             setOpcionesParticionHA(opciones1);
         }
+        
+
         if (datosFiltro2) {
             console.log("Datos Filtro2 desde Tabs:", datosFiltro2);
           const opciones2 = Object.keys(datosFiltro2).map(key => ({
@@ -241,7 +246,7 @@ const TabComponent = ({ urnBuscada }) => {
              isFixed: false
          }));
          setOpcionesPiso(opciones2);
-     }
+     } 
 
       }, [datosFiltro1,datosFiltro2]);
 
@@ -287,7 +292,34 @@ const TabComponent = ({ urnBuscada }) => {
     const onSelect = (k) => {
         setActiveKey(k);
     };
-    const handleOpenModal = () => setShowModal(true);
+    const handleOpenModal = () => {
+        let idsRepetidos = [];
+        let pedidosConRepetidos = new Set(); // Utilizamos un Set para evitar nombres duplicados
+    
+        // Iteramos sobre cada pedido existente
+        pedidos.forEach(pedido => {
+            // Aseguramos que los IDs del pedido estén como números enteros
+            const pedidoIdsNumerico = pedido.ids.map(id => parseInt(id, 10));
+            // Filtramos los IDs seleccionados que están presentes en este pedido
+            const repetidosEnPedido = selectedIds.filter(id => pedidoIdsNumerico.includes(id));
+            if (repetidosEnPedido.length > 0) {
+                idsRepetidos = idsRepetidos.concat(repetidosEnPedido); // Acumulamos todos los IDs repetidos
+                pedidosConRepetidos.add(pedido.nombre_pedido); // Añadimos el nombre del pedido al conjunto de pedidos con repetidos
+            }
+        });
+    
+        if (idsRepetidos.length > 0) {
+            console.log("IDs repetidos encontrados:", idsRepetidos);
+            const nombresPedidos = Array.from(pedidosConRepetidos).join(", "); // Convertimos el Set a Array y lo unimos en una cadena
+            toast.error(`Hay elementos repetidos en los siguientes pedidos: ${nombresPedidos}`);
+            viewPedido(idsRepetidos); // Visualiza los IDs repetidos
+        } else {
+            setShowModal(true); // Abre el modal solo si no hay IDs repetidos
+        }
+    };
+    
+    
+    
     const handleCloseModal = () => setShowModal(false);
     const handleExecuteOrderClick = async () => {
         if (!pedidoNombre.trim()) {
@@ -409,7 +441,7 @@ const TabComponent = ({ urnBuscada }) => {
         right: '50px',
         transform: 'translateY(-50%)',
         zIndex: 1000,
-        width: '450px',
+        width: '470px',
         height: '385px',
         overflow: 'auto',
         paddingBottom: '520px',
@@ -554,7 +586,11 @@ const TabComponent = ({ urnBuscada }) => {
             {/* Cards de pedidos existentes */}
              {/* Ajusta el 32px según el tamaño de tu encabezado */}
             
-             <div className="list-group" style={{ fontSize: '8pt' }}>
+             <div className="list-group" style={{ 
+    fontSize: '8pt', 
+    maxHeight: pedidos.length > 5 ? '300px' : 'auto', // Establece una altura máxima cuando hay más de 5 elementos
+    overflowY: pedidos.length > 5 ? 'scroll' : 'hidden' // Permite desplazamiento vertical sólo si hay más de 5 elementos
+}}>
                 {pedidos.map((pedido, index) => (
                     <div key={index} className="list-group-item d-flex justify-content-between align-items-center">
                         <div className="flex-grow-1">

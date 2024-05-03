@@ -3,6 +3,7 @@ import { Tabs, Tab, Button,Modal,Form  } from 'react-bootstrap';
 import './paleta.css';
 import axios from 'axios';
 import { ActionsContext } from '../../context/ActionContext';
+import { useVisibility } from '../../context/VisibilityContext';
 import API_BASE_URL from '../../config';
 import { toast } from 'react-toastify';
 const Paleta =  ({ urnBuscada })  => {
@@ -17,7 +18,7 @@ const Paleta =  ({ urnBuscada })  => {
     const [fechaInstalacion, setFechaInstalacion] = useState('');
     const { selectedObjectProps,resultadoFierros, seleccionActual,obtenerIdsConFecha, obtenerIdsSinFecha,buscaBarrasHormigon,cleanModel,gestionarYpintarIds} = useContext(ActionsContext); // Aquí usas useContext para acceder al contexto
     const[esAdministradorEditor,setAdministradorEditor] = useState('');
-
+    const [isVisible, setIsVisible] = useState(true);
   
     
     const estiloDelComponente = {
@@ -118,7 +119,18 @@ const Paleta =  ({ urnBuscada })  => {
         }
     };
     
-    
+    useEffect(() => {
+        const toggleVisibilityPaleta = () => {
+         
+           setIsVisible(prev => !prev); // Cambia la visibilidad
+        };
+
+        window.addEventListener('toggleTabVisibilityPaleta', toggleVisibilityPaleta);
+
+        return () => {
+            window.removeEventListener('toggleTabVisibilityPaleta', toggleVisibilityPaleta);
+        };
+    }, []);
 
     const handleMouseMove = (e) => {
         if (!isDragging) return;
@@ -200,7 +212,7 @@ const Paleta =  ({ urnBuscada })  => {
         }
     };
     
-    return (
+    return isVisible ?(
         <div style={estiloDelComponente}>
         
             <div style={estiloFila} onClick={pintarFechas}>
@@ -216,6 +228,21 @@ const Paleta =  ({ urnBuscada })  => {
             </div>
             {showModal && (
     <div style={modalStyle}>
+         <button
+        style={{
+            position: 'absolute',
+            top: '10px', // Ajusta según sea necesario para tu diseño
+            right: '10px', // Ajusta según sea necesario para tu diseño
+            border: 'none',
+            background: 'transparent',
+            color: 'black', // Ajusta el color según tu estilo
+            cursor: 'pointer',
+            fontSize: '24px' // Ajusta el tamaño según sea necesario
+        }}
+        onClick={toggleModal} // Función para cerrar el modal
+    >
+        &times;
+    </button>
         {resultadoFierros && resultadoFierros.length > 1 ? (
             <>
                 <h4>Barras Incluidas en Selección</h4>
@@ -229,8 +256,10 @@ const Paleta =  ({ urnBuscada })  => {
             </>
         ) : (
             <>
+                {selectedObjectProps && selectedObjectProps.name ? (
+    <>
                 <h4>Propiedades</h4>
-                <h8>dbId: {selectedObjectProps?.dbId}, Nombre: {selectedObjectProps?.name}</h8>
+                <h8>dbId: {selectedObjectProps.dbId}, Nombre: {selectedObjectProps.name}</h8>
                 <div style={{ maxHeight: '420px', overflowY: 'auto', border: '1px solid #cccccc', borderRadius: '10px' }}>
                     {selectedObjectProps.properties?.map((prop, index) => (
                         <div key={index} className="list-group-item d-flex justify-content-between align-items-center">
@@ -242,6 +271,13 @@ const Paleta =  ({ urnBuscada })  => {
                         </div>
                     ))}
                 </div>
+            </>
+        ) : (
+            <div>
+                <h5>No ha seleccionado ningún objeto</h5>
+            </div>
+        )}
+
             </>
         )}
   {selectedObjectProps.properties && selectedObjectProps.properties.length > 0 && (
@@ -334,7 +370,7 @@ const Paleta =  ({ urnBuscada })  => {
 
         </div>
         
-    );
+    ):null;
 };
 
 export default Paleta;

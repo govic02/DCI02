@@ -9,6 +9,7 @@ import ListItemText from '@mui/material/ListItemText';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from 'react-toastify';
+import API_BASE_URL from '../../config'; 
 const ListadoProyectos = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) => {
   const [proyectoSeleccionado, setProyectoSeleccionado] = useState('');
   const [tokenVar, setToken] = useState(null);
@@ -37,7 +38,7 @@ const ListadoProyectos = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) 
   const fetchFilters = async () => {
     if (tokenVar) {
         try {
-            const response = await fetch('http://localhost:3001/api/bucketsProyectos', {
+            const response = await fetch(`${API_BASE_URL}/api/bucketsProyectos`, {
                 headers: {
                     Authorization: `${tokenVar}`
                 }
@@ -45,10 +46,13 @@ const ListadoProyectos = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) 
             const data = await response.json();
             console.log(data);
             if (data.length > 0) {
-                console.log(data[0]?.bucketKey);
-                setBucketKey(data[0]?.bucketKey);
-            }
-            setProyectos(data);
+              var data1 = data.sort((a, b) => a.objectKey.localeCompare(b.objectKey));
+                console.log("Datos ordenados:", data1);
+                setBucketKey(data[0]?.bucketKey); // Establece el bucketKey del primer proyecto
+                setProyectos( data1);
+          }
+
+        //  setProyectos(data); // Establece los proyectos ordenados en el estado
         } catch (error) {
             console.error('Error al buscar los filtros:', error);
         }
@@ -59,7 +63,7 @@ const ListadoProyectos = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) 
     const fetchToken = async () => {
       try {
         
-        const response = await fetch('http://localhost:3001/api/gettoken');
+        const response = await fetch(`${API_BASE_URL}/api/gettoken`);
         const data = await response.json();
         setToken(data.token);
       } catch (error) {
@@ -83,7 +87,7 @@ const ListadoProyectos = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) 
     onProyectoKeySeleccionado(proyectoKey);
 
     try {
-      const response = await fetch('http://localhost:3001/api/setproyectoAdmin', {
+      const response = await fetch(`${API_BASE_URL}/api/setproyectoAdmin`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -113,7 +117,7 @@ const ListadoProyectos = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) 
         console.log(bucketKey);
         console.log(objectKey);
         handleListItemClick(proyectos[0].objectKey, proyectos[0].urn);
-          fetch('http://localhost:3001/api/deleteObject', {
+          fetch(`${API_BASE_URL}/api/deleteObject`, {
               method: 'POST',
               headers: {
                   'Content-Type': 'application/json'
@@ -174,7 +178,7 @@ const ListadoProyectos = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) 
     const fetchFilters = async () => {
       if (tokenVar) {
         try {
-          const response = await fetch('http://localhost:3001/api/bucketsProyectos', {
+          const response = await fetch(`${API_BASE_URL}/api/bucketsProyectos`, {
             headers: {
               Authorization: `${tokenVar}`
             }
@@ -182,10 +186,12 @@ const ListadoProyectos = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) 
           const data = await response.json();
           console.log(data);
           if (data.length > 0) {
-            console.log(data[0]?.bucketKey);
-            setBucketKey(data[0]?.bucketKey);
+           var data1 = data.sort((a, b) => a.objectKey.localeCompare(b.objectKey));
+                console.log("Datos ordenados:", data1);
+                setBucketKey(data[0]?.bucketKey); // Establece el bucketKey del primer proyecto
+                setProyectos( data1);
           }
-          setProyectos(data);
+         
         } catch (error) {
           console.error('Error al buscar los filtros:', error);
         }
@@ -197,7 +203,7 @@ const ListadoProyectos = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) 
   useEffect(() => {
     const obtenerUsuarioProyecto = async () => {
       try {
-        const response = await fetch('http://localhost:3001/api/getUserProyectId', {
+        const response = await fetch(`${API_BASE_URL}/api/getUserProyectId`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -236,13 +242,19 @@ const ListadoProyectos = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) 
   
     const input = document.createElement('input');
     input.type = 'file';
-    input.accept = '.pdf,.dwg'; 
+    input.accept = '.rvt,.ifc'; 
     input.onchange = async (event) => {
       const file = event.target.files[0];
       if (!file) return;
 
       const fileName = file.name; // Obtiene el nombre del archivo sin la extensión
       console.log("nombre archivo",fileName);
+
+      const fileExtension = fileName.slice(((fileName.lastIndexOf(".") - 1) >>> 0) + 2); // Extrae la extensión del archivo
+      if (!['rvt', 'ifc'].includes(fileExtension.toLowerCase())) {
+        toast.error('Solo puede subir archivos con extensiones .rvt o .ifc');
+        return;
+    }
       const proyectoExistente = proyectos.some(proyecto => proyecto.objectKey === fileName);
 
       if (proyectoExistente) {
@@ -252,10 +264,14 @@ const ListadoProyectos = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) 
       const formData = new FormData();
       formData.append('fileToUpload', file);
       formData.append('bucketKey', bucketKey); // Ajusta esto según tu lógica de obtención de la clave del bucket
-
+      const username = localStorage.getItem('username');
+      formData.append('username', username);
       try {
         toast.success(` Inicio de proceso de carga, el proceso puede tardar algunos minutos. Te notificaremos una vez esté listo`);
-        const response = await fetch('http://localhost:3001/api/objects', {
+        const response = await fetch(`${API_BASE_URL}/api/objects`, {
+          headers: {
+            Authorization: `${tokenVar}`
+          },
           method: 'POST',
           body: formData,
           processData: false,
@@ -265,8 +281,8 @@ const ListadoProyectos = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) 
         console.log(response);
         if (response.ok) {
           // Aquí puedes actualizar la interfaz o mostrar un mensaje de éxito
-          console.log('Archivo subido exitosamente');
-          toast.success(`Se ha guardado y cargado exitosamente el nuevo proyecto`);
+          console.log('Se ha iniciado el proceso de subida exitosamente. Recibirá un correo electrónico de notificación una vez que el archivo esté disponible');
+          toast.success(`Se ha completado el proceso de subida exitosamente. Recibirá un correo electrónico de notificación una vez que el archivo esté disponible`);
           fetchFilters();
         } else {
           // Aquí puedes manejar el caso de error
@@ -289,14 +305,15 @@ const ListadoProyectos = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) 
     var objectKey = node.id;
     console.log(bucketKey);
     console.log(objectKey);
+    const username = localStorage.getItem('username');
     try {
-      toast.success(` Proceso de traducción  iniciado , el proceso tomará algunos minutos`);
-      const response = await fetch('http://localhost:3001/api/jobs', {
+      toast.success(` Proceso de traducción  iniciado , el proceso tomará algunos minutos, recibirá un correo electrónico que notificará cuando esté disponible`);
+      const response = await fetch(`${API_BASE_URL}/api/jobs`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ 'bucketKey': bucketKey, 'objectName': objectKey })
+        body: JSON.stringify({ 'bucketKey': bucketKey, 'objectName': objectKey ,'username':username})
       });
       console.log(response);
       if (response.ok) {

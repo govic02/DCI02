@@ -277,11 +277,15 @@ app.get('/api/bucketsProyectos', async (req, res, next) => {
   
 });
 
+
+
 app.post('/api/objects',  multer({ storage: multer.memoryStorage() }).single('fileToUpload'), async (req, res, next) => {
     
   console.log("tamaño archivo");
   console.log(req.file.size);
   const fileSize = req.file.size;
+  const username = req.body.username
+  console.log("usuario que está subiendo archivo",username);
   //const chunkSize = 512 * 1024;
   const chunkSize = 350 * 1024 * 1024; // 200 MB en bytes
   const nbChunks = Math.round(0.5 + fileSize / chunkSize);
@@ -320,6 +324,8 @@ app.post('/api/objects',  multer({ storage: multer.memoryStorage() }).single('fi
               continue;
           } else if (response.statusCode === 200) {
               console.log('La última parte se ha subido.');
+              // username
+              sendCompletionEmail( username);
              res.status(200).json({ok:true});
           } else {
               console.log('Error en la respuesta:', response.data); 
@@ -334,11 +340,42 @@ app.post('/api/objects',  multer({ storage: multer.memoryStorage() }).single('fi
   
 
 });
+async function sendCompletionEmail(userEmail) {
+  const mailOptions = {
+      from: process.env.EMAIL_USERNAME,
+      to: userEmail,
+      subject: 'Archivo Subido Exitosamente',
+      html: `<p>Estimado usuario, tu archivo ha sido subido con éxito a la plataforma. Ahora puedes iniciar el proceso de traducción recuerda que una vez iniciado puede tardar varios minutos</p>`
+  };
 
+  try {
+      await mailTransport.sendMail(mailOptions);
+      console.log('Email de notificación enviado.');
+  } catch (error) {
+      console.error('Error al enviar el email de notificación', error);
+  }
+}
+
+async function sendCompletioTranslatenEmail(userEmail) {
+  const mailOptions = {
+      from: process.env.EMAIL_USERNAME,
+      to: userEmail,
+      subject: 'Archivo Traducido Exitosamente',
+      html: `<p>Estimado usuario, tu archivo ha sido Traducido con éxito . Ahora puedes está listo para ser utilizado.</p>`
+  };
+
+  try {
+      await mailTransport.sendMail(mailOptions);
+      console.log('Email de notificación enviado.');
+  } catch (error) {
+      console.error('Error al enviar el email de notificación', error);
+  }
+}
 app.post('/api/jobs', async (req, res, next) => {
   let job = new JobPayload();
   job.input = new JobPayloadInput();
   job.input.urn = req.body.objectName;
+  const username = req.body.username
   job.output = new JobPayloadOutput([
     new JobSvfOutputPayload()
   ]);
@@ -349,6 +386,7 @@ app.post('/api/jobs', async (req, res, next) => {
     console.log(job);
     // Submit a translation job using [DerivativesApi](https://github.com/Autodesk-Forge/forge-api-nodejs-client/blob/master/docs/DerivativesApi.md#translate).
     await new DerivativesApi().translate(job, {}, req.oauth_client, req.oauth_token);
+    sendCompletionEmail(username);
     res.status(200).end();
   } catch (err) {
     next(err);

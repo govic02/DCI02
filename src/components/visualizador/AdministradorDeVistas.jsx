@@ -12,7 +12,8 @@ import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from 'react-toastify';
 const AdministradorDeVistas = ({ tabsRef,identificadoresActual,refViewer2 , urnBuscada }) => {
-    const { isVisible } = useVisibility();
+    const [isVisible, setIsVisible] = useState(true);
+
     
     const [vistaSeleccionada, setVistaSeleccionada] = useState(null);
     const [topPosition, setTopPosition] = useState('55%');
@@ -92,6 +93,20 @@ const AdministradorDeVistas = ({ tabsRef,identificadoresActual,refViewer2 , urnB
         identificadoresActual = selectedOption.ids;
         setVistaSeleccionada(selectedOption);
     };
+
+
+    useEffect(() => {
+        const toggleVisibilityVistas = () => {
+         
+           setIsVisible(prev => !prev); // Cambia la visibilidad
+        };
+
+        window.addEventListener('toggleTabVisibilityVistas', toggleVisibilityVistas);
+
+        return () => {
+            window.removeEventListener('toggleTabVisibilityVistas', toggleVisibilityVistas);
+        };
+    }, []);
     async function handleDeleteClick(idVS) {
         console.log("ID A BORRAR");
         console.log(idVS);
@@ -222,8 +237,8 @@ const AdministradorDeVistas = ({ tabsRef,identificadoresActual,refViewer2 , urnB
             borderColor: '#DA291C', // Color del borde
            
             color: '#DA291C', // Color del texto,
-            height: '50px', // Establecer el alto del control
-            minHeight: '50px' // Establecer la altura mínima para asegurar que no sea menor
+            height: '40px', // Establecer el alto del control
+            minHeight: '40px' // Establecer la altura mínima para asegurar que no sea menor
         }),
         valueContainer: (provided) => ({
             ...provided,
@@ -243,6 +258,11 @@ const AdministradorDeVistas = ({ tabsRef,identificadoresActual,refViewer2 , urnB
             ...provided,
             backgroundColor: '#DA291C', // Color del separador de indicadores
         }),
+        menu: (provided) => ({
+            ...provided,
+            maxHeight: '60px', // Establece un alto máximo para el menú
+            overflowY: 'auto', // Permite el desplazamiento vertical si el contenido excede el alto máximo
+        })
         // Puedes agregar más estilos personalizados según sea necesario
     };
 

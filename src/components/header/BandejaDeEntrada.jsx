@@ -97,6 +97,7 @@ const BandejaDeEntrada = ({ open, onClose,urn }) => {
     };
 
     const handleMessageSend = async () => {
+        
         if (!newMessage.destinatario || !newMessage.asunto) {
             setError('Todos los campos deben estar completos.');
             return;
@@ -115,11 +116,24 @@ const BandejaDeEntrada = ({ open, onClose,urn }) => {
                 }],
                 estado: 'abierto'
             });
-            
+            const participantsWithUsernames = await Promise.all(response.data.participants.map(async participantId => {
+                try {
+                    const userResponse = await axios.get(`${API_BASE_URL}/api/usuarios/${participantId}`);
+                    return userResponse.data.username || participantId;  // Usa el username si está disponible
+                } catch {
+                    return participantId;  // En caso de error, retorna el ID original
+                }
+            }));
+    
+            const updatedConversation = {
+                ...response.data,
+                participants: participantsWithUsernames
+            };
             // Añade la nueva conversación al inicio del array de mensajes
-            setMensajes(prevMensajes => [response.data, ...prevMensajes]);
+            setMensajes(prevMensajes => [updatedConversation, ...prevMensajes]);
             setIsNewMessage(false); // Opcional: Depende de si quieres limpiar el formulario
             setNewMessage({ destinatario: "", asunto: "", cuerpo: "" }); // Limpia el formulario
+            
             // onClose(); No cierres el drawer
         } catch (error) {
             setError(`Error al enviar el mensaje: ${error.message}`);
@@ -320,7 +334,7 @@ const BandejaDeEntrada = ({ open, onClose,urn }) => {
                                 <Divider style={{ margin: '10px 0' }} />
                                 <div style={{ flex: 1, overflow: 'auto', minHeight: '100px' }}>
                                 {selectedMessage.messages.map((msg, index) => {
-        // Determinar si el mensaje fue enviado por el usuario actual
+                                 // Determinar si el mensaje fue enviado por el usuario actual
                                     const isSender = msg.senderId === userId;
                                     let senderName = isSender ? "Tú" : selectedMessage.participants.find(p => p !== userId);
                                     // Si el remitente no es el usuario actual, obtenemos su nombre apropiado

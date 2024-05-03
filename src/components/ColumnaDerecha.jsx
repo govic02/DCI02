@@ -8,6 +8,8 @@ import HeaderApp from './HeaderApp';
 import { ActionsProvider } from '../context/ActionContext';
 import { useAuth } from '../context/AuthContext';
 import API_BASE_URL from '../config';
+import './styles/columna.css'; // Ajusta la ruta según dónde se encuentre el archivo CSS
+
 const ColumnaDerecha = ({ isCollapsed, token, urn, selectedIds, onCameraChange, onSelectionChange, refViewer }) => {
   const { token: tokenContexto } = useAuth();
     const [urnSelected, setUrnSelected] = useState('');
@@ -83,7 +85,7 @@ const ColumnaDerecha = ({ isCollapsed, token, urn, selectedIds, onCameraChange, 
     }, );
   
     return (
-        <div style={estiloActual}>
+        <div className="columna"style={estiloActual}>
         
             <HeaderApp proyectoKey={proyectoKeySeleccionado}  urn={urnSelected}/> {/* Instancia el componente HeaderApp aquí */}
             <ActionsProvider  viewerRef={refViewer}>

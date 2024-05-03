@@ -59,6 +59,17 @@ const Estadisticas = () => {
             <div style={estiloEstadisticas}>
                 {/* Contenido y otros componentes */}
                 <div className='row'>
+                        <div className='col-4'>
+                        
+                        </div>
+                        <div className='col-4'>
+
+                        </div>
+                        <div className='col-4'>
+                            
+                        </div>
+                </div>
+                <div className='row'>
                     <div className='col-6'>
                         <GraficoPesosPorValor urn={urnSelected} />
                     </div>

@@ -21,10 +21,10 @@ const GraficoPesosPromedio = ({ urn }) => {
         const respuesta = await fetch(url);
         if (!respuesta.ok) throw new Error('Respuesta no satisfactoria del servidor');
         const data = await respuesta.json();
-
+        const pesosOrdenados = data.pesos.sort((a, b) => parseInt(a.nombreFiltro2) - parseInt(b.nombreFiltro2));
         // Preparar los datos para el gráfico
-        const labels = data.pesos.map(item => item.nombreFiltro2);
-        const pesos = data.pesos.map(item => item.promedioPeso);
+        const labels = pesosOrdenados.map(item => item.nombreFiltro2);
+        const pesos = pesosOrdenados.map(item => item.promedioPeso);
 
         setDatosGrafico({
           labels,

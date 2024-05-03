@@ -21,7 +21,8 @@ const GraficoLongitudPromedio = ({ urn }) => {
         const respuesta = await fetch(url);
         if (!respuesta.ok) throw new Error('Respuesta no satisfactoria del servidor');
         const { longitudes } = await respuesta.json();
-
+         longitudes.sort((a, b) => parseInt(a.nombreFiltro2) - parseInt(b.nombreFiltro2));
+        console.log("valores longitudes",longitudes);
         // Preparar los datos para el gráfico
         const labels = longitudes.map(item => item.nombreFiltro2);
         const data = longitudes.map(item => item.promedioLongitud/1000);

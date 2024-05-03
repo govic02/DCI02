@@ -40,6 +40,22 @@ class HandleSelectionExtension extends Autodesk.Viewing.Extension {
         // Add a new button to the toolbar group
         this._button = new Autodesk.Viewing.UI.Button('handleSelectionExtensionButton');
         this._gestorVistasButton = new Autodesk.Viewing.UI.Button('gestorVistasButton');
+        this._button2 = new Autodesk.Viewing.UI.Button('botonPaleta');
+       
+       
+        this._button2.onClick = (ev) => {
+            // Lógica para alternar la visibilidad de los elementos seleccionados
+            const selection = this.viewer.getSelection();
+            console.log("detecto click");
+            window.dispatchEvent(new CustomEvent('toggleTabVisibilityPaleta'));
+        };
+
+
+        this._button2.setToolTip('Fechas&Propiedades');
+        let iconPathP = "images/calen.png";  // Actualiza con la ruta real a tu ícono
+        this._button2.icon.style = `background-image: url(${iconPathP}); background-size: cover;`;
+        this._group.addControl(this._button2);
+
         this._button.onClick = (ev) => {
            console.log("detecto click");
            window.dispatchEvent(new CustomEvent('toggleTabVisibility'));
@@ -73,7 +89,10 @@ class HandleSelectionExtension extends Autodesk.Viewing.Extension {
         this._gestorVistasButton.onClick = (ev) => {
             // Aquí puedes agregar la lógica que se ejecutará cuando se haga clic en el botón
             console.log('Botón gestorVistas pulsado');
+            window.dispatchEvent(new CustomEvent('toggleTabVisibilityVistas'));
         };
+
+        
         this._button.setToolTip('Funciones ICD');
         this._gestorVistasButton.setToolTip('Gestor de Vistas');
         let iconPath = "images/isotipoTransparente.png";

@@ -1,0 +1,15 @@
+.columna {
+    width: 100%;
+    position: fixed;
+    top: 64px;
+    height: 88%;
+    margin-bottom: 30px;
+}
+
+@media (max-width: 768px) {
+    .columna {
+        position: static;
+        height: auto;
+        margin-bottom: 0;
+    }
+}
