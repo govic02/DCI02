@@ -312,7 +312,7 @@ app.post('/api/objects', upload.single('fileToUpload'), async (req, res) => {
       const assembledFilePath = tempFilePath;  // El archivo ensamblado está completo
 
       // tamaño del nuevo fragmento para la API externa
-      const chunkSize = 5 * 1024 * 1024;  // 350 MB por fragmento
+      const chunkSize = 900 * 1024 * 1024;  // 350 MB por fragmento
       const fileSize = fs.statSync(assembledFilePath).size;
       const buffer = fs.readFileSync(assembledFilePath);
       
@@ -350,7 +350,7 @@ app.post('/api/objects', upload.single('fileToUpload'), async (req, res) => {
       }
 
       // Eliminar archivo temporal
-      fs.unlinkSync(assembledFilePath);
+     // fs.unlinkSync(assembledFilePath);
       console.log("PROCESO DE ENVIO TERMINADO DE ARCHIVO");
       res.status(200).json({ message: 'Archivo completo subido y procesado exitosamente' });
   } else {
