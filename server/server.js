@@ -286,7 +286,75 @@ app.get('/api/bucketsProyectos', async (req, res, next) => {
   }
   
 });
+app.post('/api/objects', upload.single('fileToUpload'), async (req, res) => {
+  const file = req.file;
+  const { originalname, username, bucketKey } = req.body;
 
+  if (!file) {
+      return res.status(400).json({ error: 'No se ha proporcionado un archivo válido' });
+  }
+
+  // Crear un directorio temporal para almacenar el archivo ensamblado
+  const tempDir = path.join(__dirname, 'temp');
+  if (!fs.existsSync(tempDir)) {
+      fs.mkdirSync(tempDir, { recursive: true });
+  }
+
+  // Ruta del archivo temporal
+  const tempFilePath = path.join(tempDir, originalname);
+  fs.appendFileSync(tempFilePath, file.buffer);
+
+  const totalChunks = parseInt(req.body.totalChunks);  // Total de fragmentos esperados
+  const receivedChunkNumber = parseInt(req.body.chunkNumber);  // Número del fragmento recibido
+
+  // Verificar si es el último fragmento
+  if (receivedChunkNumber === totalChunks) {
+      const assembledFilePath = tempFilePath;
+      const fileSize = fs.statSync(assembledFilePath).size;
+      const buffer = fs.readFileSync(assembledFilePath);
+
+      const chunkSize = 350 * 1024 * 1024; // 500 MB por fragmento
+      const nbChunks = Math.ceil(fileSize / chunkSize);
+      const sessionId = randomString(12);
+      for (let i = 0; i < nbChunks; i++) {
+          const start = i * chunkSize;
+          const end = Math.min(start + chunkSize, fileSize);
+          const chunkBuffer = buffer.slice(start, end);
+
+          // Crear un nuevo stream para cada chunk
+          const memoryStream = new stream.Readable();
+          memoryStream.push(chunkBuffer);
+          memoryStream.push(null); // Marcar el final del stream
+
+          const range = `bytes ${start}-${end - 1}/${fileSize}`;
+          
+          const length = end - start;
+
+          try {
+              const response = await new ObjectsApi().uploadChunk(
+                  bucketKey, originalname,
+                  length, range, sessionId,
+                  memoryStream, {}, { autoRefresh: false }, req.oauth_token
+              );
+              console.log("Chunk enviado " + i);
+              if (response.statusCode !== 200 && response.statusCode !== 202) {
+                  throw new Error(`Error al subir el fragmento: ${response.statusCode}`);
+              }
+          } catch (error) {
+              console.error('Error al subir el fragmento:', error);
+              fs.unlinkSync(assembledFilePath); // Eliminar archivo temporal
+              return res.status(500).json({ error: 'Error interno del servidor' });
+          }
+      }
+
+      fs.unlinkSync(assembledFilePath); // Eliminar archivo temporal después de subir todos los chunks
+      res.status(200).json({ message: 'Archivo completo subido y procesado exitosamente' });
+  } else {
+      res.status(202).json({ message: `Fragmento ${receivedChunkNumber} de ${totalChunks} recibido` });
+  }
+});
+
+/*
 app.post('/api/objects', upload.single('fileToUpload'), async (req, res) => {
   const file = req.file;
   const { originalname, username, bucketKey } = req.body;
@@ -312,7 +380,7 @@ app.post('/api/objects', upload.single('fileToUpload'), async (req, res) => {
       const assembledFilePath = tempFilePath;  // El archivo ensamblado está completo
 
       // tamaño del nuevo fragmento para la API externa
-      const chunkSize = 900 * 1024 * 1024;  // 350 MB por fragmento
+      const chunkSize = 500 * 1024 * 1024;  // 350 MB por fragmento
       const fileSize = fs.statSync(assembledFilePath).size;
       const buffer = fs.readFileSync(assembledFilePath);
       
@@ -330,11 +398,11 @@ app.post('/api/objects', upload.single('fileToUpload'), async (req, res) => {
           console.log();
           const range = `bytes ${start}-${end - 1}/${fileSize}`;
           const sessionId = randomString(12);  // Asume una función que genera una cadena aleatoria
-
+          const length =  end - start;
           try {
               const response = await new ObjectsApi().uploadChunk(
                   bucketKey, originalname,
-                  end - start, range, sessionId,
+                  length, range, sessionId,
                   memoryStream, {}, { autoRefresh: false }, req.oauth_token
               );
               console.log("Chunk enviado "+i );
@@ -357,7 +425,7 @@ app.post('/api/objects', upload.single('fileToUpload'), async (req, res) => {
       res.status(202).json({ message: `Fragmento ${receivedChunkNumber + 1} de ${totalChunks} recibido` });
   }
 });
-
+*/
 
 /*
 app.post('/api/objects',  multer({ storage: multer.memoryStorage() }).single('fileToUpload'), async (req, res, next) => {

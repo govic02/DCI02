@@ -265,7 +265,7 @@ const ListadoProyectos = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) 
       const chunkSize = 5 * 1024 * 1024; // 5 MB
       const totalChunks = Math.ceil(file.size / chunkSize);
       let currentChunk = 0;
-  
+      const toastId = toast.info(`Iniciando la carga de ${totalChunks} partes.`, { autoClose: false });
       while (currentChunk < totalChunks) {
         const start = currentChunk * chunkSize;
         const end = Math.min((currentChunk + 1) * chunkSize, file.size);
@@ -280,6 +280,15 @@ const ListadoProyectos = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) 
         formData.append('username', localStorage.getItem('username'));
   
         console.log(`Uploading chunk ${currentChunk + 1} of ${totalChunks}`);
+        let ck = currentChunk+1
+        
+        toast.update(toastId, {
+          render: `Parte ${currentChunk+1} de ${totalChunks} subida con éxito.`
+        });
+        if( ck ==totalChunks){
+          console.log("INICIO PROCESO ");
+          toast.info( `El proceso de carga en el repositorio ha iniciado. La operación puede tardar varios segundos..`, { autoClose: false });
+        }
         try {
           const response = await fetch(`${API_BASE_URL}/api/objects`, {
             method: 'POST',
@@ -289,7 +298,9 @@ const ListadoProyectos = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) 
             body: formData
           });
           if (!response.ok) throw new Error('Failed to upload chunk.');
+          
           console.log(`Chunk ${currentChunk + 1} uploaded successfully.`);
+          
           currentChunk++;
         } catch (error) {
           console.error('Error uploading chunk:', error);
