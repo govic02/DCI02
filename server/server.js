@@ -312,7 +312,7 @@ app.post('/api/objects', upload.single('fileToUpload'), async (req, res) => {
       const assembledFilePath = tempFilePath;  // El archivo ensamblado está completo
 
       // tamaño del nuevo fragmento para la API externa
-      const chunkSize = 350 * 1024 * 1024;  // 350 MB por fragmento
+      const chunkSize = 5 * 1024 * 1024;  // 350 MB por fragmento
       const fileSize = fs.statSync(assembledFilePath).size;
       const buffer = fs.readFileSync(assembledFilePath);
       
@@ -327,7 +327,7 @@ app.post('/api/objects', upload.single('fileToUpload'), async (req, res) => {
           const memoryStream = new stream.Readable();
           memoryStream.push(chunkBuffer);
           memoryStream.push(null);
-
+          console.log();
           const range = `bytes ${start}-${end - 1}/${fileSize}`;
           const sessionId = randomString(12);  // Asume una función que genera una cadena aleatoria
 
@@ -337,7 +337,9 @@ app.post('/api/objects', upload.single('fileToUpload'), async (req, res) => {
                   end - start, range, sessionId,
                   memoryStream, {}, { autoRefresh: false }, req.oauth_token
               );
-
+              console.log("Chunk enviado "+i );
+              console.log("respuesta " );
+              console.log(response);
               if (response.statusCode !== 200 && response.statusCode !== 202) {
                   throw new Error(`Error al subir el fragmento: ${response.statusCode}`);
               }
@@ -349,6 +351,7 @@ app.post('/api/objects', upload.single('fileToUpload'), async (req, res) => {
 
       // Eliminar archivo temporal
       fs.unlinkSync(assembledFilePath);
+      console.log("PROCESO DE ENVIO TERMINADO DE ARCHIVO");
       res.status(200).json({ message: 'Archivo completo subido y procesado exitosamente' });
   } else {
       res.status(202).json({ message: `Fragmento ${receivedChunkNumber + 1} de ${totalChunks} recibido` });
