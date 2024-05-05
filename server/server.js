@@ -313,7 +313,7 @@ app.post('/api/objects', upload.single('fileToUpload'), async (req, res) => {
       const fileSize = fs.statSync(assembledFilePath).size;
       const buffer = fs.readFileSync(assembledFilePath);
 
-      const chunkSize = 350 * 1024 * 1024; // 500 MB por fragmento
+      const chunkSize = 10 * 1024 * 1024; // 500 MB por fragmento
       const nbChunks = Math.ceil(fileSize / chunkSize);
       const sessionId = randomString(12);
       for (let i = 0; i < nbChunks; i++) {
