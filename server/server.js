@@ -300,14 +300,14 @@ app.post('/api/objects', upload.single('fileToUpload'), async (req, res) => {
       fs.mkdirSync(tempDir, { recursive: true });
   }
   // Nombre temporal para el archivo ensamblado
-  const tempFilePath = path.join(tempDir, file.originalname);
+  const tempFilePath = path.join(tempDir, originalname);
   fs.appendFileSync(tempFilePath, file.buffer);
 
   const totalChunks = req.body.totalChunks;  // Total de fragmentos esperados
   const receivedChunkNumber = req.body.chunkNumber;  // Número del fragmento recibido
 
   // Verificar si es el último fragmento
-  if (receivedChunkNumber == totalChunks - 1) {
+  if (receivedChunkNumber == totalChunks ) {
       // Proceso para cuando todos los fragmentos han sido recibidos
       const assembledFilePath = tempFilePath;  // El archivo ensamblado está completo
 
