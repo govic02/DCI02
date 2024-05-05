@@ -350,7 +350,7 @@ app.post('/api/objects', upload.single('fileToUpload'), async (req, res) => {
       }
 
       // Eliminar archivo temporal
-     // fs.unlinkSync(assembledFilePath);
+      fs.unlinkSync(assembledFilePath);
       console.log("PROCESO DE ENVIO TERMINADO DE ARCHIVO");
       res.status(200).json({ message: 'Archivo completo subido y procesado exitosamente' });
   } else {
