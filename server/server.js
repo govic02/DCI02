@@ -346,9 +346,10 @@ app.post('/api/objects', upload.single('fileToUpload'), async (req, res) => {
               return res.status(500).json({ error: 'Error interno del servidor' });
           }
       }
-
+      sendCompletionEmail(username);
       fs.unlinkSync(assembledFilePath); // Eliminar archivo temporal después de subir todos los chunks
       res.status(200).json({ message: 'Archivo completo subido y procesado exitosamente' });
+
   } else {
       res.status(202).json({ message: `Fragmento ${receivedChunkNumber} de ${totalChunks} recibido` });
   }
