@@ -8,6 +8,7 @@ import API_BASE_URL from '../../config';
 const IndicadorPesoPromedio = ({ urn }) => {
     const [pesoPromedioGeneral, setPesoPromedioGeneral] = useState(0);
     const [diametroPromedioGeneral, setDiametroPromedioGeneral] = useState(0);
+    const [pesoTotalProyecto, setPesoTotalProyecto] = useState(0);
     useEffect(() => {
         const fetchPesoPromedioGeneral = async () => {
             try {
@@ -33,8 +34,18 @@ const IndicadorPesoPromedio = ({ urn }) => {
                 console.error("Error al obtener el diámetro promedio general:", error);
             }
         };
-
+        const fetchPesoTotalProyecto = async () => {
+            try {
+                const url = `${API_BASE_URL}/api/getPesovsPedidos/${urn}`;
+                const respuesta = await axios.get(url);
+                const data = respuesta.data;
+                setPesoTotalProyecto(data.pesoTotalProyecto);
+            } catch (error) {
+                console.error("Error al obtener el peso total del proyecto:", error);
+            }
+        };
         fetchDiametroPromedioGeneral();
+        fetchPesoTotalProyecto();
     }, [urn]);
     const cardStyle = {
         marginLeft: '40px',
@@ -48,10 +59,16 @@ const IndicadorPesoPromedio = ({ urn }) => {
     return (
         <Card style={cardStyle}>
             <CardContent>
-                <Typography variant="h5" component="h2" style={{ fontSize: 14, marginBottom: '10px',textAlign: 'center' }}>
+            <Typography variant="h5" component="h2" style={{ fontSize: 16, textAlign: 'center',marginBottom: '10px' }}>
+                    Peso Total del Proyecto
+                </Typography>
+                <Typography variant="body2" style={{ fontSize: 16, textAlign: 'center' , marginBottom:'20px'}}>
+                    <b>{pesoTotalProyecto.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits:0 })} kg</b>
+                </Typography>
+                <Typography variant="h5" component="h2" style={{ fontSize: 14, textAlign: 'center' ,marginBottom: '10px'}}>
                     Peso Promedio General del Proyecto
                 </Typography>
-                <Typography variant="body2" style={{ fontSize: 14, marginBottom: '10px',textAlign: 'center', marginBottom:'50px' }}>
+                <Typography variant="body2" style={{ fontSize: 14, marginBottom: '10px',textAlign: 'center', marginBottom:'20px' }}>
                  <b>  {pesoPromedioGeneral.toLocaleString(undefined, {
                         minimumFractionDigits: 2,
                         maximumFractionDigits: 2

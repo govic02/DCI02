@@ -49,11 +49,70 @@ const TabComponent = ({ urnBuscada }) => {
     const [selectedButtons, setSelectedButtons] = useState({});
     const { updateIdentificadoresActuales } = useActions();
     const[esAdministradorEditor,setAdministradorEditor] = useState('');
+    const [showConfirmChange, setShowConfirmChange] = useState(false);
     const handleOpenModalWithInfo = async (pedido) => {
         setModalInfo({ show: true, data: pedido });
+        console.log("pedido a mostrar", pedido);
         await cargarAdicionales(pedido._id); // Llama a cargarAdicionales aquí
     };
 
+    const handleNextStateClick = () => {
+        setShowConfirmChange(true); // Muestra la confirmación
+    };
+    const confirmStateChange = async () => {
+        const username = localStorage.getItem('username');
+        const estados = ['paquetizado', 'espera_aprobacion', 'rechazado', 'aceptado', 'fabricacion', 'despacho', 'recepcionado', 'instalado', 'inspeccionado', 'hormigonado'];
+        const currentEstados = modalInfo.data.estados || {}; // Obtiene los estados actuales o un objeto vacío si no existen
+        let nuevoEstado = 'paquetizado'; // Estado inicial por defecto
+        let fechaActual = new Date();
+    
+        // Determinar el próximo estado basado en el estado actual más reciente
+        const ultimoEstadoIndex = estados.findIndex(estado => currentEstados[estado] && currentEstados[estado].est === 'ok');
+        if (ultimoEstadoIndex !== -1 && ultimoEstadoIndex < estados.length - 1) {
+            nuevoEstado = estados[ultimoEstadoIndex + 1];
+        } else if (ultimoEstadoIndex === estados.length - 1) {
+            console.log("Ya está en el último estado posible.");
+            return;
+        }
+    
+        const estadoData = {
+            fecha: fechaActual,
+            nombreUsuario: username,
+            est: 'ok' // 'ok' indica que el estado está activo/completado
+        };
+    
+        console.log("pedido trabajando", modalInfo.data);
+        console.log("estado a actualizar", nuevoEstado);
+    
+        try {
+            // Realizar la actualización del estado
+            const response = await axios.post(`${API_BASE_URL}/api/actualizarEstadoPedido`, {
+                pedidoId: modalInfo.data._id,
+                nombreEstado: nuevoEstado,
+                estadoData: estadoData,
+                nombreUsuario:username
+            });
+    
+            if (response.status === 200) {
+                toast.success("Estado cambiado con éxito");
+                setShowConfirmChange(true); // Muestra nuevamente el botón para cambiar de estado después de confirmar
+                // Actualiza la información del pedido en el modal con el nuevo estado
+                setModalInfo(prevState => ({
+                    ...prevState,
+                    data: {
+                        ...prevState.data,
+                        estados: {
+                            ...prevState.data.estados,
+                            [nuevoEstado]: estadoData
+                        }
+                    }
+                }));
+            }
+        } catch (error) {
+            console.error("Error al cambiar el estado:", error);
+            toast.error("Error al cambiar el estado");
+        }
+    };
     
     const handleApplyFilterClick = () => {
         if (filtrar) {
@@ -630,82 +689,98 @@ const TabComponent = ({ urnBuscada }) => {
                     <Modal.Title>{modalInfo.data.nombre_pedido}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-    <p>Largo Total: <strong>{modalInfo.data.largos} Mts</strong> | Peso Total: <strong>{modalInfo.data.pesos} kg</strong></p>
-    <p>Estado: <span style={{ height: '15px', width: '15px', backgroundColor: '#DA291C', borderRadius: '50%', display: 'inline-block' }}></span></p>
-    
-    {/* Añadiendo la tabla de estados con iconos circulares */}
-    <Table striped bordered hover size="sm">
-    <thead>
-        <tr>
-            <th>Estado</th>
-            <th>Est</th>
-            <th>Fecha</th>
-            <th>Nombre de Usuario</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>Paquetizado</td>
-            <td><span className="status-indicator" style={{backgroundColor: '#007bff'}}></span></td>
-            <td>{/* Fecha paquetizado */}</td>
-            <td>{/* Usuario paquetizado */}</td>
-        </tr>
-        <tr>
-            <td>Espera aprobación</td>
-            <td><span className="status-indicator" style={{backgroundColor: '#ffc107'}}></span></td>
-            <td>{/* Fecha solicitado en espera */}</td>
-            <td>{/* Usuario solicitado en espera */}</td>
-        </tr>
-        <tr>
-            <td> Rechazado</td>
-            <td><span className="status-indicator" style={{backgroundColor: '#dc3545'}}></span></td>
-            <td>{/* Fecha solicitado rechazado */}</td>
-            <td>{/* Usuario solicitado rechazado */}</td>
-        </tr>
-        <tr>
-            <td> Aceptado</td>
-            <td><span className="status-indicator" style={{backgroundColor: '#28a745'}}></span></td>
-            <td>{/* Fecha solicitado aceptado */}</td>
-            <td>{/* Usuario solicitado aceptado */}</td>
-        </tr>
-        <tr>
-            <td>En fabricación</td>
-            <td><span className="status-indicator" style={{backgroundColor: '#17a2b8'}}></span></td>
-            <td>{/* Fecha en fabricación */}</td>
-            <td>{/* Usuario en fabricación */}</td>
-        </tr>
-        <tr>
-            <td>En despacho</td>
-            <td><span className="status-indicator" style={{backgroundColor: '#6610f2'}}></span></td>
-            <td>{/* Fecha en despacho */}</td>
-            <td>{/* Usuario en despacho */}</td>
-        </tr>
-        <tr>
-            <td>Recepcionado</td>
-            <td><span className="status-indicator" style={{backgroundColor: '#6f42c1'}}></span></td>
-            <td>{/* Fecha recepcionado */}</td>
-            <td>{/* Usuario recepcionado */}</td>
-        </tr>
-        <tr>
-            <td>Instalado</td>
-            <td><span className="status-indicator" style={{backgroundColor: '#20c997'}}></span></td>
-            <td>{/* Fecha instalado */}</td>
-            <td>{/* Usuario instalado */}</td>
-        </tr>
-        <tr>
-            <td>Inspeccionado</td>
-            <td><span className="status-indicator" style={{backgroundColor: '#e83e8c'}}></span></td>
-            <td>{/* Fecha inspeccionado */}</td>
-            <td>{/* Usuario inspeccionado */}</td>
-        </tr>
-        <tr>
-            <td>Hormigonado</td>
-            <td><span className="status-indicator" style={{backgroundColor: '#fd7e14'}}></span></td>
-            <td>{/* Fecha hormigonado */}</td>
-            <td>{/* Usuario hormigonado */}</td>
-        </tr>
-    </tbody>
-</Table>
+              
+                <p>Largo Total: <strong>{modalInfo.data.largos} Mts</strong> | Peso Total: <strong>{modalInfo.data.pesos} kg</strong></p>
+                <p>Estado: <span style={{ height: '15px', width: '15px', backgroundColor: '#DA291C', borderRadius: '50%', display: 'inline-block' }}></span></p>
+                
+                {/* Añadiendo la tabla de estados con iconos circulares */}
+                {!showConfirmChange && (
+                        <Button variant="primary" onClick={handleNextStateClick}>
+                            Pasar al siguiente estado
+                        </Button>
+                    )}
+
+                    {/* Confirmación para el cambio de estado */}
+                    {showConfirmChange && (
+                        <>
+                            <p>¿Está seguro de pasar al siguiente estado? Este cambio no es reversible.</p>
+                            <Button variant="danger" onClick={confirmStateChange}>
+                                Confirmar cambio de estado
+                            </Button>
+                        </>
+                    )}
+                <Table striped bordered hover size="sm">
+                <thead>
+                    <tr>
+                        <th>Estado</th>
+                        <th>Est</th>
+                        <th>Fecha</th>
+                        <th>Nombre de Usuario</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Paquetizado</td>
+                        <td><span className="status-indicator" style={{backgroundColor: '#007bff'}}></span></td>
+                        <td>{/* Fecha paquetizado */}</td>
+                        <td>{/* Usuario paquetizado */}</td>
+                    </tr>
+                    <tr>
+                        <td>Espera aprobación</td>
+                        <td><span className="status-indicator" style={{backgroundColor: '#ffc107'}}></span></td>
+                        <td>{/* Fecha solicitado en espera */}</td>
+                        <td>{/* Usuario solicitado en espera */}</td>
+                    </tr>
+                    <tr>
+                        <td> Rechazado</td>
+                        <td><span className="status-indicator" style={{backgroundColor: '#dc3545'}}></span></td>
+                        <td>{/* Fecha solicitado rechazado */}</td>
+                        <td>{/* Usuario solicitado rechazado */}</td>
+                    </tr>
+                    <tr>
+                        <td> Aceptado</td>
+                        <td><span className="status-indicator" style={{backgroundColor: '#28a745'}}></span></td>
+                        <td>{/* Fecha solicitado aceptado */}</td>
+                        <td>{/* Usuario solicitado aceptado */}</td>
+                    </tr>
+                    <tr>
+                        <td>En fabricación</td>
+                        <td><span className="status-indicator" style={{backgroundColor: '#17a2b8'}}></span></td>
+                        <td>{/* Fecha en fabricación */}</td>
+                        <td>{/* Usuario en fabricación */}</td>
+                    </tr>
+                    <tr>
+                        <td>En despacho</td>
+                        <td><span className="status-indicator" style={{backgroundColor: '#6610f2'}}></span></td>
+                        <td>{/* Fecha en despacho */}</td>
+                        <td>{/* Usuario en despacho */}</td>
+                    </tr>
+                    <tr>
+                        <td>Recepcionado</td>
+                        <td><span className="status-indicator" style={{backgroundColor: '#6f42c1'}}></span></td>
+                        <td>{/* Fecha recepcionado */}</td>
+                        <td>{/* Usuario recepcionado */}</td>
+                    </tr>
+                    <tr>
+                        <td>Instalado</td>
+                        <td><span className="status-indicator" style={{backgroundColor: '#20c997'}}></span></td>
+                        <td>{/* Fecha instalado */}</td>
+                        <td>{/* Usuario instalado */}</td>
+                    </tr>
+                    <tr>
+                        <td>Inspeccionado</td>
+                        <td><span className="status-indicator" style={{backgroundColor: '#e83e8c'}}></span></td>
+                        <td>{/* Fecha inspeccionado */}</td>
+                        <td>{/* Usuario inspeccionado */}</td>
+                    </tr>
+                    <tr>
+                        <td>Hormigonado</td>
+                        <td><span className="status-indicator" style={{backgroundColor: '#fd7e14'}}></span></td>
+                        <td>{/* Fecha hormigonado */}</td>
+                        <td>{/* Usuario hormigonado */}</td>
+                    </tr>
+                </tbody>
+            </Table>
 
 
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>

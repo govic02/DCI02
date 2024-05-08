@@ -14,8 +14,8 @@ const { DerivativesApi, JobPayload, JobPayloadInput, JobPayloadOutput, JobSvfOut
 
 const { BucketsApi, ObjectsApi, PostBucketsPayload } = forgeSDK;
 import { obtenerFiltros } from '../controllers/filtrosController.js';
-import {crearPedido,eliminarPedido,obtenerPedidos } from '../controllers/pedidoController.js';
-import  {actualizarUsuarioProyectoAsignadoPorIdUsuario,obtenerUsuarioProyectoAsignadoPorIdUsuario } from '../controllers/usuarioProyectoAsignadoController.js'; 
+import {crearPedido,eliminarPedido,obtenerPedidos,actualizarEstadoPedido } from '../controllers/pedidoController.js'; // PEDIDOS
+import  {actualizarUsuarioProyectoAsignadoPorIdUsuario,obtenerUsuarioProyectoAsignadoPorIdUsuario } from '../controllers/usuarioProyectoAsignadoController.js'; // Asignación proyectos
 import { manipularConfiguracionViewer,obtenerConfiguracionViewer} from '../controllers/ConfiguracionViewerController.js'; 
 import { buscarCrearActualizarObjetoProyectoPlan, obtenerObjetosPorUrn ,CrearObjetoProyectoPlan,obtenerPorDbIdYUrn,procesarObjetosProyectoPlanMasivamente} from '../controllers/ObjetoProyectoPlanController.js';
 import {guardarSumaPisosGeneral,obtenerRegistroPorUrn} from '../controllers/RespuestaSumaPesosController.js';
@@ -585,9 +585,14 @@ app.delete('/api/eliminarPedido', eliminarPedido);
 app.delete('/api/vistasGuardadas/:idVS', eliminarVistaSave); // Eliminar una vista guardada por ID
 app.post('/api/getUserProyectId',  obtenerUsuarioProyectoAsignadoPorIdUsuario  );
 app.post('/api/setproyectoAdmin',  actualizarUsuarioProyectoAsignadoPorIdUsuario );// buscar proyectoasignado, en caso de que no crea una colección y le ingresa la urn
+
+// PEDIDOS
 app.post('/api/pedido', crearPedido);
 app.post('/api/adicionalesPedido', crearAdicionalPedido);
 app.get('/api/obtenerAdicionalesPorUrn/:urn',obtenerAdicionalesPorUrn);
+app.post('/api/actualizarEstadoPedido', actualizarEstadoPedido);
+//
+
 
 app.get('/api/filtros', obtenerFiltros );
 

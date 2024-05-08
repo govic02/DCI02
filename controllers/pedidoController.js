@@ -14,6 +14,46 @@ const obtenerPedido = async (req, res) => {
         res.status(500).send(error.message);
     }
 };
+
+
+// Función para actualizar el estado de un pedido
+const actualizarEstadoPedido = async (req, res) => {
+    const { pedidoId, nombreEstado, fecha, nombreUsuario } = req.body;
+    console.log("Solicitud cambio estado pedido");
+    console.log("Pedido ID:", pedidoId);
+    console.log("Nombre Usuario:", nombreUsuario);
+    console.log("Estado a actualizar:", nombreEstado);
+
+    // Preparar la ruta de actualización
+    const estadoPath = `estados.${nombreEstado}`; // Construye la ruta del campo del estado a actualizar
+
+    try {
+        // Encuentra el pedido y actualiza el estado específico
+        const pedidoActualizado = await Pedido.findOneAndUpdate(
+            { "_id": pedidoId }, // Identificador del pedido
+            {
+                "$set": {
+                    [`${estadoPath}.est`]: "ok", // Actualiza el campo est a 'ok'
+                    [`${estadoPath}.fecha`]: fecha || new Date(), // Usa la fecha proporcionada o la actual
+                    [`${estadoPath}.nombreUsuario`]: nombreUsuario // Actualiza el nombre del usuario
+                }
+            },
+            { new: true } // Devuelve el documento actualizado
+        );
+
+        if (!pedidoActualizado) {
+            console.log("No se encontró un pedido con los datos proporcionados.");
+            return res.status(404).send('No se encontró el pedido con el ID proporcionado.');
+        }
+
+        res.json(pedidoActualizado); // Envía el pedido actualizado como respuesta
+    } catch (error) {
+        console.log("Se encontró el pedido pero hubo un error: " + error.message);
+        res.status(500).send("Error al actualizar el estado del pedido: " + error.message);
+    }
+};
+
+
 const obtenerAdicionalesPorUrn = async (req, res) => {
     try {
         const { urn } = req.query; // Recibe la URN como parámetro de consulta
@@ -205,5 +245,6 @@ export {
     crearAdicionalPedido,
     obtenerAdicionalesPorPedidoId,
     eliminarAdicionalPedido,
-    obtenerAdicionalesPorUrn
+    obtenerAdicionalesPorUrn,
+    actualizarEstadoPedido
 };

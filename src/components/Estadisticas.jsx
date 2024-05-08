@@ -9,6 +9,8 @@ import GraficoPedidosTotal from './estadisticas/GraficoPedidosTotal';
 import GraficosPedidoDiametro from './estadisticas/GraficosPedidoDiametro';
 import GraficoLongitudPromedio from './estadisticas/GraficoLongitudPromedio';
 import GraficoPesosPromedio from './estadisticas/GraficoPesosPromedio';
+//
+import GraficoPesosPisoDiametroBarras from './estadisticas/GraficoPesosPisoDiametroBarras';
 import MaestroFierros from './estadisticas/MaestroFierros';
 import API_BASE_URL from '../config';
 
@@ -67,11 +69,11 @@ const Estadisticas = () => {
                     </Box>
                     {activeSection === 'general' && (
                         <div style={estiloEstadisticas}>
-                            {/* Aquí puedes incluir todos los gráficos y componentes para la sección "Proyecto General" */}
-                            <IndicadorTotalPeso urn={urnSelected} />
+                            {/*  <GraficoPesosPorValor urn={urnSelected} /> */}
+                           
                             <IndicadorPesoPromedio urn={urnSelected} />
-                            <GraficoPesosPorValor urn={urnSelected} />
-                            <GraficoLineasPesosPorDiametro urn={urnSelected} />
+                         
+                            <GraficoPesosPisoDiametroBarras urn={urnSelected} />
                           
                             <GraficoLongitudPromedio urn={urnSelected} />
                             <GraficoPesosPromedio urn={urnSelected} />
@@ -80,6 +82,7 @@ const Estadisticas = () => {
                     {activeSection === 'pedidos' && (
                         <div style={estiloEstadisticas}>
                             {/* Aquí puedes incluir todos los gráficos y componentes para la sección "Pedidos" */}
+                            <IndicadorTotalPeso urn={urnSelected} />
                             <GraficoPedidosTotal urn={urnSelected} />
                             <GraficosPedidoDiametro urn={urnSelected} />
                             <MaestroFierros urn={urnSelected} />
