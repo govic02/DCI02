@@ -236,6 +236,75 @@ const eliminarPedido = async (req, res) => {
         res.status(500).send(error.message);
     }
 };
+
+const transfierePedido = async (req, res) => {
+    const { URNconsulta, URNreemplazo } = req.body;
+
+    if (!URNconsulta || !URNreemplazo) {
+        return res.status(400).send('Los parámetros URNconsulta y URNreemplazo son obligatorios.');
+    }
+
+    try {
+        // Realiza la actualización de los documentos que coincidan
+        const resultado = await Pedido.updateMany(
+            { urn_actual: URNconsulta },
+            { $set: { urn_actual: URNreemplazo } }
+        );
+
+        if (resultado.modifiedCount === 0) {
+            return res.json({
+                message: 'No Se encontraron coincidencias',
+                URNoriginal: URNreemplazo,
+                URNnueva: URNconsulta,
+                documentosActualizados: resultado.modifiedCount
+            });
+        }
+
+        res.json({
+            message: 'Pedidos actualizados correctamente',
+            URNoriginal: URNreemplazo,
+            URNnueva: URNconsulta,
+            documentosActualizados: resultado.modifiedCount
+        });
+    } catch (error) {
+        console.error('Error al transferir pedidos:', error);
+        res.status(500).send('Error interno al intentar actualizar los pedidos.');
+    }
+};
+const transfiereAdicionalesPedidos = async (req, res) => {
+    const { URNconsulta, URNreemplazo } = req.body;
+
+    if (!URNconsulta || !URNreemplazo) {
+        return res.status(400).send('Se requieren los campos URNconsulta y URNreemplazo para realizar la transferencia.');
+    }
+
+    try {
+        // Realiza la actualización de los documentos que coincidan con URNconsulta
+        const resultado = await AdicionalesPedidos.updateMany(
+            { urn: URNreemplazo },
+            { $set: { urn: URNconsulta } }
+        );
+
+        if (resultado.modifiedCount === 0) {
+            return res.json({
+                message: 'No Se encontraron coincidencias',
+                URNoriginal: URNreemplazo,
+                URNnueva: URNconsulta,
+                documentosActualizados: resultado.modifiedCount
+            });
+        }
+
+        res.json({
+            message: 'Adicionales de pedidos actualizados correctamente',
+            URNoriginal: URNconsulta,
+            URNnueva: URNreemplazo,
+            documentosActualizados: resultado.modifiedCount
+        });
+    } catch (error) {
+        console.error('Error al transferir adicionales de pedidos:', error);
+        res.send('Error interno al intentar actualizar los adicionales de pedidos.');
+    }
+};
 export {
     obtenerPedidos,
     obtenerPedido,
@@ -246,5 +315,7 @@ export {
     obtenerAdicionalesPorPedidoId,
     eliminarAdicionalPedido,
     obtenerAdicionalesPorUrn,
-    actualizarEstadoPedido
+    actualizarEstadoPedido,
+    transfierePedido,
+    transfiereAdicionalesPedidos
 };

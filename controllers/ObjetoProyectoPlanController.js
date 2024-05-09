@@ -144,5 +144,50 @@ const obtenerObjetosPorUrn = async (req, res) => {
         res.status(500).send(error.message);
     }
 };
+const transfiereObjetoProyectoPlan = async (req, res) => {
+    const { URNconsulta, URNreemplazo } = req.body;
 
-export { buscarCrearActualizarObjetoProyectoPlan, obtenerObjetosPorUrn,CrearObjetoProyectoPlan,obtenerPorDbIdYUrn,procesarObjetosProyectoPlanMasivamente };
+    if (!URNconsulta || !URNreemplazo) {
+        return res.status(400).send('Se requieren los campos URNconsulta y URNreemplazo para realizar la transferencia.');
+    }
+
+    if (URNconsulta === URNreemplazo) {
+        return res.status(400).send('La URN de consulta y la URN de reemplazo no pueden ser iguales.');
+    }
+
+    try {
+        // Obtener todos los objetos de proyecto planificados asociados a URNconsulta
+        const objetos = await ObjetoProyectoPlan.find({ urn: URNconsulta });
+
+        for (let objeto of objetos) {
+            // Verificar si ya existe un objeto con el mismo IdObjeto y URNreemplazo
+            const objetoExistente = await ObjetoProyectoPlan.findOne({ IdObjeto: objeto.IdObjeto, urn: URNreemplazo });
+            if (objetoExistente) {
+                // Si existe, actualiza el objeto existente con los datos del objeto encontrado
+                objetoExistente.fecha_plan = objeto.fecha_plan;
+                objetoExistente.fecha_instalacion = objeto.fecha_instalacion;
+                objetoExistente.fecha_plan_modelo = objeto.fecha_plan_modelo;
+                objetoExistente.dateModificacion = Date.now();
+                await objetoExistente.save();
+            } else {
+                // Si no existe, actualiza la URN del objeto encontrado a URNreemplazo
+                objeto.urn = URNreemplazo;
+                objeto.dateModificacion = Date.now();
+                await objeto.save();
+            }
+        }
+
+        res.json({
+            message: 'Objetos de proyecto transferidos o actualizados correctamente',
+            URNoriginal: URNconsulta,
+            URNnueva: URNreemplazo,
+            documentosProcesados: objetos.length
+        });
+    } catch (error) {
+        console.error('Error al transferir objetos de proyecto:', error);
+        res.status(500).send('Error interno al intentar actualizar los objetos de proyecto.');
+    }
+};
+
+
+export { buscarCrearActualizarObjetoProyectoPlan, obtenerObjetosPorUrn,CrearObjetoProyectoPlan,obtenerPorDbIdYUrn,procesarObjetosProyectoPlanMasivamente,transfiereObjetoProyectoPlan };

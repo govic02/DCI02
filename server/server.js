@@ -14,14 +14,14 @@ const { DerivativesApi, JobPayload, JobPayloadInput, JobPayloadOutput, JobSvfOut
 
 const { BucketsApi, ObjectsApi, PostBucketsPayload } = forgeSDK;
 import { obtenerFiltros } from '../controllers/filtrosController.js';
-import {crearPedido,eliminarPedido,obtenerPedidos,actualizarEstadoPedido } from '../controllers/pedidoController.js'; // PEDIDOS
+import {crearPedido,eliminarPedido,obtenerPedidos,actualizarEstadoPedido,transfierePedido } from '../controllers/pedidoController.js'; // PEDIDOS
 import  {actualizarUsuarioProyectoAsignadoPorIdUsuario,obtenerUsuarioProyectoAsignadoPorIdUsuario } from '../controllers/usuarioProyectoAsignadoController.js'; // Asignación proyectos
 import { manipularConfiguracionViewer,obtenerConfiguracionViewer} from '../controllers/ConfiguracionViewerController.js'; 
-import { buscarCrearActualizarObjetoProyectoPlan, obtenerObjetosPorUrn ,CrearObjetoProyectoPlan,obtenerPorDbIdYUrn,procesarObjetosProyectoPlanMasivamente} from '../controllers/ObjetoProyectoPlanController.js';
+import { buscarCrearActualizarObjetoProyectoPlan, obtenerObjetosPorUrn ,CrearObjetoProyectoPlan,obtenerPorDbIdYUrn,procesarObjetosProyectoPlanMasivamente,transfiereObjetoProyectoPlan} from '../controllers/ObjetoProyectoPlanController.js';
 import {guardarSumaPisosGeneral,obtenerRegistroPorUrn} from '../controllers/RespuestaSumaPesosController.js';
 import{ obtenerUsuario, obtenerUsuarios, obtenerUsuarioPorUsername,crearUsuario,actualizarUsuario,eliminarUsuario,obtenerUsuariosAdministradores} from '../controllers/usersController.js'
 import { insertarObjetoConDetalles, obtenerRegistroPorUrnBarras,obtenerBarrasPorUrneIds } from '../controllers/BarraUrnControlller.js';
-import {crearUsuarioProyectoAsignado, obtenerUsuariosProyectoAsignadoPorUrn,eliminarUsuarioProyectoAsignado} from '../controllers/usuarioProyectoAsignadoController.js'
+import {crearUsuarioProyectoAsignado, obtenerUsuariosProyectoAsignadoPorUrn,eliminarUsuarioProyectoAsignado,transferirUsuarioProyectoPerfil } from '../controllers/usuarioProyectoAsignadoController.js'
 import {guardarActualizarRespuesta,obtenerRespuestaPorUrn} from '../controllers/SumaPesosPorDiametroController.js';
 import { crearActualizarDiametroPromedioGeneral, obtenerDiametroPromedioGeneralPorUrn } from '../controllers/DiametroPromedioBarraGeneralController.js';
 
@@ -46,13 +46,13 @@ import {
   actualizarFiltroOpcionesProyecto,
   eliminarFiltroOpcionesProyecto
 } from '../controllers/FiltrosOpcionesProyectoController.js'; 
-import { crearAdicionalPedido,obtenerAdicionalesPorPedidoId ,eliminarAdicionalPedido,obtenerAdicionalesPorUrn} from '../controllers/pedidoController.js';
+import { crearAdicionalPedido,obtenerAdicionalesPorPedidoId ,eliminarAdicionalPedido,obtenerAdicionalesPorUrn,transfiereAdicionalesPedidos } from '../controllers/pedidoController.js';
 import {crearActualizarLongitudPromedio ,obtenerLongitudPromedioPorUrn,eliminarLongitudPromedioPorUrn} from '../controllers/LongitudesPromedioController.js';
 import {crearActualizarPesosTotalversusPedidos, obtenerPesosTotalversusPedidosPorUrn} from '../controllers/PesosTotalversusPedidosController.js';
 
 
 import { 
-  obtenerVistasSave, obtenerVistaSave,obtenerVistasPorUrn,crearVistaSave, eliminarVistaSave} from '../controllers/VistasSaveController.js'; // Importar los controladores de las vistas guardadas
+  obtenerVistasSave, obtenerVistaSave,obtenerVistasPorUrn,crearVistaSave, eliminarVistaSave,transfiereVistas} from '../controllers/VistasSaveController.js'; // Importar los controladores de las vistas guardadas
 import Users from '../models/users.js';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
@@ -680,8 +680,30 @@ app.put('/api/conversaciones/:conversationId/mensajes/:mensajeId', editarMensaje
 app.get('/api/conversaciones/participante/:participant', obtenerConversacionesPorParticipante); // Ruta para obtener conversaciones por participante
 app.get('/api/conversaciones/:conversationId', obtenerConversacionPorId);
 
+/*******
+ * Transferencia de datos
+ * 
+ */
+
+// transferencia Pedidos: 
+app.post('/api/transfierePedido', transfierePedido);
+
+// transfiere Adicionales pedidos
+app.post('/api/transfiereAdicionalesPedidos', transfiereAdicionalesPedidos);
+
+// Transfiere Vistas
+app.post('/api/transfiereVistas', transfiereVistas);
+
+// transfiere planes de objetos-proyecto
+app.post('/api/transfiereObjetoProyectoPlan', transfiereObjetoProyectoPlan);
+
+// transfiere usuarios de un proyecto a otro
+app.post('/api/transferirUsuarioProyectoPerfil', transferirUsuarioProyectoPerfil);
+
+
+
 app.get('/', (req, res) => {
-    res.json({ message: 'We are working for you!' });
+    res.json({ message: 'Estamos trabajando para ti!' });
 });
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => console.log(`Servidor corriendo en puerto ${PORT}`));

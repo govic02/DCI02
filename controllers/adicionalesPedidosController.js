@@ -60,10 +60,41 @@ const eliminarAdicionalPedido = async (req, res) => {
     }
 };
 
+const transfiereAdicionalesPedidos = async (req, res) => {
+    const { URNconsulta, URNreemplazo } = req.body;
+
+    if (!URNconsulta || !URNreemplazo) {
+        return res.status(400).send('Se requieren los campos URNconsulta y URNreemplazo para realizar la transferencia.');
+    }
+
+    try {
+        // Realiza la actualización de los documentos que coincidan con URNconsulta
+        const resultado = await AdicionalesPedidos.updateMany(
+            { urn: URNconsulta },
+            { $set: { urn: URNreemplazo } }
+        );
+
+        if (resultado.modifiedCount === 0) {
+            return res.status(200).send('No se encontraron adicionales de pedidos con la URN especificada para actualizar.');
+        }
+
+        res.json({
+            message: 'Adicionales de pedidos actualizados correctamente',
+            URNoriginal: URNconsulta,
+            URNnueva: URNreemplazo,
+            documentosActualizados: resultado.modifiedCount
+        });
+    } catch (error) {
+        console.error('Error al transferir adicionales de pedidos:', error);
+        res.status(500).send('Error interno al intentar actualizar los adicionales de pedidos.');
+    }
+};
+
 module.exports = {
     obtenerAdicionalesPedidos,
     obtenerAdicionalPedido,
     crearAdicionalPedido,
     actualizarAdicionalPedido,
-    eliminarAdicionalPedido
+    eliminarAdicionalPedido,
+    transfiereAdicionalesPedidos
 };

@@ -80,11 +80,52 @@ const obtenerVistasPorUrn = async (req, res) => {
         res.status(500).send(error.message);
     }
 };
+const transfiereVistas = async (req, res) => {
+    const { URNconsulta, URNreemplazo } = req.body;
+
+    if (!URNconsulta || !URNreemplazo) {
+        return res.status(400).send('Se requieren los campos URNconsulta y URNreemplazo para realizar la transferencia.');
+    }
+
+    if (URNconsulta === URNreemplazo) {
+        return res.status(400).send('La URN de consulta y la URN de reemplazo no pueden ser iguales.');
+    }
+
+    try {
+        // Actualizar la URN de todas las vistas guardadas que coincidan con URNconsulta
+        const resultado = await VistasSave.updateMany(
+            { urn: URNconsulta },
+            { $set: { urn: URNreemplazo } }
+        );
+
+        // Verificar si se realizaron cambios
+        if (resultado.modifiedCount === 0) {
+            return res.status(404).json({
+                message: 'No se encontraron vistas guardadas con la URN de consulta proporcionada para actualizar.',
+                URNoriginal: URNconsulta,
+                URNnueva: URNreemplazo,
+                documentosActualizados: resultado.modifiedCount
+            });
+        }
+
+        res.json({
+            message: 'Vistas guardadas actualizadas correctamente',
+            URNoriginal: URNconsulta,
+            URNnueva: URNreemplazo,
+            documentosActualizados: resultado.modifiedCount
+        });
+    } catch (error) {
+        console.error('Error al actualizar vistas guardadas:', error);
+        res.status(500).send('Error interno al intentar actualizar las vistas guardadas.');
+    }
+};
+
 
 export  {
     obtenerVistasSave,
     obtenerVistaSave,
     crearVistaSave,
     eliminarVistaSave,
-    obtenerVistasPorUrn
+    obtenerVistasPorUrn,
+    transfiereVistas
 };

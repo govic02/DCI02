@@ -147,10 +147,52 @@ const eliminarUsuarioProyectoAsignado = async (req, res) => {
   }
 };
 
+const transferirUsuarioProyectoPerfil = async (req, res) => {
+  const { URNconsulta, URNreemplazo } = req.body;
+
+  if (!URNconsulta || !URNreemplazo) {
+      return res.status(400).send('Se requieren los campos URNconsulta y URNreemplazo para realizar la transferencia.');
+  }
+
+  if (URNconsulta === URNreemplazo) {
+      return res.status(400).send('La URN de consulta y la URN de reemplazo no pueden ser iguales.');
+  }
+
+  try {
+      // Obtener todos los usuarios de proyecto asociados a URNconsulta
+      const usuarios = await UsuarioProyectoAsignado.find({ urn: URNconsulta });
+
+      let documentosActualizados = 0;
+      for (let usuario of usuarios) {
+          // Verificar si ya existe un usuario con el mismo idUsuario y URNreemplazo
+          const usuarioExistente = await UsuarioProyectoAsignado.findOne({ idUsuario: usuario.idUsuario, urn: URNreemplazo });
+          if (!usuarioExistente) {
+              // Si no existe, actualiza la URN del usuario encontrado a URNreemplazo
+              usuario.urn = URNreemplazo;
+              await usuario.save();
+              documentosActualizados++;
+          }
+          // Si existe, no hacemos nada para evitar duplicados
+      }
+
+      res.json({
+          message: 'Usuarios de proyecto transferidos o actualizados correctamente',
+          URNoriginal: URNconsulta,
+          URNnueva: URNreemplazo,
+          documentosActualizados: documentosActualizados
+      });
+  } catch (error) {
+      console.error('Error al transferir usuarios de proyecto:', error);
+      res.status(500).send('Error interno al intentar actualizar los usuarios de proyecto.');
+  }
+};
+
+
   export  {
   crearUsuarioProyectoAsignado,
   actualizarUsuarioProyectoAsignadoPorIdUsuario,
   obtenerUsuarioProyectoAsignadoPorIdUsuario,
   obtenerUsuariosProyectoAsignadoPorUrn,
-  eliminarUsuarioProyectoAsignado
+  eliminarUsuarioProyectoAsignado,
+  transferirUsuarioProyectoPerfil 
 };

@@ -17,6 +17,10 @@ const AdministracionProyecto = (proyectoKey,urn) => {
     const [usuarioSeleccionado, setUsuarioSeleccionado] = useState('');
     const [barrasActual,setBarras] =  useState([]);
     const [tickets, setTickets] = useState({});
+    const [proyectos, setProyectos] = useState([]);
+    const [proyectoSeleccionado, setProyectoSeleccionado] = useState({});
+
+
     const onSelect = (k) => {
         setActiveKey(k);
     };
@@ -58,7 +62,143 @@ const AdministracionProyecto = (proyectoKey,urn) => {
         marginBotom: '35px',
         paddingBotom: '35px'
     };
+    useEffect(() => {
+        const fetchProyectos = async () => {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/bucketsProyectos`);
+                const proyectos = await response.json();
+                if (proyectos.length > 0) {
+                    // Asegúrate de que cada proyecto tenga una 'urn' y un 'nombre'
+                    setProyectos(proyectos.map(proj => ({
+                        urn: proj.urn,
+                        nombre: proj.objectKey
+                    })));
+                }
+            } catch (error) {
+                console.error('Error al obtener la lista de proyectos:', error);
+                toast.error('Error al cargar proyectos');
+            }
+        };
+    
+        fetchProyectos();
+    }, []);
+    
 
+    const handleSelectProject = (e) => {
+        const seleccionado = proyectos.find(proyecto => proyecto.urn === e.target.value);
+        if (seleccionado) {
+            setProyectoSeleccionado(seleccionado);
+        } else {
+            setProyectoSeleccionado({});
+        }
+    };
+    
+    const transferirDatos = async () => {
+        // Asegúrate de que no se está intentando transferir a la misma URN
+         
+         if ( !proyectoSeleccionado ) {
+            toast.error("Debe seleccionar un proyecto al cual transferir los datos");
+            return;
+        }
+
+        const confirmacion = window.confirm(`Está realmente seguro que desea transferir los datos desde  ${proyectoKey.proyectoKey} al proyecto ${proyectoSeleccionado.nombre}?`);
+        if (!confirmacion) {
+                return;
+        }
+        if (proyectoKey.urn === proyectoSeleccionado.urn) {
+            toast.error("No puede transferir los datos de un proyecto al mismo.");
+            return;
+        }
+      
+    
+        try {
+            console.log('Iniciando la transferencia de datos del modelo...');
+            toast.info("Iniciando la transferencia de datos...");
+            // Llamada a la API para transferir pedidos
+            const responsePedidos = await fetch(`${API_BASE_URL}/api/transfierePedido`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    URNconsulta: proyectoKey.urn,
+                    URNreemplazo: proyectoSeleccionado.urn
+                })
+            });
+    
+            const dataPedidos = await responsePedidos.json();
+            console.log('Respuesta de transferencia de pedidos:', dataPedidos);
+            toast.success("Pedidos  Transferidos.");
+            // Llamada a la API para transferir adicionales de pedidos
+            const responseAdicionales = await fetch(`${API_BASE_URL}/api/transfiereAdicionalesPedidos`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    URNconsulta: proyectoKey.urn,
+                    URNreemplazo: proyectoSeleccionado.urn
+                })
+            });
+    
+            const dataAdicionales = await responseAdicionales.json();
+            console.log('Respuesta de transferencia de adicionales de pedidos:', dataAdicionales);
+            toast.success("Pedidos Adicionales Transferidos.");
+            // Notificar al usuario que la transferencia fue exitosa
+
+
+            const responseVistas = await fetch(`${API_BASE_URL}/api/transfiereVistas`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    URNconsulta: proyectoKey.urn,
+                    URNreemplazo: proyectoSeleccionado.urn
+                })
+            });
+    
+            const dataVistas = await responseVistas.json();
+            console.log('Respuesta de transferencia de vistas guardadas:', dataVistas);
+            toast.success("Vistas Guardadas Transferidas.");
+            const responseObjectProyectoPlan = await fetch(`${API_BASE_URL}/api/transfiereObjetoProyectoPlan`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    URNconsulta: proyectoKey.urn,
+                    URNreemplazo: proyectoSeleccionado.urn
+                })
+            });
+    
+            const dataObjetoProyectoPlan = await responseObjectProyectoPlan.json();
+            console.log('Respuesta de transferencia de objeto proyecto plan:', dataObjetoProyectoPlan);
+            toast.success("Objetos de Proyecto Plan Transferidos.");
+
+            const responseUsuarioProyectoPerfil = await fetch(`${API_BASE_URL}/api/transferirUsuarioProyectoPerfil`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    URNconsulta: proyectoKey.urn,
+                    URNreemplazo: proyectoSeleccionado.urn
+                })
+            });
+    
+            const dataUsuarioProyectoPerfil = await responseUsuarioProyectoPerfil.json();
+            console.log('Respuesta de transferencia de usuario proyecto perfil:', dataUsuarioProyectoPerfil);
+            if(dataUsuarioProyectoPerfil.message) {
+                toast.success(dataUsuarioProyectoPerfil.message);
+            }
+
+            toast.success("Los datos del proyecto han sido transferidos correctamente.");
+    
+        } catch (error) {
+            console.error('Error al transferir datos del modelo:', error);
+            toast.error('Error al transferir datos del modelo.');
+        }
+    };
+    
     useEffect(() => {
         const obtenerUsuarios = async () => {
             const respuesta = await fetch(`${API_BASE_URL}/api/usuarios`);
@@ -323,7 +463,7 @@ const AdministracionProyecto = (proyectoKey,urn) => {
     
         try {
             const payload = {
-                idUsuario: usuarioEncontrado.idUsu, // asumiendo que idUsuario es el ID del usuario
+                idUsuario: usuarioEncontrado.idUsu, 
                 urn: proyectoKey.urn, // aquí usas la urn desde proyectoKey
                 proyectoKey: proyectoKey.proyectoKey // si necesitas el proyectoKey completo
                 // Asegúrate de incluir cualquier otro dato necesario que tu backend requiera
@@ -361,15 +501,17 @@ const AdministracionProyecto = (proyectoKey,urn) => {
             <Tabs defaultActiveKey="informacionGeneral" id="tab-administracion-proyecto" onSelect={onSelect} style={tabHeaderStyle}>
                 <Tab eventKey="informacionGeneral" title={<span><img src={getTabImage('informacionGeneral')} alt="" />Proyecto</span>}>
                     <div style={tabContentStyle}>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Nombre del Proyecto</Form.Label>
-                            <Form.Control type="text" value={nombreProyecto} onChange={(e) => setNombreProyecto(e.target.value)} />
-                        </Form.Group>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Descripción del Proyecto</Form.Label>
-                            <Form.Control as="textarea" rows={3} value={descripcionProyecto} onChange={(e) => setDescripcionProyecto(e.target.value)} />
-                        </Form.Group>
-                        <Button style={botonEstilo}>Transferir Datos</Button>
+                    <Form.Label>Proyecto al cual se transferirán los datos</Form.Label>
+                    <Form.Control as="select" value={proyectoSeleccionado.urn || ''} onChange={handleSelectProject}>
+                        <option value="">Seleccione un proyecto...</option>
+                        {proyectos.map((proyecto) => (
+                            <option key={proyecto.urn} value={proyecto.urn}>
+                                {proyecto.nombre} 
+                            </option>
+                        ))}
+                    </Form.Control>
+                        <Button style={botonEstilo} onClick={transferirDatos}>Transferir Datos</Button>
+
                         <p></p>  
                          <Button onClick={guardarDatosModelo} style={{...botonEstilo, marginTop: '10px'}}>Calcular  Estadísticas</Button><p></p> <p></p><br></br>
                          {Object.entries(tickets).map(([task, status]) => (
