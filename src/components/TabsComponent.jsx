@@ -54,6 +54,7 @@ const TabComponent = ({ urnBuscada }) => {
     const [showConfirmChange, setShowConfirmChange] = useState(false);
     const [pedidoActual, setPedidoActual]=useState([]);
     const estados = ['paquetizado', 'espera_aprobacion', 'rechazado', 'aceptado', 'fabricacion', 'despacho', 'recepcionado', 'instalado', 'inspeccionado', 'hormigonado'];
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const handleOpenModalWithInfo = async (pedido) => {
         setPedidoActual(pedido);
         setModalInfo({ show: true, data: pedido });
@@ -400,7 +401,10 @@ const TabComponent = ({ urnBuscada }) => {
             toast.error("Debe agregar un nombre al pedido");
             return;
         }
-    
+        if (isSubmitting) {  // Verifica si ya se está procesando una solicitud
+            return;
+        }
+        setIsSubmitting(true); 
         console.log("Nombre del pedido:", pedidoNombre);
         // Suponiendo que tienes un estado o una forma de obtener los IDs seleccionados, 
         // aquí es donde mostrarías esos IDs. 
@@ -434,6 +438,7 @@ const TabComponent = ({ urnBuscada }) => {
             toast.error("Error al crear el pedido");
             // Mantener el modal abierto para permitir correcciones
         }
+        setIsSubmitting(false);
         handleCloseModal(); // Cierra el modal después de ejecutar las acciones necesarias
     };
     

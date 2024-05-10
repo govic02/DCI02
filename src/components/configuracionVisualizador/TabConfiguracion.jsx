@@ -17,13 +17,16 @@ const TabConfiguracion = () => {
             try {
                 const respuesta = await fetch(url);
                 const resultado = await respuesta.json();
+                console.log("respuesta",respuesta);
+                console.log("res",resultado);
                 if (respuesta.ok) {
                     // Actualiza el estado con los valores obtenidos
                     const { configuracion } = resultado;
-                    setFiltroVisual01(configuracion.filtro01 || '');
-                    setFiltroVisual02(configuracion.filtro02 || '');
-                    setParametroBarras(configuracion.variableBarra || '');
-                    setVariableTiempo(configuracion.variableTiempo || '');
+                    console.log("configuracion",configuracion);
+                    setFiltroVisual01(resultado.filtro01 || '');
+                    setFiltroVisual02(resultado.filtro02 || '');
+                    setParametroBarras(resultado.variableBarra || '');
+                    setVariableTiempo(resultado.variableTiempo || '');
 
                     
                 } else {
