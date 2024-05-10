@@ -12,7 +12,7 @@ import Card from 'react-bootstrap/Card';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye,faPlus, faHandPointer,faTrash } from '@fortawesome/free-solid-svg-icons';
 import API_BASE_URL from '../config';
-
+import { useMediaQuery } from 'react-responsive';
 const customStyles = {
     multiValue: (base) => ({
         ...base,
@@ -30,10 +30,8 @@ const menuStyles = {
     overflowY: 'hidden'
 };
 
-  const estiloExpandido = {
-      width: '100%',
-  };
-const TabComponent = ({ urnBuscada }) => {
+
+const TabComponentMobile = ({ urnBuscada }) => {
     const { filtrar, cleanModel, datosFiltro1,datosFiltro2, pesoTotal, largoTotal, totalBarras,updatePesoTotal,updateLargoTotal,updateTotalBarras  } = useActions();
     const { isVisible } = useVisibility();
     const [activeKey, setActiveKey] = useState('filtrosVisuales');
@@ -510,12 +508,12 @@ const TabComponent = ({ urnBuscada }) => {
       
     const tabStyle = {
         position: 'fixed',
-        top: '40%',
-        right: '50px',
+        top: '100%',
+        right: '5%',
         transform: 'translateY(-50%)',
         zIndex: 1000,
-        width: '465px',
-        height: '385px',
+        width: '310px',
+       
         overflow: 'auto',
         paddingBottom: '520px',
         overflowY: 'hidden'
@@ -586,7 +584,7 @@ const TabComponent = ({ urnBuscada }) => {
     return isVisible ? (
         <div style={tabStyle}>
             <Tabs defaultActiveKey="filtrosVisuales" id="tab-component" onSelect={onSelect} style={tabHeaderStyle}>
-                <Tab eventKey="filtrosVisuales" title={<span><img src={getTabIcon('filtrosVisuales')} alt="Icono Filtros Visuales" /> Filtros visuales</span>}>
+                <Tab eventKey="filtrosVisuales" title={<span><img src={getTabIcon('filtrosVisuales')} alt="Icono Filtros Visuales" /> Filtros </span>}>
                     <div style={tabContentStyle}>
                         <div className="filasContenido" style={filasContenido}>
                             <label htmlFor="particionHA" style={labelStyle}>Valores para AEC partición HA</label>
@@ -626,7 +624,7 @@ const TabComponent = ({ urnBuscada }) => {
                         </div>
                     </div>
                 </Tab>
-                <Tab eventKey="barrasPedidos" title={<span><img src={getTabIcon('barrasPedidos')} alt="Icono Barras y Pedidos" /> Barras & Pedidos</span>}>
+                <Tab eventKey="barrasPedidos" title={<span><img src={getTabIcon('barrasPedidos')} alt="Icono Barras y Pedidos" /> Barras</span>}>
                     <div style={tabContentStyle}>
                     <div style={{ display: 'flex', marginBottom: '0px' }}>
             {/* Columna 1 */}
@@ -837,4 +835,4 @@ const TabComponent = ({ urnBuscada }) => {
     ) : null;
 };
 
-export default TabComponent;
+export default TabComponentMobile;

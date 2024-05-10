@@ -45,7 +45,7 @@ const TabConfiguracion = () => {
             return activeKey === 'variablesTiempo' ? 'images/variableTiempoIcn.svg' : 'images/variableTiempoIcn.svg';
         }
     };
-    
+    ///api/setFiltros
     const guardarConfiguracion = async () => {
         const url = API_BASE_URL+'/api/configuracionViewer'; // Asegúrate de usar la URL correcta
         const data = {

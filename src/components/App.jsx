@@ -62,8 +62,9 @@ const App = ({ token, urn ,data}) => {
                                     </Routes>
                                 </div>
                             </div>
-                            <Footer />
+                           
                         </div>
+                        <Footer />
                         </AuthProvider>
                     </VisibilityProvider>
             

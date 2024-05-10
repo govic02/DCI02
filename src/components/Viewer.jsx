@@ -250,14 +250,16 @@ class Viewer extends React.Component {
     obtenerFiltros = async (urnBuscada) => {
         try {
             console.log("URN antes de AXIOS:", urnBuscada);
-            const response = await axios.get(`${API_BASE_URL}/api/filtros`);
-            console.log("Respuesta Filtros:", response.data);
+           // const response = await axios.get(`${API_BASE_URL}/api/filtros`);
+           //api/configuracionViewer
+           const response = await axios.get(`${API_BASE_URL}/api/configuracionViewer`);
+           console.log("Respuesta Filtros:", response.data);
     
-            const filtrado1 = response.data[0].filtro_1;
-            const filtrado2 = response.data[0].filtro_2;
+            const filtrado1 = response.data.filtro01;
+            const filtrado2 = response.data.filtro02;
     
             // Actualiza el estado con los nuevos filtros y fierros.
-            await this.setStateAsync({ filtro1: filtrado1, filtro2: filtrado2, fierros: response.data[0].fierro });
+            await this.setStateAsync({ filtro1: filtrado1, filtro2: filtrado2, fierros: response.data.variableBarra });
     
             console.log("Filtros actualizados en el estado:", filtrado1, filtrado2);
     
@@ -630,7 +632,7 @@ class Viewer extends React.Component {
             viewer.getProperties(dbId, (data) => {
           
                 this.context.updateSelectedObjectProps(data);
-                // Aquí puedes hacer algo más con las propiedades si lo necesitas
+               console.log("elemento seleccionado",data);
             }, (error) => {
                 console.error("Error al obtener propiedades del elemento seleccionado:", error);
             });

@@ -25,14 +25,15 @@ const obtenerConfiguracionViewer = async (req, res) => {
     try {
       // Intenta encontrar el primer/único documento en la colección
       const configuracion = await ConfiguracionViewer.findOne();
-  
+      console.log("datos de configuración");
+      console.log(configuracion);
       if (!configuracion) {
         // Si no existe ninguna configuración, devuelve un mensaje indicando que aún no se ha configurado
         return res.status(404).json({ mensaje: 'Configuración del visor no encontrada.' });
       }
   
       // Si se encuentra la configuración, la devuelve
-      res.status(200).json({ mensaje: 'Configuración del visor obtenida con éxito', configuracion });
+      res.status(200).json( configuracion);
     } catch (error) {
       // En caso de error, devuelve un mensaje indicando el error
       res.status(500).json({ mensaje: 'Error al obtener la configuración del visor', error });

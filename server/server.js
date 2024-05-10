@@ -13,7 +13,7 @@ import forgeSDK from 'forge-apis'; // Importa todo el paquete forge-apis
 const { DerivativesApi, JobPayload, JobPayloadInput, JobPayloadOutput, JobSvfOutputPayload } = forgeSDK; // Extrae los objetos 
 
 const { BucketsApi, ObjectsApi, PostBucketsPayload } = forgeSDK;
-import { obtenerFiltros } from '../controllers/filtrosController.js';
+import { obtenerFiltros,actualizarFiltro } from '../controllers/filtrosController.js';
 import {crearPedido,eliminarPedido,obtenerPedidos,actualizarEstadoPedido,transfierePedido } from '../controllers/pedidoController.js'; // PEDIDOS
 import  {actualizarUsuarioProyectoAsignadoPorIdUsuario,obtenerUsuarioProyectoAsignadoPorIdUsuario } from '../controllers/usuarioProyectoAsignadoController.js'; // Asignación proyectos
 import { manipularConfiguracionViewer,obtenerConfiguracionViewer} from '../controllers/ConfiguracionViewerController.js'; 
@@ -595,7 +595,7 @@ app.post('/api/actualizarEstadoPedido', actualizarEstadoPedido);
 
 
 app.get('/api/filtros', obtenerFiltros );
-
+app.post('/api/setFiltros',actualizarFiltro);
 app.get('/api/vistasGuardadasPorUrn/:urn', obtenerVistasPorUrn);
 app.get('/api/filtrosPorUrn/:urn', obtenerFiltrosOpcionesProyectoPorUrn);
 app.get('/api/listPedidos', obtenerPedidos); 
