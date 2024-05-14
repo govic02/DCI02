@@ -16,7 +16,7 @@ const BarraNuevaCuenta = () => {
     const [tipoUsuario, setTipoUsuario] = useState('');
     const [esFormularioValido, setEsFormularioValido] = useState(false);
     const [modalOpen, setModalOpen] = useState(false);
-    
+    const [mensajeError, setMensajeError] = useState('');
 const modalStyle = {
   position: 'absolute',
   top: '50%',
@@ -44,11 +44,19 @@ const modalStyle = {
     margin: '4px 5px', // Margen de 4px arriba y abajo, 5px a los lados
     borderRadius: '20px'
   };
+
+  const validarEmail = (email) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && /\.(cl|com|org|net)$/.test(email);
+  };
   useEffect(() => {
-    const esEmailValido = email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);
-    const esFormularioValido = nombre && esEmailValido && contrasena && tipoUsuario;
-    setEsFormularioValido(esFormularioValido);
-}, [nombre, email, contrasena, tipoUsuario]);
+    setEsFormularioValido(
+      nombre && validarEmail(email) && contrasena && tipoUsuario
+    );
+    if(esFormularioValido){
+       setEmail(email);
+    }
+    
+  }, [nombre, email, contrasena, tipoUsuario]);
 const verificarUsuarioExistente = async () => {
   try {
     const response = await fetch(`${API_BASE_URL}/api/usuarios/username/${email}`);
@@ -63,6 +71,15 @@ const verificarUsuarioExistente = async () => {
   } catch (error) {
     console.error('Error checking user existence:', error);
     return false;
+  }
+};
+const handleInputChange = (event, setter) => {
+  const { value } = event.target;
+  if (value.length <= 25) {
+    setter(value);
+    setMensajeError('');
+  } else {
+    setMensajeError('No se pueden añadir más de 25 caracteres');
   }
 };
 const crearCuenta = async () => {
@@ -123,16 +140,16 @@ const crearCuenta = async () => {
         <div className="row justify-content-center mb-4">
           <div className="col-auto">
             <TextField label="Nombre Completo" variant="outlined" className="me-2"  value={nombre}
-                    onChange={(e) => setNombre(e.target.value)}/>
+                    onChange={(e) =>  handleInputChange(e, setNombre)}/>
           </div>
           <div className="col-auto">
             <TextField label="E-Mail" variant="outlined" className="me-2"   value={email}
-                    onChange={(e) => setEmail(e.target.value)}/>
+                    onChange={(e) =>handleInputChange(e, setEmail)}/>
           </div>
           <div className="col-auto">
             <TextField label="Contraseña" variant="outlined" className="me-2"  type="password"
                     value={contrasena}
-                    onChange={(e) => setContrasena(e.target.value)} />
+                    onChange={(e) => handleInputChange(e, setContrasena)} />
           </div>
           <div className="col-auto">
             <RadioGroup row value={tipoUsuario} onChange={(e) => setTipoUsuario(e.target.value)}>
@@ -142,6 +159,11 @@ const crearCuenta = async () => {
             </RadioGroup>
           </div>
         </div>
+        {mensajeError && (
+          <Typography color="error" style={{ marginBottom: '10px' }}>
+            {mensajeError}
+          </Typography>
+        )}
         <div className="row justify-content-center">
           <div className="col-auto">
             <Button variant="contained" style={buttonStyle} disabled={!esFormularioValido} onClick={crearCuenta}>

@@ -17,6 +17,7 @@ const insertarObjetoConDetalles = async (req, res) => {
         id: item.id,
         longitudTotal: item.longitudTotal,
         pesoLineal: item.pesoLineal,
+        nivel: item.nivel
     }));
 
     // Crea el documento a insertar

@@ -5,7 +5,7 @@ import Typography from '@mui/material/Typography';
 import { Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
 import API_BASE_URL from '../../config';
-
+import axios from 'axios';
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 const GraficoPesosPromedio = ({ urn }) => {
@@ -17,20 +17,41 @@ const GraficoPesosPromedio = ({ urn }) => {
   useEffect(() => {
     const fetchDatos = async () => {
       try {
-        const url = `${API_BASE_URL}/api/getPesoPromedio/${urn}`;
-        const respuesta = await fetch(url);
+        // Intenta obtener el orden predefinido desde el servidor
+        const ordenNivelesResponse = await axios.get(`${API_BASE_URL}/api/ordenNiveles/${encodeURIComponent(urn)}`);
+        let ordenNivelesData = ordenNivelesResponse.data.listaNiveles;
+        let predefinedOrderMap = {};
+        let usePredefinedOrder = ordenNivelesData && ordenNivelesData.length > 0;
+
+        if (usePredefinedOrder) {
+          ordenNivelesData.forEach((item, index) => {
+            predefinedOrderMap[item.nombre.trim()] = index;
+          });
+        }
+
+        // Obtén los datos principales para el gráfico
+        const respuesta = await fetch(`${API_BASE_URL}/api/getPesoPromedio/${urn}`);
         if (!respuesta.ok) throw new Error('Respuesta no satisfactoria del servidor');
         const data = await respuesta.json();
-        const pesosOrdenados = data.pesos.sort((a, b) => parseInt(a.nombreFiltro2) - parseInt(b.nombreFiltro2));
+        let pesos = data.pesos;
+
+        // Si existe un orden predefinido, ordena usando ese orden
+        if (usePredefinedOrder) {
+          pesos.sort((a, b) => predefinedOrderMap[a.nombreFiltro2.trim()] - predefinedOrderMap[b.nombreFiltro2.trim()]);
+        } else {
+          // Lógica de ordenamiento predeterminada si no hay orden predefinido
+          pesos.sort((a, b) => parseFloat(a.nombreFiltro2.replace(/\D/g, '')) - parseFloat(b.nombreFiltro2.replace(/\D/g, '')));
+        }
+
         // Preparar los datos para el gráfico
-        const labels = pesosOrdenados.map(item => item.nombreFiltro2);
-        const pesos = pesosOrdenados.map(item => item.promedioPeso);
+        const labels = pesos.map(item => item.nombreFiltro2);
+        const pesosData = pesos.map(item => item.promedioPeso);
 
         setDatosGrafico({
           labels,
           datasets: [{
             label: 'Promedio de Peso por Nivel',
-            data: pesos,
+            data: pesosData,
             backgroundColor: 'rgba(255, 99, 132, 0.5)',
             borderColor: 'rgba(255, 99, 132, 1)',
             borderWidth: 1

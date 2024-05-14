@@ -13,8 +13,10 @@ import forgeSDK from 'forge-apis'; // Importa todo el paquete forge-apis
 const { DerivativesApi, JobPayload, JobPayloadInput, JobPayloadOutput, JobSvfOutputPayload } = forgeSDK; // Extrae los objetos 
 
 const { BucketsApi, ObjectsApi, PostBucketsPayload } = forgeSDK;
+import { crearActualizarOrdenNiveles, obtenerOrdenNivelesPorUrn } from '../controllers/OrdenNivelesController.js';
+
 import { obtenerFiltros,actualizarFiltro } from '../controllers/filtrosController.js';
-import {crearPedido,eliminarPedido,obtenerPedidos,actualizarEstadoPedido,transfierePedido } from '../controllers/pedidoController.js'; // PEDIDOS
+import {crearPedido,eliminarPedido,obtenerPedidos,actualizarEstadoPedido,transfierePedido,eliminarPedidosPorUrn } from '../controllers/pedidoController.js'; // PEDIDOS
 import  {actualizarUsuarioProyectoAsignadoPorIdUsuario,obtenerUsuarioProyectoAsignadoPorIdUsuario } from '../controllers/usuarioProyectoAsignadoController.js'; // Asignación proyectos
 import { manipularConfiguracionViewer,obtenerConfiguracionViewer} from '../controllers/ConfiguracionViewerController.js'; 
 import { buscarCrearActualizarObjetoProyectoPlan, obtenerObjetosPorUrn ,CrearObjetoProyectoPlan,obtenerPorDbIdYUrn,procesarObjetosProyectoPlanMasivamente,transfiereObjetoProyectoPlan} from '../controllers/ObjetoProyectoPlanController.js';
@@ -590,7 +592,8 @@ app.post('/api/setproyectoAdmin',  actualizarUsuarioProyectoAsignadoPorIdUsuario
 app.post('/api/pedido', crearPedido);
 app.post('/api/adicionalesPedido', crearAdicionalPedido);
 app.get('/api/obtenerAdicionalesPorUrn/:urn',obtenerAdicionalesPorUrn);
-app.post('/api/actualizarEstadoPedido', actualizarEstadoPedido);
+app.post('/api/actualizarEstadoPedido', actualizarEstadoPedido); //
+app.delete('/api/eliminarPedidoURN/:urn', eliminarPedidosPorUrn);
 //
 
 
@@ -700,6 +703,12 @@ app.post('/api/transfiereObjetoProyectoPlan', transfiereObjetoProyectoPlan);
 // transfiere usuarios de un proyecto a otro
 app.post('/api/transferirUsuarioProyectoPerfil', transferirUsuarioProyectoPerfil);
 
+
+//  Orden de niveles
+// Ruta para crear o actualizar un registro de OrdenNiveles
+app.post('/api/ordenNiveles', crearActualizarOrdenNiveles);
+
+app.get('/api/ordenNiveles/:urn', obtenerOrdenNivelesPorUrn);
 
 
 app.get('/', (req, res) => {

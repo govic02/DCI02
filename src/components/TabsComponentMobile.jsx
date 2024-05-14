@@ -13,6 +13,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye,faPlus, faHandPointer,faTrash } from '@fortawesome/free-solid-svg-icons';
 import API_BASE_URL from '../config';
 import { useMediaQuery } from 'react-responsive';
+import zIndex from '@mui/material/styles/zIndex';
 const customStyles = {
     multiValue: (base) => ({
         ...base,
@@ -48,10 +49,11 @@ const TabComponentMobile = ({ urnBuscada }) => {
     const [adicionales, setAdicionales] = useState([]);
     const [selectedButtons, setSelectedButtons] = useState({});
     const { updateIdentificadoresActuales } = useActions();
-    const[esAdministradorEditor,setAdministradorEditor] = useState('');
+    const [esAdministradorEditor,setAdministradorEditor] = useState('');
     const [showConfirmChange, setShowConfirmChange] = useState(false);
     const [pedidoActual, setPedidoActual]=useState([]);
     const estados = ['paquetizado', 'espera_aprobacion', 'rechazado', 'aceptado', 'fabricacion', 'despacho', 'recepcionado', 'instalado', 'inspeccionado', 'hormigonado'];
+   
     const handleOpenModalWithInfo = async (pedido) => {
         setPedidoActual(pedido);
         setModalInfo({ show: true, data: pedido });
@@ -508,14 +510,14 @@ const TabComponentMobile = ({ urnBuscada }) => {
       
     const tabStyle = {
         position: 'fixed',
-        top: '100%',
-        right: '5%',
-        transform: 'translateY(-50%)',
+        top: '55px',
+        right: '10%',
+       
         zIndex: 1000,
         width: '310px',
-       
+         zIndex:'9999',
         overflow: 'auto',
-        paddingBottom: '520px',
+        
         overflowY: 'hidden'
     };
     const modalStyle = {

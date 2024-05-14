@@ -75,7 +75,7 @@ const DatosUsuario = () => {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           style={{ marginBottom: '10px' }}
-          disabled={!nombreCompleto || !contrasena || !repetirContrasena}
+          disabled={true}
         />
         <TextField
           label="Contraseña"

@@ -6,7 +6,11 @@ const configuracionViewerSchema = new mongoose.Schema({
   filtro01: String,
   filtro02: String,
   variableBarra: String,
-  variableTiempo: String
+  variableTiempo: String,
+  variableLargo:String,
+  variablePesoLineal:String,
+  variableDiametro:String,
+  variableNivel:String
 });
 
 // Crear el modelo a partir del esquema definido

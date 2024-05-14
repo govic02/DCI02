@@ -1,9 +1,10 @@
 import React, { useRef ,useState,useEffect} from 'react';
 import Viewer from './Viewer';
-import VisualizadorDev from './VisualizadorDev';
+
 import TabsComponent from './TabsComponent';
 import TabsComponentMobile from './TabsComponentMobile';
 import AdministradorDeVistas from './visualizador/AdministradorDeVistas';
+import AdministradorDeVistasMobile from './visualizador/AdministradorDeVistasMobile';
 import Paleta from './visualizador/Paleta';
 import HeaderApp from './HeaderApp';
 import { ActionsProvider } from '../context/ActionContext';
@@ -12,12 +13,15 @@ import API_BASE_URL from '../config';
 import { useMediaQuery } from 'react-responsive';
 import './styles/columna.css'; // Ajusta la ruta según dónde se encuentre el archivo CSS
 import 'bootstrap/dist/css/bootstrap.min.css'; // 
+import ViewerMobile from './ViewerMobile';
 
 const ColumnaDerecha = ({ isCollapsed, token, urn, selectedIds, onCameraChange, onSelectionChange, refViewer }) => {
   const { token: tokenContexto } = useAuth();
     const [urnSelected, setUrnSelected] = useState('');
     const [proyectoKeySeleccionado, setProyectoKeySeleccionado] = useState('');
-   
+    const [showTabsComponentMobile, setShowTabsComponentMobile] = useState(true); 
+    const [showAdministradorVistasMobile, setShowAdministradorVistasMobile] = useState(false); 
+
     const isDesktopOrLaptop = useMediaQuery({
       query: '(min-width: 1224px)'
     });
@@ -96,7 +100,19 @@ const ColumnaDerecha = ({ isCollapsed, token, urn, selectedIds, onCameraChange, 
       obtenerUsuarioProyecto();
     }, );
   
-
+    const handleFilterBarsClick = () => {
+      if (showAdministradorVistasMobile) {
+          setShowAdministradorVistasMobile(false); // Si el Administrador de Vistas está visible, ocultarlo
+      }
+      setShowTabsComponentMobile(prev => !prev); // Alternar la visibilidad de TabsComponentMobile
+  };
+    
+  const handleViewsClick = () => {
+    if (showTabsComponentMobile) {
+        setShowTabsComponentMobile(false); // Si TabsComponentMobile está visible, ocultarlo
+    }
+    setShowAdministradorVistasMobile(prev => !prev); // Alternar la visibilidad de AdministradorDeVistasMobile
+};
    
     return (
       <div>
@@ -143,25 +159,28 @@ const ColumnaDerecha = ({ isCollapsed, token, urn, selectedIds, onCameraChange, 
                 <div className="col-12">
 
                  <ActionsProvider viewerRef={refViewer}>
-                    <div className="row no-gutters">
+                    <div className="row ">
                       
-                          <div className="col-6" style={{width:'50px;'}}>
-                              <Viewer
-                                  runtime={{ accessToken: token }}
-                                  urn={urnSelected}
-                                  selectedIds={selectedIds}
-                                  onCameraChange={onCameraChange}
-                                  onSelectionChange={onSelectionChange}
-                                  ref={refViewer}
-                                  token={token}
-                                />
+                          <div className="col-6" style={{height:'-200px'}}>
+                          <ViewerMobile                            runtime={{ accessToken: token }}
+                              urn={urnSelected}
+                              selectedIds={selectedIds}
+                              onCameraChange={onCameraChange}
+                              onSelectionChange={onSelectionChange}
+                              ref={refViewer}
+                              token = {token}
+                              guardarIdentificadores={guardarIdentificadores} // Pasar la función para guardar identificadores
+                          />
+                          </div>
+                          
+                          <div className="col-12">
+                          {showTabsComponentMobile && <TabsComponentMobile urnBuscada={urnSelected} />}
                           </div>
                           <div className="col-12">
-                              <TabsComponentMobile urnBuscada={urnSelected} />
+                          {showAdministradorVistasMobile && <AdministradorDeVistasMobile identificadoresActual={identificadoresActual} urnBuscada={urnSelected} />}
+                            
                           </div>
-                          <div className="col-12">
-                              <AdministradorDeVistas identificadoresActual={identificadoresActual} urnBuscada={urnSelected} />
-                          </div>
+                          
                     </div>
                  </ActionsProvider>
                 </div>
@@ -171,7 +190,7 @@ const ColumnaDerecha = ({ isCollapsed, token, urn, selectedIds, onCameraChange, 
           
           </div>
           }
-        {isPortrait && <div>You are in portrait orientation</div>}
+        {isPortrait && <div>Coloca el Dispositivo en horizontal</div>}
         {/* Aquí puedes añadir tu contenido o componentes basados en la resolución */}
       </div>
 );

@@ -19,7 +19,15 @@ const Paleta =  ({ urnBuscada })  => {
     const { selectedObjectProps,resultadoFierros, seleccionActual,obtenerIdsConFecha, obtenerIdsSinFecha,buscaBarrasHormigon,cleanModel,gestionarYpintarIds} = useContext(ActionsContext); // Aquí usas useContext para acceder al contexto
     const[esAdministradorEditor,setAdministradorEditor] = useState('');
     const [isVisible, setIsVisible] = useState(true);
-  
+    const [colorModalVisible, setColorModalVisible] = useState(false); // Controla la visibilidad del modal de colores
+    const [colores, setColores] = useState([
+        { color: '#0E31F3 ', descripcion: 'Azul - Con fecha de Instalación' },
+        { color: '#303031 ', descripcion: 'Gris - Sin fecha plan' },
+        { color: '#FA1F05 ', descripcion: 'Rojo - Fecha plan caducada' },
+        { color: '#FC9E05 ', descripcion: 'Anaranjado - Quedan 7 días o menos para fecha plan' },
+        { color: '#FAF705 ', descripcion: 'Amarillo - Más de 7 días para fecha plan' }
+    ]);
+    
     
     const estiloDelComponente = {
         width: '65px',
@@ -72,6 +80,8 @@ const Paleta =  ({ urnBuscada })  => {
         overflow: 'auto', // Habilita el scroll si el contenido excede el tamaño
         padding: '10px' // Añade algo de padding alrededor del contenido
     };
+
+   
     const handleBuscaBarrasClick = () => {
         toast.info('Iniciando el proceso de cálculo, espere unos segundos');
         buscaBarrasHormigon(); // Llama a la función del contexto
@@ -165,7 +175,9 @@ const Paleta =  ({ urnBuscada })  => {
         cleanModel();
     }
     const pintarFechas=()=>{
+        setColorModalVisible(true); // Mostrar el modal de colores
         gestionarYpintarIds();
+       
     }
     const handleGuardarClick = async () => {
         console.log("Guardando datos...");
@@ -214,7 +226,51 @@ const Paleta =  ({ urnBuscada })  => {
     
     return isVisible ?(
         <div style={estiloDelComponente}>
-        
+          {colorModalVisible && (
+                <div style={{
+                    position: 'fixed',
+                    width:'350px',
+                    left: '200px',
+                    top: '300px',
+                    transform: 'translate(-50%, -50%)',
+                    backgroundColor: 'white',
+                    padding: '20px',
+                    borderRadius: '10px',
+                    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+                    zIndex: 1001 // Asegúrate de que esté por encima de otros elementos
+                }}>
+                    <h4>Mapa de Estados</h4>
+                    <ul>
+                        {colores.map((item, index) => (
+                            <li key={index} style={{
+                                padding: '10px',
+                                marginBottom: '10px',
+                                display: 'flex',
+                                alignItems: 'center' // Alinea verticalmente el recuadro y el texto
+                            }}>
+                                <span style={{
+                                    display: 'inline-block',
+                                    width: '20px', // Tamaño del recuadro de color
+                                    height: '20px',
+                                    backgroundColor: item.color,
+                                    marginRight: '10px' // Margen entre el recuadro y el texto
+                                }}></span>
+                                <span style={{ color: 'black' }}>{item.descripcion}</span>
+                            </li>
+                        ))}
+                    </ul>
+                    <Button 
+                            onClick={() => setColorModalVisible(false)}
+                            style={{
+                                backgroundColor: '#DA291C', // Color de fondo rojo
+                                color: 'white', // Color del texto
+                                borderColor: '#DA291C' // Color del borde para que coincida con el fondo
+                            }}
+                        >
+                            Cerrar
+                        </Button>
+                </div>
+            )}
             <div style={estiloFila} onClick={pintarFechas}>
                 <img src="images/paletaBrocha.svg" alt="Icono 1" />
             </div>
@@ -227,20 +283,20 @@ const Paleta =  ({ urnBuscada })  => {
                 <img src="images/paletaFecha.svg" alt="Icono 3" />
             </div>
             {showModal && (
-    <div style={modalStyle}>
+            <div style={modalStyle}>
          <button
-        style={{
-            position: 'absolute',
-            top: '10px', // Ajusta según sea necesario para tu diseño
-            right: '10px', // Ajusta según sea necesario para tu diseño
-            border: 'none',
-            background: 'transparent',
-            color: 'black', // Ajusta el color según tu estilo
-            cursor: 'pointer',
-            fontSize: '24px' // Ajusta el tamaño según sea necesario
-        }}
-        onClick={toggleModal} // Función para cerrar el modal
-    >
+                    style={{
+                        position: 'absolute',
+                        top: '10px', // Ajusta según sea necesario para tu diseño
+                        right: '10px', // Ajusta según sea necesario para tu diseño
+                        border: 'none',
+                        background: 'transparent',
+                        color: 'black', // Ajusta el color según tu estilo
+                        cursor: 'pointer',
+                        fontSize: '24px' // Ajusta el tamaño según sea necesario
+                    }}
+                    onClick={toggleModal} // Función para cerrar el modal
+                >
         &times;
     </button>
         {resultadoFierros && resultadoFierros.length > 1 ? (
@@ -298,7 +354,13 @@ const Paleta =  ({ urnBuscada })  => {
                 Buscar Barras incluidas
             </button>
         </div> )}
+   
+    {/* Modal para los colores */}
+  
+   
     </div>
+
+
 )}
 
             {dragging && (

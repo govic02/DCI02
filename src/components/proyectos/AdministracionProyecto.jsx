@@ -1,6 +1,7 @@
 import React, { useState,useEffect } from 'react';
 import { Tabs, Tab, Form, Button, Table, Alert } from 'react-bootstrap';
-
+import TabConfiguracion from '../configuracionVisualizador/TabConfiguracion';
+import ListaReordenable from './ListaReordenable';
 import { toast } from 'react-toastify';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -19,8 +20,13 @@ const AdministracionProyecto = (proyectoKey,urn) => {
     const [tickets, setTickets] = useState({});
     const [proyectos, setProyectos] = useState([]);
     const [proyectoSeleccionado, setProyectoSeleccionado] = useState({});
+    const [niveles, setNiveles] = useState([ ]);
 
 
+      const handleReorder = (newOrder) => {
+        console.log('Nuevo orden de proyectos:', newOrder);
+        setNiveles(newOrder);
+      };
     const onSelect = (k) => {
         setActiveKey(k);
     };
@@ -35,7 +41,7 @@ const AdministracionProyecto = (proyectoKey,urn) => {
        
         marginLeft: '20px',
         height: '485px',
-        width:'450px',
+        width:'100%',
         overflow: 'auto'
     };
 
@@ -254,9 +260,96 @@ const AdministracionProyecto = (proyectoKey,urn) => {
     
     useEffect(() => {
         obtenerUsuariosAsignados();
+        setNiveles(['']);
     }, [proyectoKey.urn]); // Se ejecuta al montar y cuando cambia el urn del proyecto seleccionado
     
+    const guardarOrdenNiveles = async () => {
+
+        const listaNiveles = niveles.map((nivel, index) => ({
+            nombre: nivel.content, // Asumiendo que 'content' corresponde al nombre del nivel
+            posicion: index + 1      // La posición podría ser el índice en el arreglo + 1
+        }));
     
+        try {
+            let urn = proyectoKey.urn;
+            const response = await fetch(`${API_BASE_URL}/api/ordenNiveles`, {
+                method: 'POST',   // Utiliza POST para enviar los datos
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ urn, listaNiveles })  // Enviar la URN y los niveles formateados
+            });
+            console.log("respuesta intento consulta",response);
+            if (!response.ok) {
+                throw new Error('Error al guardar los niveles');
+            }
+    
+            const responseData = await response.json();
+            console.log('Orden de niveles guardado:', responseData);
+            alert('Orden de niveles actualizado correctamente.');
+        } catch (error) {
+            console.error('Error al guardar orden de niveles:', error);
+            alert('Error al guardar los niveles.');
+        }
+    };
+    
+    const buscarOrdenNiveles = async() =>{
+        console.log("intento  guardar orden actual");
+        try {
+            const ordenNivelesResponse = await fetch(`${API_BASE_URL}/api/ordenNiveles/${encodeURIComponent(proyectoKey.urn)}`);
+            console.log("respuesta ordenes niveles",ordenNivelesResponse);
+            const ordenNivelesData = await ordenNivelesResponse.json();
+            console.log("datos respuessta server orden niveles",ordenNivelesData);
+          
+            if(ordenNivelesData.mensaje == "sin registros"){
+                let filtrosOrdenes = await actions.obtenerFiltrosOrden(proyectoKey.urn);
+                 console.log("filtros para ordenar", filtrosOrdenes);
+
+                 const orderedKeys = Object.keys(filtrosOrdenes).sort((a, b) => {
+                    // Verificar si ambas claves son numéricas
+                    const isNumA = !isNaN(a);
+                    const isNumB = !isNaN(b);
+                    if (isNumA && isNumB) {
+                        // Orden numérico si ambas claves son números
+                        return parseInt(a, 10) - parseInt(b, 10);
+                    } else if (!isNumA && !isNumB) {
+                        // Orden alfabético si ninguna de las claves es un número
+                        return a.localeCompare(b);
+                    } else {
+                        // Asegurarse de que los números vengan primero
+                        return isNumA ? -1 : 1;
+                    }
+                });
+
+                // Transformar los filtros en la forma deseada
+                const nivelesActualizados = orderedKeys.map((key, index) => ({
+                    id: `p${index}`, // Usar el índice como parte del id para evitar problemas con llaves duplicadas
+                    content: ` ${key}` // Usa el valor de key original para el content
+                }));
+
+                console.log("Nuevos niveles:", nivelesActualizados);
+                setNiveles(nivelesActualizados);
+            }
+            else{
+                
+                console.log("filtros para ordenar", ordenNivelesData);
+    
+                // Cargar los filtros directamente sin ordenar
+                const nivelesActualizados = ordenNivelesData.listaNiveles.map((filtro, index) => ({
+                    id: `p${index}`,
+                    content: filtro.nombre // Asumiendo que los filtros vienen como un array de objetos
+                }));
+    
+                console.log("Nuevos niveles después de obtener filtros:", nivelesActualizados);
+                setNiveles(nivelesActualizados);
+                
+            
+            }
+        } catch (error) {
+            console.error('Error al obtener niveles o detalles de barras:', error);
+          //  toast.error('Error al cargar datos de niveles o barras');
+        }
+    }
     const DiametroEquivalenteLargosIguales = async (urn) => {
         try {
             // Llamada a la API para obtener datos
@@ -330,7 +423,7 @@ const AdministracionProyecto = (proyectoKey,urn) => {
                 console.log("No hay detalles disponibles para calcular el promedio.");
                 return {}; // Retornar un objeto vacío si no hay datos
             }
-    
+           
             const detalles = data.detalles;
             const resultados = {};
     
@@ -501,6 +594,7 @@ const AdministracionProyecto = (proyectoKey,urn) => {
             <Tabs defaultActiveKey="informacionGeneral" id="tab-administracion-proyecto" onSelect={onSelect} style={tabHeaderStyle}>
                 <Tab eventKey="informacionGeneral" title={<span><img src={getTabImage('informacionGeneral')} alt="" />Proyecto</span>}>
                     <div style={tabContentStyle}>
+                    <TabConfiguracion urn={proyectoKey.urn} />
                     <Form.Label>Proyecto al cual se transferirán los datos</Form.Label>
                     <Form.Control as="select" value={proyectoSeleccionado.urn || ''} onChange={handleSelectProject}>
                         <option value="">Seleccione un proyecto...</option>
@@ -556,6 +650,37 @@ const AdministracionProyecto = (proyectoKey,urn) => {
                         </Table>
                     </div>
                 </Tab>
+                <Tab eventKey="listaReordenable" title="Orden de Niveles">
+                <div style={tabContentStyle}>
+                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+                <Button 
+                    onClick={buscarOrdenNiveles} 
+                    style={{ 
+                        backgroundColor: '#DA291C',
+                        borderRadius: '10px',
+                        color: 'white',
+                        marginRight: '5px'
+                    }}>
+                    Buscar Orden Actual
+                </Button>
+                <Button 
+                    onClick={guardarOrdenNiveles} 
+                    style={{ 
+                        backgroundColor: '#DA291C',
+                        borderRadius: '10px',
+                        color: 'white'
+                    }}>
+                    Guardar Niveles con Orden Actual
+                </Button>
+                </div>
+                 <ListaReordenable items={niveles} onReorder={handleReorder} />
+                </div>
+                   
+                </Tab>
+                <Tabs defaultActiveKey="informacionGeneral" id="tab-administracion-proyecto">
+     
+      
+                </Tabs>
             </Tabs>
         </div>
     );

@@ -10,7 +10,9 @@ const itemSchema = new Schema({
   fecha: { type: String, default: "" }, // Puedes cambiar el tipo a Date si necesitas almacenar una fecha real
   id: { type: Number, required: true },
   longitudTotal: { type: Number },
-  pesoLineal: { type: Number }
+  pesoLineal: { type: Number },
+  nivel:{ type: String }
+
 });
 
 // Define el esquema principal que incluye el subesquema

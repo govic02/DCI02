@@ -1,0 +1,20 @@
+.bottom-buttons {
+    position: fixed;
+    left: 25%;
+    bottom: 50px;
+    transform: translateX(-50%);
+    display: flex;
+    justify-content: center;
+    gap: 10px; /* Espacio entre los botones */
+    z-index: 1000; /* Asegura que esté sobre otros elementos */
+}
+
+.bottom-button {
+    background-color: #DA291C; /* Color de fondo rojo */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+}

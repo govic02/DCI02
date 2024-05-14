@@ -15,6 +15,7 @@ import { AuthProvider } from '../context/AuthContext';
 
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useMediaQuery } from 'react-responsive';
 const App = ({ token, urn ,data}) => {
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [isLoggedIn, setIsLoggedIn] = useState(false);

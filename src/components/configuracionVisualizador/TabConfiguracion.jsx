@@ -1,23 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import { Tabs, Tab, Form, Button } from 'react-bootstrap';
 import API_BASE_URL from '../../config';
-const TabConfiguracion = () => {
+const TabConfiguracion = (urn) => {
     const [activeKey, setActiveKey] = useState('filtrosVisuales');
     const [filtroVisual01, setFiltroVisual01] = useState('');
     const [filtroVisual02, setFiltroVisual02] = useState('');
     const [parametroBarras, setParametroBarras] = useState('');
     const [variableTiempo, setVariableTiempo] = useState('');
+    const [variableNivel,setVariableNivel] = useState('');
+    const [variableLargo, setVariableLargo] = useState('');
+    const [variablePesoLineal, setVariablePesoLineal] = useState('');
+    const [variableDiametro, setvariableDiametro]= useState('');
     const onSelect = (k) => {
         setActiveKey(k);
     };
 
     useEffect(() => {
         const cargarConfiguracion = async () => {
-            const url = `${API_BASE_URL}/api/configuracionViewer`;
+            const url = `${API_BASE_URL}/api/configuracionViewer?urn=${encodeURIComponent(urn.urn)}`;
+          console.log("urn inicial", urn.urn);
             try {
-                const respuesta = await fetch(url);
+                if(urn.urn != "" &&  urn.urn !== undefined ){
+                    const respuesta = await fetch(url);
                 const resultado = await respuesta.json();
-                console.log("respuesta",respuesta);
+                console.log("respuesta configuracion",respuesta);
                 console.log("res",resultado);
                 if (respuesta.ok) {
                     // Actualiza el estado con los valores obtenidos
@@ -26,20 +32,34 @@ const TabConfiguracion = () => {
                     setFiltroVisual01(resultado.filtro01 || '');
                     setFiltroVisual02(resultado.filtro02 || '');
                     setParametroBarras(resultado.variableBarra || '');
+                    setVariableLargo(resultado.variableLargo || '');
+                    setVariablePesoLineal(resultado.variablePesoLineal || '');
                     setVariableTiempo(resultado.variableTiempo || '');
-
+                    setvariableDiametro(resultado.variableDiametro || '');
+                    setVariableNivel(resultado.variableNivel || '');
                     
                 } else {
                     // Manejar la respuesta no exitosa (p.ej. configuración no encontrada)
                     console.error('Configuración no encontrada:', resultado.mensaje);
+                    setFiltroVisual01('');
+                    setFiltroVisual02('');
+                    setParametroBarras('');
+                    setVariableLargo('');
+                    setVariablePesoLineal('');
+                    setVariableTiempo('');
+                    setvariableDiametro('');
+                    setVariableNivel('');
                 }
+
+                }
+                
             } catch (error) {
                 console.error('Error al cargar la configuración:', error);
             }
         };
 
         cargarConfiguracion();
-    }, []); // El arreglo vacío indica que este efecto se ejecuta una sola vez, al montar el componente
+    }, [urn.urn]); // El arreglo vacío indica que este efecto se ejecuta una sola vez, al montar el componente
 
     const getTabImage = (key) => {
         if (key === 'filtrosVisuales') {
@@ -51,12 +71,17 @@ const TabConfiguracion = () => {
     ///api/setFiltros
     const guardarConfiguracion = async () => {
         const url = API_BASE_URL+'/api/configuracionViewer'; // Asegúrate de usar la URL correcta
+        console.log("URN A ASOCIACIÓN", urn);
         const data = {
-            urn: "URN",
+            urn: urn,
             filtro01: filtroVisual01,
             filtro02: filtroVisual02,
             variableBarra: parametroBarras,
-            variableTiempo: variableTiempo 
+            variableTiempo: variableTiempo ,
+            variableLargo: variableLargo,
+            variablePesoLineal: variablePesoLineal,
+            variableDiametro:variableDiametro,
+            variableNivel:variableNivel
         };
     
         try {
@@ -87,14 +112,18 @@ const TabConfiguracion = () => {
         console.log("Filtro Visual 02:", filtroVisual02);
         console.log("Parámetro Barras:", parametroBarras);
         console.log("Variable de Tiempo:", variableTiempo);
+        console.log("Variable de largo:", variableLargo);
+        console.log("Variable de Peso Lineal:", variablePesoLineal);
+        console.log("Variable de Nivel:", variableNivel);
  
     };
     const tabStyle = {
         marginTop: '50px',
         marginLeft: '30px',
         marginRight: '30px',
-        height: '385px',
-        overflow: 'auto'
+    
+        
+        
     };
 
     const buttonStyle = {
@@ -107,7 +136,7 @@ const TabConfiguracion = () => {
         borderRadius: '0 20px 20px 20px',
         padding: '15px',
         height: '100%',
-        overflowY: 'auto',
+       
         fontWeight: 'bold'
     };
 
@@ -132,19 +161,27 @@ const TabConfiguracion = () => {
                             <Form.Label>Parámetro Barras</Form.Label>
                             <Form.Control type="text" value={parametroBarras} onChange={(e) => setParametroBarras(e.target.value)} />
                         </Form.Group>
-                        <Button style={buttonStyle} onClick={guardarConfiguracion}>Guardar</Button>
-                    </div>
-                </Tab>
-                <Tab eventKey="variablesTiempo" title={<span><img src={getTabImage('variablesTiempo')}  /> Variables de Tiempo</span>}>
-                    <div style={tabContentStyle}>
-                    <Form.Group className="mb-3">
+                        <Form.Group className="mb-3">
+                            <Form.Label>Parámetro Largo</Form.Label>
+                            <Form.Control type="text" value={variableLargo} onChange={(e) => setVariableLargo(e.target.value)} />
+                        </Form.Group>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Parámetro peso Lineal</Form.Label>
+                            <Form.Control type="text" value={variablePesoLineal} onChange={(e) => setVariablePesoLineal(e.target.value)} />
+                        </Form.Group>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Parámetro Diametro</Form.Label>
+                            <Form.Control type="text" value={variableDiametro} onChange={(e) => setvariableDiametro(e.target.value)} />
+                        </Form.Group>
+                          <Form.Group className="mb-3">
                             <Form.Label>Variable de Tiempo</Form.Label>
                             <Form.Control type="text" value={variableTiempo} onChange={(e) => setVariableTiempo(e.target.value)} />
                         </Form.Group>
-                        {/* Aquí puedes agregar el contenido de la pestaña "Variables de Tiempo" */}
+                      
                         <Button style={buttonStyle} onClick={guardarConfiguracion}>Guardar</Button>
                     </div>
                 </Tab>
+                
             </Tabs>
               {/* Botón Guardar */}
               <div className="mt-3">

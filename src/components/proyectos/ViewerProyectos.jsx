@@ -21,6 +21,11 @@ class ViewerProyectos extends React.Component {
             idsConFecha: [], // Guarda los IDs con fecha
             idsSinFecha: [], // Guarda los IDs sin fecha
             nombreParametroFecha: '',
+            nombreParametroBarra: '',
+            nombreParametrolargo: '',
+            nombreParametroPesoLineal: '',
+            nombreParametroDiametro: '',
+            nombreParametroNivel:'',
             filtro1: '',
             filtro2: '',
             idsBarraActual:[],
@@ -52,6 +57,7 @@ class ViewerProyectos extends React.Component {
             this.context.registerAction('PesoPromedioGeneral', this.PesoPromedioGeneral); // 
             this.context.registerAction('diametroPromedioGeneral', this.diametroPromedioGeneral);
             this.context.registerAction('porcentajePedidoTotal', this.porcentajePedidoTotal);
+            this.context.registerAction("obtenerFiltrosOrden", this.obtenerFiltrosOrden);
            
     }
 
@@ -106,7 +112,7 @@ class ViewerProyectos extends React.Component {
     setupViewer = () => {
         this.viewer = new Autodesk.Viewing.GuiViewer3D(this.container.current, { extensions: ['Autodesk.DocumentBrowser'] });
         this.viewer.start();
-   
+    
         this.viewer.loadExtension('HandleSelectionExtension');
         this.viewer.addEventListener(Autodesk.Viewing.GEOMETRY_LOADED_EVENT, this.onModelLoaded);
         this.viewer.addEventListener(Autodesk.Viewing.CAMERA_CHANGE_EVENT, this.onViewerCameraChange);
@@ -128,7 +134,7 @@ class ViewerProyectos extends React.Component {
        
         console.log("nueva urn a cargar");
         console.log(this.props.urn);
-        
+       
         if (this.viewer && (this.props.urn !== prevProps.urn || this.props.idUsuario !== prevProps.idUsuario || this.props.proyectoKey !== prevProps.proyectoKey)) {
           
             const now = Date.now();
@@ -157,6 +163,7 @@ class ViewerProyectos extends React.Component {
               
                 this.viewer.start();
                 this.updateViewerState({})
+                this.cargarConfiguracion();
                 Autodesk.Viewing.Document.load(
                     'urn:' + this.props.urn,
                     (doc) => {
@@ -188,18 +195,26 @@ class ViewerProyectos extends React.Component {
     }
     
     cargarConfiguracion = async () => {
-        const url = `${API_BASE_URL}/api/configuracionViewer`;
+        console.log("busco configuración en viewer proyectos");
+        const url = `${API_BASE_URL}/api/configuracionViewer?urn=${encodeURIComponent(this.props.urn)}`;
+        console.log("URN CONSULTADA",this.props.urn);
         try {
             const respuesta = await fetch(url);
             const resultado = await respuesta.json();
+            console.log("respuesta config",resultado);
             if (respuesta.ok) {
-                const { configuracion } = resultado;
+                
                 // Actualiza el estado con el nombre del parámetro de fecha obtenido
-                this.setState({ nombreParametroFecha: configuracion.variableTiempo || '' });
-                this.setState({ nombreParametroBarra: configuracion.variableBarra|| '' });
+                this.setState({ nombreParametroFecha: resultado.variableTiempo || '' });
+                this.setState({ nombreParametroBarra: resultado.variableBarra|| '' });
+                this.setState({ nombreParametroBarra: resultado.variableBarra|| '' });
+                this.setState({ nombreParametrolargo: resultado.variableLargo|| '' });
+                this.setState({ nombreParametroPesoLineal: resultado.variablePesoLineal|| '' });
+                this.setState({ nombreParametroDiametro: resultado.variableDiametro|| '' });
                 console.log("parametro fecha buscado");
-                console.log( configuracion.variableBarra);
-                console.log(configuracion.variableTiempo);
+                console.log( resultado.variableBarra);
+                console.log(resultado.variableTiempo);
+                
             } else {
                 console.error('Configuración no encontrada:', resultado.mensaje);
             }
@@ -212,6 +227,7 @@ class ViewerProyectos extends React.Component {
         const sumaPesos = idsBarras.reduce((acumulador, barraActual) => {
             // Usar el valor de filtro2 como clave
             const clave = barraActual.nombreFiltro2; // Asume que filtro2 es una variable o constante que contiene la cadena 'AEC Piso'
+          //  console.log("barra actual: ",barraActual.nombreFiltro2);
             const pesoActual = barraActual.pesoLineal * barraActual.longitudTotal / 100; // Convertir longitud en metros y calcular peso
     
             if (!acumulador[clave]) {
@@ -221,7 +237,7 @@ class ViewerProyectos extends React.Component {
             acumulador[clave] += pesoActual; // Sumar el peso de la barra actual al total para este piso
             return acumulador;
         }, {});
-    
+        console.log("Suma por pisos parametro 2", sumaPesos);
         return sumaPesos;
     };
   // Asumiendo que obtenerIdsBarras y sumarPesosPorFiltro2 están definidas en el mismo ámbito
@@ -231,6 +247,7 @@ class ViewerProyectos extends React.Component {
     idsBarras.forEach(barra => {
         const piso = barra.nombreFiltro2;
         const diametro = barra.diametroBarra;
+        const nivel = barra.nivel;
         const peso = barra.pesoLineal * (barra.longitudTotal / 100); // Asume que longitudTotal está en mm, convertido a m
 
         // Inicializa el objeto para el piso si aún no existe
@@ -251,9 +268,10 @@ class ViewerProyectos extends React.Component {
     const resultadosArray = Object.entries(resultadosPorPiso).map(([piso, diametrosYpesos]) => {
         return {
             piso,
-            diametros: Object.entries(diametrosYpesos).map(([diametro, pesoTotal]) => ({
+            diametros: Object.entries(diametrosYpesos).map(([diametro, pesoTotal,nivel]) => ({
                 diametro,
-                pesoTotal
+                pesoTotal,
+                nivel
             }))
         };
     });
@@ -303,6 +321,7 @@ class ViewerProyectos extends React.Component {
         const datosParaEnviarDiametros = {
             urn: this.props.urn,
             nombreFiltro2: this.state.filtro2,
+            nivel:this.state.nombreParametroNivel,
             pesosPorPiso: diametroPiso, // Asegúrate de que esto sea una lista de { piso, diametros: [{ diametro, pesoTotal }] }
         };
         const urlDiametros = `${API_BASE_URL}/api/respuestasDiametros`; // Asegúrate de que API_BASE_URL esté definido
@@ -328,6 +347,7 @@ class ViewerProyectos extends React.Component {
                     nombreFiltro1: barra.nombreFiltro1, // Ajusta según tus datos
                     nombreFiltro2: barra.nombreFiltro2,
                     diametroBarra: barra.diametroBarra,
+                    nivel: barra.nivel,
                     fecha: barra.fecha,
                     id: barra.id,
                     longitudTotal: barra.longitudTotal,
@@ -360,37 +380,40 @@ diametroPromedioGeneral = async (urn) => {
         let totalBarras = 0;
         const { idsBarras } = this.state;
         console.log("barras previo diametro general");
-        idsBarras.forEach(barra => {
-            const { diametroBarra } = barra;
-            totalDiametro += diametroBarra;  // Suma acumulativa de todos los diámetros
-            totalBarras++;  // Contador de barras
-        });
-
-        if (totalBarras > 0) {
-            const diametroPromedio = totalDiametro / totalBarras;  // Calcula el diámetro promedio del proyecto
-            console.log(`Diámetro promedio del proyecto: ${diametroPromedio} unidades`);
-
-            // Realiza la llamada a la API para guardar el resultado
-            const response = await fetch(`${API_BASE_URL}/api/diametroPromedioGeneral`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ urn, diametroPromedio })
+        if(idsBarras && idsBarras.length>0){
+            idsBarras.forEach(barra => {
+                const { diametroBarra } = barra;
+                totalDiametro += diametroBarra;  // Suma acumulativa de todos los diámetros
+                totalBarras++;  // Contador de barras
             });
-
-            if (!response.ok) {
-                console.error("Error en la inserción", response.statusText);
-                return;
+    
+            if (totalBarras > 0) {
+                const diametroPromedio = totalDiametro / totalBarras;  // Calcula el diámetro promedio del proyecto
+                console.log(`Diámetro promedio del proyecto: ${diametroPromedio} unidades`);
+    
+                // Realiza la llamada a la API para guardar el resultado
+                const response = await fetch(`${API_BASE_URL}/api/diametroPromedioGeneral`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ urn, diametroPromedio })
+                });
+    
+                if (!response.ok) {
+                    console.error("Error en la inserción", response.statusText);
+                    return;
+                }
+    
+                const saveResult = await response.json();
+                console.log('Saved project average diameter:', saveResult);
+                return { diametroPromedioProyecto: diametroPromedio };
+            } else {
+                console.log("No hay barras para calcular el promedio");
+                return { diametroPromedioProyecto: 0 };
             }
-
-            const saveResult = await response.json();
-            console.log('Saved project average diameter:', saveResult);
-            return { diametroPromedioProyecto: diametroPromedio };
-        } else {
-            console.log("No hay barras para calcular el promedio");
-            return { diametroPromedioProyecto: 0 };
         }
+        
     } catch (error) {
         console.error("Error al procesar los datos de las barras:", error);
         throw error;  // Re-lanza el error para manejarlo en la función que llama
@@ -451,7 +474,7 @@ PesoPromedio = async (urn) => {
         const { idsBarras } = this.state;
        // const detalles = await this.obtenerIdsBarras();
        // console.log("pesos promedio",detalles);
-        console.log("supuestas barras",this.state);
+        console.log("PesoPromedio",this.state);
         console.log("supuestas barras",idsBarras);
         const resultados = {};
         if(idsBarras != undefined){
@@ -559,7 +582,7 @@ porcentajePedidoTotal = async (urn) => {
 };
 
 
-    guardarIdsBarras = async () => {
+ guardarIdsBarras = async () => {
         const { idsBarras } = this.state;
         const { urn } = this.props;
         console.log("objeto con barras",idsBarras);
@@ -599,23 +622,24 @@ porcentajePedidoTotal = async (urn) => {
             }
     
             try {
-                const { filtro1, filtro2, nombreParametroFecha } = this.state;
-    
+                const { filtro1, filtro2, nombreParametroFecha,nombreParametroBarra, nombreParametrolargo ,nombreParametroPesoLineal,nombreParametroDiametro, nombreParametroNivel} = this.state;
+                console.log("parametro nivel buscado ", nombreParametroNivel);
+                
                 // Utilizando BulkProperties para obtener las propiedades de todos los elementos
-                this.viewer.model.getBulkProperties([], { propFilter: ['Category', filtro1, filtro2, 'RS Peso Lineal (kg/m)', 'Total Bar Length', 'Bar Diameter', nombreParametroFecha] }, (result) => {
+                this.viewer.model.getBulkProperties([], { propFilter: ['Category', filtro1, filtro2, nombreParametroPesoLineal, nombreParametrolargo, nombreParametroDiametro, nombreParametroFecha,nombreParametroNivel] }, (result) => {
                     let idsBarras = result.filter(element => 
                         element.properties.some(prop => 
-                            prop.displayName === 'Category' && prop.displayValue === 'Revit Structural Rebar'
+                            prop.displayName === 'Category' && prop.displayValue === nombreParametroBarra
                         )
                     ).map(element => {
                         // Encuentra valores para los filtros, peso lineal, longitud total, diámetro de barra y fecha
                         const propFiltro1 = element.properties.find(prop => prop.displayName === filtro1)?.displayValue || '';
                         const propFiltro2 = element.properties.find(prop => prop.displayName === filtro2)?.displayValue || '';
-                        const pesoLineal = element.properties.find(prop => prop.displayName === 'RS Peso Lineal (kg/m)')?.displayValue || '0';
-                        const longitudTotal = element.properties.find(prop => prop.displayName === 'Total Bar Length')?.displayValue || '0';
-                        const diametroBarra = element.properties.find(prop => prop.displayName === 'Bar Diameter')?.displayValue || '0';
+                        const pesoLineal = element.properties.find(prop => prop.displayName === nombreParametroPesoLineal)?.displayValue || '0';
+                        const longitudTotal = element.properties.find(prop => prop.displayName === nombreParametrolargo )?.displayValue || '0';
+                        const diametroBarra = element.properties.find(prop => prop.displayName === nombreParametroDiametro)?.displayValue || '0';
                         const fecha = element.properties.find(prop => prop.displayName === nombreParametroFecha)?.displayValue || '';
-    
+                        const nivel = element.properties.find(prop => prop.displayName === nombreParametroNivel)?.displayValue || '';
                         return {
                             id: element.dbId,
                             nombreFiltro1: propFiltro1,
@@ -623,7 +647,8 @@ porcentajePedidoTotal = async (urn) => {
                             pesoLineal: parseFloat(pesoLineal),
                             longitudTotal: parseFloat(longitudTotal),
                             diametroBarra: parseFloat(diametroBarra),
-                            fecha
+                            fecha:  fecha,
+                            nivel: nivel
                         };
                     });
     
@@ -631,6 +656,7 @@ porcentajePedidoTotal = async (urn) => {
                     this.setState({ idsBarras });
                    
                     // Resolver la promesa con los IDs de barras encontrados
+                    console.log("Barras generadas con datos ", idsBarras);
                     resolve(idsBarras);
                 });
             } catch (error) {
@@ -680,15 +706,24 @@ porcentajePedidoTotal = async (urn) => {
                 console.log("URN ANTES DE AXIOS");
                 console.log(this.props);
     
-                const response = await axios.get(`${API_BASE_URL}/api/filtros`);
+                const response = await axios.get(`${API_BASE_URL}/api/configuracionViewer?urn=${encodeURIComponent(this.props.urn)}`);
                 console.log("Respuesta Filtros:", response.data);
     
-                let filtrado1 = response.data[0].filtro_1;
-                let filtrado2 = response.data[0].filtro_2;
+                let filtrado1 = response.data.filtro01;
+                let filtrado2 = response.data.filtro02;
     
                 // Actualiza el estado con los nuevos filtros y fierros.
-                this.setState({ filtro1: filtrado1, filtro2: filtrado2, fierros: response.data[0].fierro }, async () => {
-                    console.log("Filtros actualizados en el estado:", filtrado1, filtrado2);
+                this.setState({ filtro1: filtrado1,
+                                filtro2: filtrado2, 
+                                fierros: response.data.variableBarra,
+                                nombreParametroBarra:response.data.variableBarra,
+                                nombreParametroFecha:response.data.variableTiempo,
+                                nombreParametrolargo:response.data.variableLargo, 
+                                nombreParametroPesoLineal:response.data.variablePesoLineal,
+                                nombreParametroDiametro: response.data.variableDiametro,
+                                nombreParametroNivel : response.data.variableNivel
+                            }, async () => {
+                    console.log("Filtros actualizados en el estado:", filtrado1, filtrado2,response.data.variableBarra,response.data.variableTiempo,response.data.variableLargo,response.data.variablePesoLineal ,response.data.variableDiametro, response.data.variableNivel );
     
                     // Después de actualizar el estado, procede con la consulta de filtros.
                     try {
@@ -701,6 +736,52 @@ porcentajePedidoTotal = async (urn) => {
     
                         // Una vez completado todo, resuelve la promesa.
                         resolve();
+                    } catch (error) {
+                        console.error("Error al consultar los filtros:", error);
+                        reject(error);
+                    }
+                });
+            } catch (error) {
+                console.error("Error al obtener los filtros:", error);
+                reject(error);
+            }
+        });
+    };
+
+    obtenerFiltrosOrden = async (urnBuscada) => {
+        return new Promise(async (resolve, reject) => {
+            try {
+                console.log("URN ANTES DE AXIOS");
+                console.log(this.props);
+    
+                const response = await axios.get(`${API_BASE_URL}/api/configuracionViewer?urn=${encodeURIComponent(this.props.urn)}`);
+                console.log("Respuesta Filtros:", response.data);
+    
+                let filtrado1 = response.data.filtro01;
+                let filtrado2 = response.data.filtro02;
+    
+                // Actualiza el estado con los nuevos filtros y fierros.
+                this.setState({ filtro1: filtrado1,
+                                filtro2: filtrado2, 
+                                fierros: response.data.variableBarra,
+                                nombreParametroBarra:response.data.variableBarra,
+                                nombreParametroFecha:response.data.variableTiempo,
+                                nombreParametrolargo:response.data.variableLargo, 
+                                nombreParametroPesoLineal:response.data.variablePesoLineal,
+                                nombreParametroDiametro: response.data.variableDiametro,
+                                nombreParametroNivel : response.data.variableNivel
+                            }, async () => {
+                    console.log("Filtros actualizados en el estado:", filtrado1, filtrado2,response.data.variableBarra,response.data.variableTiempo,response.data.variableLargo,response.data.variablePesoLineal ,response.data.variableDiametro, response.data.variableNivel );
+    
+                    // Después de actualizar el estado, procede con la consulta de filtros.
+                    try {
+                      
+                        const datosFiltro2 = await this.consultaFiltro([filtrado2]);
+                        console.log("filtro datos 2 para orden",datosFiltro2);
+                       // this.context.updateDatosFiltro2(datosFiltro2);
+    
+                        // Una vez completado todo, resuelve la promesa.
+                        resolve(datosFiltro2);
                     } catch (error) {
                         console.error("Error al consultar los filtros:", error);
                         reject(error);
@@ -801,6 +882,7 @@ porcentajePedidoTotal = async (urn) => {
     };
 
     onModelLoaded = async () => {
+        
         try {
             // Espera a que ambas funciones asincrónicas se completen.
             const [idsConFecha, idsSinFecha] = await Promise.all([
@@ -810,8 +892,8 @@ porcentajePedidoTotal = async (urn) => {
     
             // Actualiza el estado con los resultados obtenidos.
             this.setState({ idsConFecha, idsSinFecha });
+            
             this.cargarConfiguracion();
-
             await this.obtenerFiltros(this.props.urn).then(async () => {
                 try {
                     const idsBarras = await this.obtenerIdsBarras();
@@ -839,7 +921,7 @@ porcentajePedidoTotal = async (urn) => {
     };
 
     render() {
-        return <div ref={this.container} style={{ position: 'relative', marginLeft: '5px', marginTop: '27px', width: '100%', height: '380px' }} />;
+        return <div ref={this.container} style={{ position: 'relative', marginLeft: '5px', marginTop: '27px', width: '100%', height: '460px' }} />;
     }
 }
 

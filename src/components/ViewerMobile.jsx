@@ -10,7 +10,7 @@ const { Autodesk } = window;
 var { filtroPiso } ="";
 var { filtroHa } ="";
 
-class Viewer extends React.Component {
+class ViewerMobile extends React.Component {
     static contextType = ActionsContext;
     
     constructor(props) {
@@ -31,9 +31,6 @@ class Viewer extends React.Component {
             filtro2: '',
             nombreParametroFecha: '',
             nombreParametroBarra: '',
-            nombreParametrolargo: '',
-            nombreParametroPesoLineal: '',
-            nombreParametroDiametro: '',
             runtime: {
                 options: null,
                 ready: null
@@ -144,29 +141,18 @@ class Viewer extends React.Component {
    
  
     cargarConfiguracion = async () => {
-         const url = `${API_BASE_URL}/api/configuracionViewer?urn=${encodeURIComponent(this.props.urn)}`;
-         console.log("URN CONSULTADA",this.props.urn);
+        const url = `${API_BASE_URL}/api/configuracionViewer`;
         try {
             const respuesta = await fetch(url);
-           
             const resultado = await respuesta.json();
-            console.log("respuesta config",resultado);
-            if (resultado.urn !== "") {
-               // const { configuracion } = resultado;
-              //  console.log("RESULTADO CONFIG",configuracion);
+            if (respuesta.ok) {
+                const { configuracion } = resultado;
                 // Actualiza el estado con el nombre del parámetro de fecha obtenido
-                this.setState({ nombreParametroFecha: resultado.variableTiempo || '' });
-                this.setState({ nombreParametroBarra: resultado.variableBarra|| '' });
-                this.setState({ nombreParametrolargo: resultado.variableLargo|| '' });
-                this.setState({ nombreParametroPesoLineal: resultado.variablePesoLineal|| '' });
-                this.setState({ nombreParametroDiametro: resultado.variableDiametro|| '' });
+                this.setState({ nombreParametroFecha: configuracion.variableTiempo || '' });
+                this.setState({ nombreParametroBarra: configuracion.variableBarra|| '' });
                 console.log("parametro fecha buscado");
-                console.log( resultado.variableBarra);
-                console.log(resultado.variableTiempo);
-                console.log( resultado.variablePesoLineal);
-                console.log(resultado.variableDiametro);
-                console.log(resultado.variableLargo);
-
+                console.log( configuracion.variableBarra);
+                console.log(configuracion.variableTiempo);
             } else {
                 console.error('Configuración no encontrada:', resultado.mensaje);
             }
@@ -218,21 +204,21 @@ class Viewer extends React.Component {
             }
     
             try {
-                const { filtro1, filtro2, nombreParametroFecha , nombreParametroBarra, nombreParametroPesoLineal, nombreParametroDiametro, nombreParametrolargo} = this.state;
+                const { filtro1, filtro2, nombreParametroFecha } = this.state;
     
                 // Utilizando BulkProperties para obtener las propiedades de todos los elementos
-                this.viewer.model.getBulkProperties([], { propFilter: ['Category', filtro1, filtro2, nombreParametroPesoLineal, nombreParametrolargo, nombreParametroDiametro, nombreParametroFecha] }, (result) => {
+                this.viewer.model.getBulkProperties([], { propFilter: ['Category', filtro1, filtro2, 'RS Peso Lineal (kg/m)', 'Total Bar Length', 'Bar Diameter', nombreParametroFecha] }, (result) => {
                     let idsBarras = result.filter(element => 
                         element.properties.some(prop => 
-                            prop.displayName === 'Category' && prop.displayValue === nombreParametroBarra
+                            prop.displayName === 'Category' && prop.displayValue === 'Revit Structural Rebar'
                         )
                     ).map(element => {
                         // Encuentra valores para los filtros, peso lineal, longitud total, diámetro de barra y fecha
                         const propFiltro1 = element.properties.find(prop => prop.displayName === filtro1)?.displayValue || '';
                         const propFiltro2 = element.properties.find(prop => prop.displayName === filtro2)?.displayValue || '';
-                        const pesoLineal = element.properties.find(prop => prop.displayName === nombreParametroPesoLineal)?.displayValue || '0';
-                        const longitudTotal = element.properties.find(prop => prop.displayName === nombreParametrolargo)?.displayValue || '0';
-                        const diametroBarra = element.properties.find(prop => prop.displayName === nombreParametroDiametro)?.displayValue || '0';
+                        const pesoLineal = element.properties.find(prop => prop.displayName === 'RS Peso Lineal (kg/m)')?.displayValue || '0';
+                        const longitudTotal = element.properties.find(prop => prop.displayName === 'Total Bar Length')?.displayValue || '0';
+                        const diametroBarra = element.properties.find(prop => prop.displayName === 'Bar Diameter')?.displayValue || '0';
                         const fecha = element.properties.find(prop => prop.displayName === nombreParametroFecha)?.displayValue || '';
     
                         return {
@@ -248,7 +234,7 @@ class Viewer extends React.Component {
     
                     // Guarda los resultados en el estado o maneja como prefieras
                     this.setState({ idsBarras });
-                    console.log("estas son las barras",idsBarras);
+    
                     // Resolver la promesa con los IDs de barras encontrados
                     resolve(idsBarras);
                 });
@@ -265,8 +251,8 @@ class Viewer extends React.Component {
         try {
             console.log("URN antes de AXIOS:", urnBuscada);
            // const response = await axios.get(`${API_BASE_URL}/api/filtros`);
-           //api/configuracionViewer  const url = `${API_BASE_URL}/api/configuracionViewer?urn=${encodeURIComponent(this.props.urn)}`;
-           const response = await axios.get(`${API_BASE_URL}/api/configuracionViewer?urn=${encodeURIComponent(this.props.urn)}`);
+           //api/configuracionViewer
+           const response = await axios.get(`${API_BASE_URL}/api/configuracionViewer`);
            console.log("Respuesta Filtros:", response.data);
     
             const filtrado1 = response.data.filtro01;
@@ -288,7 +274,7 @@ class Viewer extends React.Component {
             console.log("filtro datos 2", datosFiltro2);
         } catch (error) {
             console.error("Error en obtenerFiltros:", error);
-            throw error;  // Puedes lanzar el error si quieres manejarlo más arriba en la cadena de promesas
+              // Puedes lanzar el error si quieres manejarlo más arriba en la cadena de promesas
         }
     };
     
@@ -320,12 +306,10 @@ class Viewer extends React.Component {
     
 
     componentDidMount() {
-       
-        
+        this.cargarConfiguracion();
         this.initializeViewerRuntime(this.props.runtime || {}, this.props.token)
             .then(() => {
                 this.setupViewer();
-            
                 this.context.registerAction('filtrar', this.filtrar);
                 this.context.registerAction('cleanModel', this.cleanModel);
                 this.context.registerAction('despliegaSavedVista', this.despliegaSavedVista);
@@ -333,7 +317,6 @@ class Viewer extends React.Component {
                 this.context.registerAction('obtenerIdsSinFecha', this.obtenerIdsSinFecha);
                 this.context.registerAction('buscaBarrasHormigon', this.buscaBarrasHormigon);
                 this.context.registerAction('gestionarYpintarIds', this.pintarIdFecha);
-                
             })
             .catch(err => console.error(err));
     }
@@ -341,7 +324,6 @@ class Viewer extends React.Component {
     setupViewer = () => {
         this.viewer = new Autodesk.Viewing.GuiViewer3D(this.container.current, { extensions: ['Autodesk.DocumentBrowser', 'HandleSelectionExtension'] });
         this.viewer.start();
-        console.log("iniciar!!!");
         this.viewer.loadExtension('FiltrosVisuales');
         this.viewer.loadExtension('HandleSelectionExtension');
         this.viewer.addEventListener(Autodesk.Viewing.GEOMETRY_LOADED_EVENT, this.onModelLoaded);
@@ -354,7 +336,6 @@ class Viewer extends React.Component {
     onModelLoaded = async () => {
         this.fetchAndProcessFiltros();
         this.obtenerIdsConFecha();
-        this.cargarConfiguracion();
         await this.obtenerFiltros(this.props.urn).then(async () => {
             try {
                 const idsBarras = await this.obtenerIdsBarras();
@@ -661,14 +642,14 @@ class Viewer extends React.Component {
     };
 
     render() {
-        return <div ref={this.container} style={{ width: '100%', height: '100%' }} />;
+        return <div ref={this.container} style={{ width: '50%', height: '20px !important'  }} />;
     }
 }
 
-Viewer.propTypes = {
+ViewerMobile.propTypes = {
     urn: PropTypes.string.isRequired,
     runtime: PropTypes.object,
     guardarIdentificadores: PropTypes.func
 };
 
-export default Viewer;
+export default ViewerMobile;

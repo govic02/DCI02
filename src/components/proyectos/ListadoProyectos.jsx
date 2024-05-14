@@ -24,7 +24,7 @@ const ListadoProyectos = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) 
     marginTop: '25px',
     marginLeft: '20px',
     marginRight: '25px',
-    borderRadius: '20px',
+    borderRadius: '20px'
   };
 
   const buttonStyle = {
@@ -66,6 +66,7 @@ const ListadoProyectos = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) 
         const response = await fetch(`${API_BASE_URL}/api/gettoken`);
         const data = await response.json();
         setToken(data.token);
+        console.log("Ok token");
       } catch (error) {
         console.error('Error al obtener el token:', error);
       }
@@ -132,20 +133,33 @@ const ListadoProyectos = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) 
               }
           })
           .then(data => {
-              console.log('Éxito:', data);
-              toast.success(`${objectKey} ha sido borrado exitosamente`);
-              fetchFilters(() => {
+            console.log('Éxito:', data);
+            toast.success(`${objectKey} ha sido borrado exitosamente`);
+
+            // Si el objeto se eliminó exitosamente, procede a eliminar los pedidos asociados
+            return fetch(`${API_BASE_URL}/api/eliminarPedidoURN/${proyectos[0].urn}`, {
+                method: 'DELETE'
+            });
+        })
+        .then(response => {
+           
+            return response.json();
+        })
+        .then(data => {
+            console.log('Pedidos eliminados exitosamente:', data);
+            toast.success('Pedidos asociados eliminados exitosamente');
+            
+            // Actualiza los filtros u otras listas que dependan de estos datos
+            fetchFilters(() => {
                 if (proyectos.length > 0) {
-                  setProyectoSeleccionado(proyectoKey);
-                  console.log("URN del proyecto:", urn);
-                  console.log("Nombre de  proyecto:", proyectoKey);
-                  setUrnSelected(urn);
-                  onProyectoSeleccionado(proyectoKey, urn); // Llamar a la función onProyectoSeleccionado
-                 
+                    setProyectoSeleccionado(proyectos[0].proyectoKey);
+                    console.log("URN del proyecto:", urn);
+                    console.log("Nombre de proyecto:", proyectos[0].proyectoKey);
+                    setUrnSelected(urn);
+                    onProyectoSeleccionado(proyectos[0].proyectoKey, urn); // Llamar a la función onProyectoSeleccionado
                 }
             });
-              // Aquí puedes agregar lógica adicional si es necesario
-          })
+        })
           
           .catch(error => {
               console.error('Error:', error);
@@ -232,7 +246,7 @@ const ListadoProyectos = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) 
   };
   //
 
-    obtenerUsuarioProyecto();
+    //obtenerUsuarioProyecto();
   }, [proyectos]);
   
   const handleFileUpload = () => {
@@ -444,7 +458,7 @@ const ListadoProyectos = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) 
             Eliminar
           </Button>
         </div>
-        <List>
+        <List style={{ height: '300px', overflowY: 'auto' }}>
           {proyectos.map((proyecto, index) => (
             <ListItem
               key={index}

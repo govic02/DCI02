@@ -3,6 +3,7 @@ import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
 import { Bar } from 'react-chartjs-2';
+import axios from 'axios';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
 import API_BASE_URL from '../../config';
 
@@ -14,18 +15,37 @@ const GraficoLongitudPromedio = ({ urn }) => {
     datasets: []
   });
 
+  
   useEffect(() => {
     const fetchDatos = async () => {
       try {
-        const url = `${API_BASE_URL}/api/getLongitudPromedio/${urn}`;
-        const respuesta = await fetch(url);
+        // Primero, intenta obtener el orden predefinido
+        const ordenNivelesResponse = await axios.get(`${API_BASE_URL}/api/ordenNiveles/${encodeURIComponent(urn)}`);
+        const ordenNivelesData = ordenNivelesResponse.data.listaNiveles;
+        
+        let predefinedOrderMap = {};
+        let usePredefinedOrder = ordenNivelesData && ordenNivelesData.length > 0;
+
+        if (usePredefinedOrder) {
+          ordenNivelesData.forEach((item, index) => {
+            predefinedOrderMap[item.nombre.trim()] = index;
+          });
+        }
+
+        // Obtén los datos principales para el gráfico
+        const respuesta = await fetch(`${API_BASE_URL}/api/getLongitudPromedio/${urn}`);
         if (!respuesta.ok) throw new Error('Respuesta no satisfactoria del servidor');
         const { longitudes } = await respuesta.json();
-         longitudes.sort((a, b) => parseInt(a.nombreFiltro2) - parseInt(b.nombreFiltro2));
-        console.log("valores longitudes",longitudes);
+        
+        if (usePredefinedOrder) {
+          longitudes.sort((a, b) => predefinedOrderMap[a.nombreFiltro2.trim()] - predefinedOrderMap[b.nombreFiltro2.trim()]);
+        } else {
+          longitudes.sort((a, b) => parseFloat(a.nombreFiltro2.replace(/\D/g, '')) - parseFloat(b.nombreFiltro2.replace(/\D/g, '')));
+        }
+
         // Preparar los datos para el gráfico
         const labels = longitudes.map(item => item.nombreFiltro2);
-        const data = longitudes.map(item => item.promedioLongitud/1000);
+        const data = longitudes.map(item => item.promedioLongitud / 1000);
 
         setDatosGrafico({
           labels,
@@ -45,6 +65,7 @@ const GraficoLongitudPromedio = ({ urn }) => {
     fetchDatos();
   }, [urn]);
 
+  
   const options = {
     scales: {
       y: {

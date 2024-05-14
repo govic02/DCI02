@@ -237,6 +237,30 @@ const eliminarPedido = async (req, res) => {
     }
 };
 
+// Función para eliminar pedidos por URN
+const eliminarPedidosPorUrn = async (req, res) => {
+    try {
+        const { urn } = req.params; // Obtiene la URN desde los parámetros de la ruta
+        console.log("busca pedidos asociados a URN");
+        console.log(urn);
+        if (!urn) {
+            return res.status(400).send('Se requiere una URN para realizar la eliminación');
+        }
+
+        // Eliminar todos los pedidos que tengan el urn_actual especificado
+        const resultado = await Pedido.deleteMany({ urn_actual: urn });
+        
+        if (resultado.deletedCount === 0) {
+            return res.status(404).send('No se encontraron pedidos con la URN proporcionada');
+        }
+
+        res.send({ mensaje: 'Pedidos eliminados con éxito', documentosEliminados: resultado.deletedCount });
+    } catch (error) {
+        console.error('Error al eliminar pedidos:', error);
+        res.status(500).send('Error interno al intentar eliminar los pedidos');
+    }
+};
+
 const transfierePedido = async (req, res) => {
     const { URNconsulta, URNreemplazo } = req.body;
 
@@ -317,5 +341,6 @@ export {
     obtenerAdicionalesPorUrn,
     actualizarEstadoPedido,
     transfierePedido,
-    transfiereAdicionalesPedidos
+    transfiereAdicionalesPedidos,
+    eliminarPedidosPorUrn
 };

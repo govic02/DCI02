@@ -22,8 +22,8 @@ const Proyectos = ({ token, selectedIds, onCameraChange, onSelectionChange, refV
     };
 
     const estiloViewerContainer = {
-        maxWidth: '400px', // Ancho máximo del contenedor
-        height: '90%' // Altura máxima del contenedor
+      
+        height: '100%' // Altura máxima del contenedor
        
     };
 
@@ -67,7 +67,10 @@ const Proyectos = ({ token, selectedIds, onCameraChange, onSelectionChange, refV
     
         obtenerUsuarioProyecto();
       }, );
+
+
     console.log(proyectoKeySelected);
+    
     const handleProyectoSeleccionado = (proyectoKey, urn) => {
         setProyectoSeleccionado({ proyectoKey, urn });
         setUrnSelected( urn);
@@ -115,11 +118,9 @@ const Proyectos = ({ token, selectedIds, onCameraChange, onSelectionChange, refV
                         onProyectoKeySeleccionado={setProyectoKeySeleccionado}
                     />
                 </div>
-                <div className='col-8'>
+                <div className='col-8' style={estiloViewerContainer}>
                     <div className='row'>
-                        <div className='col-6' style={estiloViewerContainer}>
-                            <div >
-                                <ViewerProyectos
+                    <ViewerProyectos
                                     className="custom-viewer"
                                     runtime={{ accessToken: token }}
                                     urn={urnSelected}
@@ -130,15 +131,15 @@ const Proyectos = ({ token, selectedIds, onCameraChange, onSelectionChange, refV
                                     
 
                                 />
-                            </div>
-                        </div>
-                        <div className='col-6' style={estiloAdministracionProyecto}>
-                            <AdministracionProyectos proyectoKey={proyectoKeySeleccionado}  urn={urnSelected} />
-                        </div>
+                        
                     </div>
                 </div>
             </div>
-            
+            <div className='row'>
+                <div className='col-12'>
+                <AdministracionProyectos proyectoKey={proyectoKeySeleccionado}  urn={urnSelected} />
+                </div>
+            </div>
         </div>
       </ProyectoProvider>
   </div>

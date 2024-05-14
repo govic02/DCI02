@@ -205,6 +205,7 @@ const TablaUsuarios = ({ usuarios,refrescarUsuarios }) => {
         variant="outlined"
         value={usuarioAEditar ? usuarioAEditar.username : ''}
         onChange={(e) => setUsuarioAEditar({...usuarioAEditar, username: e.target.value})}
+        disabled={true}
     />
     <TextField
         margin="dense"
