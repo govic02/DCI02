@@ -674,7 +674,7 @@ const TabComponent = ({ urnBuscada }) => {
                         <div className="flex-grow-1">
                             <span className="fw-bold text-truncate" style={{ fontWeight:'bold' }}>{pedido.nombre_pedido}</span>
                             <span> | </span>
-                            <span>Largo Total:</span><span className="text-truncate" style={{ color: '#DA291C' }}> {pedido.largos} Mts</span>
+                            <span>Fecha:</span><span className="text-truncate" style={{ color: '#DA291C' }}> {pedido.fecha}</span>
                             <span> | </span>
                            <span>Peso Total:</span> <span className="text-truncate" style={{ color: '#DA291C',fontWeight:'bold' }}> {pedido.pesos} kg</span>
                         </div>
