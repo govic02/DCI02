@@ -87,7 +87,7 @@ const GraficoLongitudPromedio = ({ urn }) => {
         <Typography variant="h5" component="h2" style={{ fontSize: 14 }}>
           Promedio de Longitud por Nivel
         </Typography>
-        <div>
+        <div >
           <Bar data={datosGrafico} options={options} />
         </div>
       </CardContent>

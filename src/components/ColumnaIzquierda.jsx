@@ -113,9 +113,9 @@ const liNormal = {
             {isDesktopOrLaptop && 
         
    
-            <div className={`${styles.leftColumn} col-${isCollapsed ? '1' : '2'}`} style={{width: isCollapsed ? '100%' : '100%',  height:'100%'}}>
+            <div className={`${styles.leftColumn} col-${isCollapsed ? '1' : '2'}`} style={{width: isCollapsed ? '100%' : '100%',  height:'90%', background:'#222223'}}>
                 <div className="container-fluid" style={{padding: '0'}}>
-                    <div className="row">
+                    <div className="row" >
                     <div className="col" style={estiloPrimeraFila}>
                         <div className="col" style={{backgroundColor: 'white', display: 'flex', alignItems: 'center', justifyContent: 'flex-end'}}>
                             {!isCollapsed && (
@@ -129,8 +129,8 @@ const liNormal = {
                             </button>
                         </div></div>
                     </div>
-                    <div className="row">
-                        <div className="col">
+                    <div className="row" >
+                        <div className="col" >
                             <ul style={{listStyleType: 'none', color: '#D4D3D3', fontSize: '14px', fontStyle: 'normal', fontWeight: 400, lineHeight: 'normal', letterSpacing: '-0.35px', marginTop: '10px', textAlign: 'left', paddingLeft: '25px'}}>
                             <li style={isCollapsed ? tituloLiColap : tituloLi}>
                                     {isCollapsed ? 'Principal': 'Principal'}
@@ -225,13 +225,7 @@ const liNormal = {
                             {/* ... otros elementos <li> */}
 
                            
-                            <li style={isCollapsed ? liNormalColap : liNormal}>
-                            <Link to="/Perfil" style={{ textDecoration: 'none', color: 'inherit' }}>
-                                <img src={isCollapsed ? "images/micuenta.svg" : "images/micuenta.svg"} alt="Estadísticas" style={isCollapsed ?imgStylesColap:imgStylesMob} />
-                            
-                                {isCollapsed ? <><br/></> : ''}
-                                </Link>
-                            </li>
+                           
 
                       
                             {/* ... otros elementos <li> ... */}

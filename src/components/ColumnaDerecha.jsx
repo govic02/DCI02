@@ -1,6 +1,7 @@
 import React, { useRef ,useState,useEffect} from 'react';
 import Viewer from './Viewer';
-
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import TabsComponent from './TabsComponent';
 import TabsComponentMobile from './TabsComponentMobile';
 import AdministradorDeVistas from './visualizador/AdministradorDeVistas';
@@ -19,7 +20,7 @@ const ColumnaDerecha = ({ isCollapsed, token, urn, selectedIds, onCameraChange, 
   const { token: tokenContexto } = useAuth();
     const [urnSelected, setUrnSelected] = useState('');
     const [proyectoKeySeleccionado, setProyectoKeySeleccionado] = useState('');
-    const [showTabsComponentMobile, setShowTabsComponentMobile] = useState(true); 
+    const [showTabsComponentMobile, setShowTabsComponentMobile] = useState(false); 
     const [showAdministradorVistasMobile, setShowAdministradorVistasMobile] = useState(false); 
 
     const isDesktopOrLaptop = useMediaQuery({
@@ -180,6 +181,10 @@ const ColumnaDerecha = ({ isCollapsed, token, urn, selectedIds, onCameraChange, 
                           {showAdministradorVistasMobile && <AdministradorDeVistasMobile identificadoresActual={identificadoresActual} urnBuscada={urnSelected} />}
                             
                           </div>
+                          <div className="bottom-buttons">
+                                <button className="bottom-button" onClick={handleFilterBarsClick}>Filtro/Barras</button>
+                                <button className="bottom-button" onClick={handleViewsClick}>Vistas</button>
+                            </div>
                           
                     </div>
                  </ActionsProvider>

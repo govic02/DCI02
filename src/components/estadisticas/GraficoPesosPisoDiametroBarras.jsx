@@ -163,7 +163,7 @@ const GraficoPesosPisoDiametroBarras = ({ urn }) => {
                 <Typography variant="h5" component="h2" style={{ fontSize: 14, marginBottom: '10px' }}>
                     Distribución de Pesos por Diametro en Cada Nivel
                 </Typography>
-                <div style={{ height: '400px' }}>
+                <div style={{ height: '310px' }}>
                     <Bar data={datosGrafico} options={options} />
                 </div>
             </CardContent>

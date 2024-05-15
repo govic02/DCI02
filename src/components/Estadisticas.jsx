@@ -22,8 +22,8 @@ const Estadisticas = () => {
 
     const estiloEstadisticas = {
         backgroundColor: '#D8D8D8',
-        padding: '20px',
-        height: 'calc(100vh - 64px)',
+      
+        height: 'calc(90vh - 64px)',
         overflowY: 'scroll',
     };
 
@@ -67,23 +67,39 @@ const Estadisticas = () => {
                             </Button>
 
                     </Box>
+                    
                     {activeSection === 'general' && (
+                       
                         <div style={estiloEstadisticas}>
-                            {/*  <GraficoPesosPorValor urn={urnSelected} /> */}
-                           
                             <IndicadorPesoPromedio urn={urnSelected} />
+                            {/*  <GraficoPesosPorValor urn={urnSelected} /> */}
+                            <div className="row">
+                                <div className="col-md-6">
+                                <GraficoPesosPisoDiametroBarras urn={urnSelected} />
+                                </div>
+                                <div className="col-md-6">
+                                <GraficoLongitudPromedio urn={urnSelected} />
+                                </div>
+                                <div className="col-md-6">
+                                <GraficoPesosPromedio urn={urnSelected} />
+                                </div>
+                                <div className="col-md-6">
+
+                                </div>
+                            </div>
+                            
                          
-                            <GraficoPesosPisoDiametroBarras urn={urnSelected} />
+                            
                           
-                            <GraficoLongitudPromedio urn={urnSelected} />
-                            <GraficoPesosPromedio urn={urnSelected} />
+                            
+                            
                         </div>
                     )}
                     {activeSection === 'pedidos' && (
                         <div style={estiloEstadisticas}>
-                            {/* Aquí puedes incluir todos los gráficos y componentes para la sección "Pedidos" */}
+                            {/* <GraficoPedidosTotal urn={urnSelected} /> */}
                             <IndicadorTotalPeso urn={urnSelected} />
-                            <GraficoPedidosTotal urn={urnSelected} />
+                           
                             <GraficosPedidoDiametro urn={urnSelected} />
                             <MaestroFierros urn={urnSelected} />
                         </div>
