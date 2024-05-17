@@ -99,7 +99,7 @@ class Viewer extends React.Component {
     
     calcularPesoYActualizarContexto = async (resultado_fierros) => {
         const identificadores = resultado_fierros; // Asume que resultado_fierros es un array de IDs
-    
+        const {  nombreParametroPesoLineal,  nombreParametrolargo} = this.state;
         let pesoTotal = 0;
         let largoTotal = 0;
         let totalBarras = 0;
@@ -115,10 +115,10 @@ class Viewer extends React.Component {
             let esBarraValida = false;
     
             result.properties.forEach(prop => {
-                if (prop.displayName === "RS Peso Lineal (kg/m)" && parseFloat(prop.displayValue) > 0) {
+                if (prop.displayName === nombreParametroPesoLineal && parseFloat(prop.displayValue) > 0) {
                     pesoActual = parseFloat(prop.displayValue);
                     esBarraValida = true;
-                } else if (prop.displayName === "Total Bar Length" && parseFloat(prop.displayValue) > 0) {
+                } else if (prop.displayName === nombreParametrolargo && parseFloat(prop.displayValue) > 0) {
                     largoActual = parseFloat(prop.displayValue) / 100; // Asume que el largo viene en cm y lo convierte a metros
                     esBarraValida = true;
                 }
@@ -450,7 +450,7 @@ class Viewer extends React.Component {
 
     filtrar =  async (identificadores) => {
        this.viewer.isolate(identificadores);
-      
+       const {  nombreParametroPesoLineal, nombreParametrolargo} = this.state;
        console.log("Muestro ids filtrar",identificadores);
        const { fierros } = this.state;
 
@@ -472,10 +472,10 @@ class Viewer extends React.Component {
            let esBarraValida = false; // Asumimos que no es válida hasta encontrar las propiedades necesarias
    
            result.properties.forEach(prop => {
-               if (prop.displayName === "RS Peso Lineal (kg/m)" && parseFloat(prop.displayValue) > 0) {
+               if (prop.displayName === nombreParametroPesoLineal && parseFloat(prop.displayValue) > 0) {
                    pesoActual = parseFloat(prop.displayValue);
                    esBarraValida = true; // Se encontró peso, marcamos como válida
-               } else if (prop.displayName === "Total Bar Length" && parseFloat(prop.displayValue) > 0) {
+               } else if (prop.displayName === nombreParametrolargo && parseFloat(prop.displayValue) > 0) {
                    largoActual = parseFloat(prop.displayValue) / 100; // Conversión si es necesario
                    esBarraValida = true; // Se encontró largo, marcamos como válida
                }

@@ -21,6 +21,27 @@ const GraficosPedidoDiametro = ({ urn }) => {
         const b = Math.floor(Math.random() * 256); // Valor aleatorio entre 0 y 255
         return `rgb(${r},${g},${b})`;
     };
+    const getLastStatus = (states) => {
+        const estadoColores = {
+            'paquetizado': '#FFFF00', 'espera_aprobacion': '#90EE90',
+            'rechazado': '#FF0000', 'aceptado': '#00FF00',
+            'fabricacion': '#0000FF', 'despacho': '#FFA500',
+            'recepcionado': '#00FFFF', 'instalado': '#A52A2A',
+            'inspeccionado': '#006400', 'hormigonado': '#90EE90'
+        };
+    
+        if (!states) {
+            return { estado: 'paquetizado', color: estadoColores['paquetizado'] };
+        }
+    
+        let lastState = { fecha: new Date(0), estado: '', color: '' };
+        for (let [estado, { fecha }] of Object.entries(states)) {
+            if (new Date(fecha) > lastState.fecha) {
+                lastState = { fecha: new Date(fecha), estado, color: estadoColores[estado] };
+            }
+        }
+        return lastState;
+    }
     useEffect(() => {
         const fetchDatos = async () => {
             try {
@@ -31,10 +52,11 @@ const GraficosPedidoDiametro = ({ urn }) => {
                 const urlPedidos = `${API_BASE_URL}/api/listPedidos?urn=${urn}`;
                 const respuestaPedidos = await axios.get(urlPedidos);
                 const pedidos = respuestaPedidos.data;
-    
+                
                 // Preparar un objeto para almacenar el peso por diámetro en cada pedido
                 let pesosPorPedidoYDiametro = {};
-    
+                pedidos.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
+                console.log("pedidos desde grafico pedidos", pedidos);
                 pedidos.forEach(pedido => {
                     if (!pesosPorPedidoYDiametro[pedido.nombre_pedido]) {
                         pesosPorPedidoYDiametro[pedido.nombre_pedido] = {};
@@ -59,6 +81,7 @@ const GraficosPedidoDiametro = ({ urn }) => {
                 Object.keys(pesosPorPedidoYDiametro).forEach((pedido, idx) => {
                     Object.entries(pesosPorPedidoYDiametro[pedido]).forEach(([diametro, peso], i) => {
                         // Verificar si el diámetro ya tiene un color asignado
+                     
                         if (!diametrosVistos[diametro]) {
                             diametrosVistos[diametro] = generarColorAleatorio(); // Asignar un color aleatorio
                         }
@@ -68,6 +91,7 @@ const GraficosPedidoDiametro = ({ urn }) => {
                                 data: new Array(Object.keys(pesosPorPedidoYDiametro).length).fill(0),
                                 backgroundColor: diametrosVistos[diametro], // Usar el color generado
                                 stack: 'Stack 0',
+                                barThickness: 20
                             });
                         }
                         const datasetIndex = datasets.findIndex(dataset => dataset.label === `Diámetro ${diametro}`);
@@ -118,10 +142,26 @@ const GraficosPedidoDiametro = ({ urn }) => {
     };
 
  
-
+    const cardContentStyle = {
+        
+        overflowX: 'auto',  // Allows horizontal scrolling
+        
+    };
+    const estadoColores = {
+        'paquetizado': '#FFFF00', // amarillo
+        'espera_aprobacion': '#90EE90', // verde claro
+        'rechazado': '#FF0000', // rojo
+        'aceptado': '#00FF00', // verde fosforescente
+        'fabricacion': '#0000FF', // azul
+        'despacho': '#FFA500', // anaranjado
+        'recepcionado': '#00FFFF', // celeste
+        'instalado': '#A52A2A', // cafe
+        'inspeccionado': '#006400', // verde oscuro
+        'hormigonado': '#90EE90' // verde claro
+    };
     return (
         <Card style={cardStyle}>
-            <CardContent>
+            <CardContent  style={cardContentStyle}>
                 <Typography variant="h5" component="h2" style={{ fontSize: 14 }}>
                     Distribución de Pesos por Diámetro en Pedidos
                 </Typography>

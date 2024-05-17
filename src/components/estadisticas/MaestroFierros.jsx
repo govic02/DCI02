@@ -62,6 +62,62 @@ const fetchBarDetails = async (pedido) => {
         console.log("pedidos con detalles",newPedidos);
         setPedidos(newPedidos);
     };
+    const handleDownloadAvailableBarsCSV = async () => {
+        try {
+            const urlBarras = `${API_BASE_URL}/api/barraurn/${urn}`;
+            const responseBarras = await axios.get(urlBarras);
+            const allBars = responseBarras.data; // Assuming the response data structure matches your needs
+            console.log("todas las barras",allBars);
+            const requestedIds = pedidos.flatMap(pedido => pedido.ids);
+            const availableBars = allBars.detalles.filter(bar => !requestedIds.includes(bar.id.toString()));
+            console.log("todas las barras no pedidas",availableBars);
+            const csvData = availableBars.map(bar => ({
+                'EJE/VIGA/LOSA': bar.nombreFiltro1,
+                'ELEM CONST': '',
+                'PISO': bar.aecPiso,
+                'CICLO': bar.aecSecuenciaHormigonado,
+                'Cantidad': bar.cantidad,
+                'Ø mm': bar.diametroBarra,
+                'Figura': bar.aecForma,
+                'L/m': bar.longitudTotal,
+                'Uso': bar.aecUsoBarra,
+                'A/cm': bar.a,
+                'B/cm': bar.b,
+                'C/cm': bar.c,
+                'D/cm': bar.d,
+                'E/cm': bar.e,
+                'F/cm': bar.f,
+                'G/cm': bar.g,
+                'H/cm': bar.h,
+                'I/cm': bar.i,
+                'J/cm': bar.j,
+                'AngV': '',
+                'AngV2': '',
+                'AngV3': '',
+                'R/cm': bar.r,
+                'Peso Kg': bar.pesoLineal,
+                'Id': bar.id
+            }));
+    
+            const csvString = unparse(csvData, {
+                quotes: true,
+                skipEmptyLines: true
+            });
+    
+            const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            link.href = url;
+            link.download = "disponibles_barras.csv";
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } catch (error) {
+            console.error("Error al procesar barras disponibles para CSV:", error);
+        }
+    };
+    
 
     const handleDownloadPedidoCSV = async (pedido) => {
         const csvData = pedido.detalles.map(barra => ({
@@ -182,21 +238,60 @@ const fetchBarDetails = async (pedido) => {
         borderRadius: '20px',
         boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)'
     };
-
+    const statusColors = {
+        'paquetizado': 'yellow',
+        'espera_aprobacion': 'lightgreen',
+        'rechazado': 'red',
+        'aceptado': 'lime',
+        'fabricacion': 'blue',
+        'despacho': 'orange',
+        'recepcionado': 'lightblue',
+        'instalado': 'brown',
+        'inspeccionado': 'darkgreen',
+        'hormigonado': 'lightgreen'
+    };
+    const getLastStatus = (estados) => {
+        if (!estados || Object.keys(estados).length === 0) {
+            return { estado: 'paquetizado', color: 'yellow' }; // Estado predeterminado
+        }
+        let lastState = null;
+        Object.entries(estados).forEach(([key, val]) => {
+            if (!lastState || new Date(val.fecha) > new Date(lastState.fecha)) {
+                lastState = { estado: key, color: statusColors[key], ...val };
+            }
+        });
+        return lastState;
+    };
     return (
         <Card style={cardStyle}>
             <CardContent>
                 <Typography variant="h5" component="h2" style={{ fontSize: 16, marginBottom: '20px', textAlign: 'center' }}>
                  <h4>  Maestro de Barras</h4>
-                </Typography>
-                <Button onClick={handleDownloadAllPedidosCSV} variant="contained" color="primary" style={{ marginBottom: '20px' }}>
-    Descargar CSV de Todos los Pedidos
-</Button>
+                </Typography >
+                <div style={{ display: 'flex', justifyContent: 'left', gap: '5px', marginBottom: '20px' }}>
+    <Button onClick={handleDownloadAllPedidosCSV} variant="contained" color="primary">
+        Descargar CSV de Todos los Pedidos
+    </Button>
+    <Button onClick={handleDownloadAvailableBarsCSV} variant="contained" color="primary">
+        Descargar CSV Barras No Solicitadas
+    </Button>
+</div>
                 <div>
                 {pedidos.map((pedido, index) => (
     <Accordion key={index} onChange={() => handleExpand(index)}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <Typography><b>{pedido.nombre_pedido}</b> - {pedido.fecha} - {pedido.pesos} kg</Typography>
+        <Typography >
+        
+            <b>{pedido.nombre_pedido}</b> - {pedido.fecha} - {pedido.pesos} kg - [ {getLastStatus(pedido.estados).estado}  <span style={{
+                                                                                                                                display: 'inline-block',
+                                                                                                                                height: '10px',
+                                                                                                                                width: '10px',
+                                                                                                                                backgroundColor: getLastStatus(pedido.estados).color,
+                                                                                                                                borderRadius: '50%',
+                                                                                                                                marginRight: '5px',
+                                                                                                                                verticalAlign: 'middle'
+                                                                                                                            }}></span>]
+        </Typography>
         </AccordionSummary>
         <AccordionDetails>
             <Button onClick={() => handleDownloadPedidoCSV(pedido)} variant="contained" color="primary">
