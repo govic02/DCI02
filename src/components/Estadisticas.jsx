@@ -97,11 +97,13 @@ const Estadisticas = () => {
                     )}
                     {activeSection === 'pedidos' && (
                         <div style={estiloEstadisticas}>
-                            {/* <GraficoPedidosTotal urn={urnSelected} /> */}
+                            {/* <GraficoPedidosTotal urn={urnSelected} /> 
+                                 
+                            */}
                             <IndicadorTotalPeso urn={urnSelected} />
                            
                             <GraficosPedidoDiametro urn={urnSelected} />
-                            <MaestroFierros urn={urnSelected} />
+                            <MaestroFierros urn={urnSelected}  proyecto={proyectoKeySeleccionado}/>
                         </div>
                     )}
                 </div>

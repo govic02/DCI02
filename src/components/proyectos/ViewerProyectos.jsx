@@ -62,7 +62,7 @@ class ViewerProyectos extends React.Component {
     }
 
     checkDataAndGenerateWeights = async () => {
-        const urn = this.props.urn; // Asegúrate de que urn esté disponible en el contexto
+        const urn = this.props.urn; //
         if (!urn) return; // Si no hay urn, no continuar
     
         try {
@@ -622,47 +622,120 @@ porcentajePedidoTotal = async (urn) => {
             }
     
             try {
-                const { filtro1, filtro2, nombreParametroFecha,nombreParametroBarra, nombreParametrolargo ,nombreParametroPesoLineal,nombreParametroDiametro, nombreParametroNivel} = this.state;
+                const { filtro1, filtro2, nombreParametroFecha, nombreParametroBarra, nombreParametrolargo, nombreParametroPesoLineal, nombreParametroDiametro, nombreParametroNivel } = this.state;
                 console.log("parametro nivel buscado ", nombreParametroNivel);
-                
-                // Utilizando BulkProperties para obtener las propiedades de todos los elementos
-                this.viewer.model.getBulkProperties([], { propFilter: ['Category', filtro1, filtro2, nombreParametroPesoLineal, nombreParametrolargo, nombreParametroDiametro, nombreParametroFecha,nombreParametroNivel] }, (result) => {
+            
+                this.viewer.model.getBulkProperties([], {
+                    propFilter: [
+                        'Category', filtro1, filtro2, nombreParametroPesoLineal, nombreParametrolargo, nombreParametroDiametro, nombreParametroFecha, nombreParametroNivel,
+                        'Partición', 'Número de armadura', 'Imagen', 'Marca de tabla de planificación', 'Comentarios', 'Marca', 'AEC Grupo', 'AEC Forma', 'AEC Código Interno', 'AEC Bloquear barras','AEC Piso','AEC Secuencia Hormigonado', 'AEC Uso Barra', 'AEC Uso Barra (Bloquear)', 'AEC Cantidad', 'AEC Id', 'AEC Ubicación', 'AEC Sub Uso Barra', 'Fase de creación', 'Fase de derribo', 'Estados de visibilidad en vista', 'Geometría', 'Estilo', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J','I', 'K', 'O', 'R', 'Volumen de refuerzo', 'Regla de diseño', 'Cantidad', 'Espaciado', 'Forma', 'Imagen de forma', 'Gancho al inicio', 'Rotación del gancho al inicio', 'Tratamiento de extremo al inicio', 'Gancho al final', 'Rotación del gancho al final', 'Tratamiento de extremo al final', 'Modificar longitudes de gancho', 'Categoría de anfitrión', 'Marca de anfitrión', 'Modificaciones de redondeo', 'Nombre de tipo', 'Material', 'Subcategoría', 'Diámetro de curvatura estándar', 'Diámetro de curvatura de gancho estándar', 'Diámetro de curvatura de estribo/tirante', 'Longitudes de gancho', 'Radio máximo de curvatura', 'Deformación', 'Imagen de tipo', 'Nota clave', 'Modelo', 'Fabricante', 'Comentarios de tipo', 'URL', 'Descripción', 'Descripción de montaje', 'Código de montaje', 'Marca de tipo', 'Costo'
+                    ]
+                }, (result) => {
                     let idsBarras = result.filter(element => 
                         element.properties.some(prop => 
                             prop.displayName === 'Category' && prop.displayValue === nombreParametroBarra
                         )
                     ).map(element => {
-                        // Encuentra valores para los filtros, peso lineal, longitud total, diámetro de barra y fecha
-                        const propFiltro1 = element.properties.find(prop => prop.displayName === filtro1)?.displayValue || '';
-                        const propFiltro2 = element.properties.find(prop => prop.displayName === filtro2)?.displayValue || '';
-                        const pesoLineal = element.properties.find(prop => prop.displayName === nombreParametroPesoLineal)?.displayValue || '0';
-                        const longitudTotal = element.properties.find(prop => prop.displayName === nombreParametrolargo )?.displayValue || '0';
-                        const diametroBarra = element.properties.find(prop => prop.displayName === nombreParametroDiametro)?.displayValue || '0';
-                        const fecha = element.properties.find(prop => prop.displayName === nombreParametroFecha)?.displayValue || '';
-                        const nivel = element.properties.find(prop => prop.displayName === nombreParametroNivel)?.displayValue || '';
+                        const valores = element.properties.reduce((acc, prop) => {
+                            acc[prop.displayName] = prop.displayValue || '';
+                            return acc;
+                        }, {});
+            
                         return {
                             id: element.dbId,
-                            nombreFiltro1: propFiltro1,
-                            nombreFiltro2: propFiltro2,
-                            pesoLineal: parseFloat(pesoLineal),
-                            longitudTotal: parseFloat(longitudTotal),
-                            diametroBarra: parseFloat(diametroBarra),
-                            fecha:  fecha,
-                            nivel: nivel
+                            nombreFiltro1: valores[filtro1],
+                            nombreFiltro2: valores[filtro2],
+                            pesoLineal: parseFloat(valores[nombreParametroPesoLineal] || '0'),
+                            longitudTotal: parseFloat(valores[nombreParametrolargo] || '0'),
+                            diametroBarra: parseFloat(valores[nombreParametroDiametro] || '0'),
+                            fecha: valores[nombreParametroFecha],
+                            nivel: valores[nombreParametroNivel],
+                            particion: valores['Partición'],
+                            numeroArmadura: valores['Número de armadura'],
+                            imagen: valores['Imagen'],
+                            marcaTablaPlanificacion: valores['Marca de tabla de planificación'],
+                            comentarios: valores['Comentarios'],
+                            marca: valores['Marca'],
+                            aecGrupo: valores['AEC Grupo'],
+                            aecForma: valores['AEC Forma'],
+                            aecCodigoInterno: valores['AEC Código Interno'],
+                            aecBloquearBarras: valores['AEC Bloquear barras'],
+                            aecUsoBarra: valores['AEC Uso Barra'],
+                            aecUsoBarraBloquear: valores['AEC Uso Barra (Bloquear)'],
+                            aecCantidad: parseFloat(valores['AEC Cantidad'] || '0'),
+                            aecId: valores['AEC Id'],
+                            aecPiso:valores['AEC Piso'],
+                            aecSecuenciaHormigonado:valores['AEC Secuencia Hormigonado'],
+                            aecUbicacion: valores['AEC Ubicación'],
+                            aecSubUsoBarra: valores['AEC Sub Uso BarUso Barra'],
+                            faseCreacion: valores['Fase de creación'],
+                            faseDerribo: valores['Fase de derribo'],
+                            estadosVisibilidadVista: valores['Estados de visibilidad en vista'],
+                            geometria: valores['Geometría'],
+                            estilo: valores['Estilo'],
+                            a: valores['A'],
+                            b: valores['B'],
+                            c: valores['C'],
+                            d: valores['D'],
+                            e: valores['E'],
+                            f: valores['F'],
+                            g: valores['G'],
+                            h: valores['H'],
+                            j: valores['J'],
+                            i: valores['I'],
+                            k: valores['K'],
+                            o: valores['O'],
+                            r: valores['R'],
+                            volumenRefuerzo: parseFloat(valores['Volumen de refuerzo'] || '0'),
+                            reglaDiseno: valores['Regla de diseño'],
+                            cantidad: parseFloat(valores['Cantidad'] || '0'),
+                            espaciado: valores['Espaciado'],
+                            forma: valores['Forma'],
+                            imagenForma: valores['Imagen de forma'],
+                            ganchoInicio: valores['Gancho al inicio'],
+                            rotacionGanchoInicio: valores['Rotación del gancho al inicio'],
+                            tratamientoExtremoInicio: valores['Tratamiento de extremo al inicio'],
+                            ganchoFinal: valores['Gancho al final'],
+                            rotacionGanchoFinal: valores['Rotación del gancho al final'],
+                            tratamientoExtremoFinal: valores['Tratamiento de extremo al final'],
+                            modificarLongitudesGancho: valores['Modificar longitudes de gancho'],
+                            categoriaAnfitrion: valores['Categoría de anfitrión'],
+                            marcaAnfitrion: valores['Marca de anfitrión'],
+                            modificacionesRedondeo: valores['Modificaciones de redondeo'],
+                            nombreTipo: valores['Nombre de tipo'],
+                            material: valores['Material'],
+                            subcategoria: valores['Subcategoría'],
+                            diametroCurvaturaEstandar: parseFloat(valores['Diámetro de curvatura estándar'] || '0'),
+                            diametroCurvaturaGanchoEstandar: parseFloat(valores['Diámetro de curvatura de gancho estándar'] || '0'),
+                            diametroCurvaturaEstriboTirante: parseFloat(valores['Diámetro de curvatura de estribo/tirante'] || '0'),
+                            longitudesGancho: valores['Longitudes de gancho'],
+                            radioMaximoCurvatura: parseFloat(valores['Radio máximo de curvatura'] || '0'),
+                            deformacion: valores['Deformación'],
+                            imagenTipo: valores['Imagen de tipo'],
+                            notaClave: valores['Nota clave'],
+                            modelo: valores['Modelo'],
+                            fabricante: valores['Fabricante'],
+                            comentariosTipo: valores['Comentarios de tipo'],
+                            url: valores['URL'],
+                            descripcion: valores['Descripción'],
+                            descripcionMontaje: valores['Descripción de montaje'],
+                            codigoMontaje: valores['Código de montaje'],
+                            marcaTipo: valores['Marca de tipo'],
+                            costo: parseFloat(valores['Costo'] || '0')
                         };
                     });
-    
+            
                     // Guarda los resultados en el estado o maneja como prefieras
                     this.setState({ idsBarras });
-                   
-                    // Resolver la promesa con los IDs de barras encontrados
                     console.log("Barras generadas con datos ", idsBarras);
                     resolve(idsBarras);
                 });
             } catch (error) {
-                console.error("Error al obtener IDs de barras:", error);
+                console.error("Error al procesar los datos de Autodesk Forge", error);
                 reject(error);
             }
+            
+            
         });
     };
     consultaFiltro = (filtros) => {

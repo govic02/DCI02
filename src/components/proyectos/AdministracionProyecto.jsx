@@ -651,35 +651,40 @@ const AdministracionProyecto = (proyectoKey,urn) => {
                     </div>
                 </Tab>
                 <Tab eventKey="listaReordenable" title="Orden de Niveles">
-                <div style={tabContentStyle}>
-                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
-                <Button 
-                    onClick={buscarOrdenNiveles} 
-                    style={{ 
-                        backgroundColor: '#DA291C',
-                        borderRadius: '10px',
-                        color: 'white',
-                        marginRight: '5px'
-                    }}>
-                    Buscar Orden Actual
-                </Button>
-                <Button 
-                    onClick={guardarOrdenNiveles} 
-                    style={{ 
-                        backgroundColor: '#DA291C',
-                        borderRadius: '10px',
-                        color: 'white'
-                    }}>
-                    Guardar Niveles con Orden Actual
-                </Button>
-                </div>
-                 <ListaReordenable items={niveles} onReorder={handleReorder} />
-                </div>
+                    <div style={tabContentStyle}>
+                    <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+                    <Button 
+                        onClick={buscarOrdenNiveles} 
+                        style={{ 
+                            backgroundColor: '#DA291C',
+                            borderRadius: '10px',
+                            color: 'white',
+                            marginRight: '5px'
+                        }}>
+                        Buscar Orden Actual
+                    </Button>
+                    <Button 
+                        onClick={guardarOrdenNiveles} 
+                        style={{ 
+                            backgroundColor: '#DA291C',
+                            borderRadius: '10px',
+                            color: 'white'
+                        }}>
+                        Guardar Niveles con Orden Actual
+                    </Button>
+                    </div>
+                    <ListaReordenable items={niveles} onReorder={handleReorder} />
+                    </div>
                    
                 </Tab>
+                <Tab eventKey="maestroFierros" title="Maestro de Fierros">
+                    <div style={tabContentStyle}>
+                        <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+                            
+                        </div>
+                    </div>
+                </Tab>
                 <Tabs defaultActiveKey="informacionGeneral" id="tab-administracion-proyecto">
-     
-      
                 </Tabs>
             </Tabs>
         </div>
