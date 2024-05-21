@@ -284,8 +284,8 @@ const fetchBarDetails = async (pedido) => {
         
             <b>{pedido.nombre_pedido}</b> - {pedido.fecha} - {pedido.pesos} kg - [ {getLastStatus(pedido.estados).estado}  <span style={{
                                                                                                                                 display: 'inline-block',
-                                                                                                                                height: '10px',
-                                                                                                                                width: '10px',
+                                                                                                                                height: '20px',
+                                                                                                                                width: '20px',
                                                                                                                                 backgroundColor: getLastStatus(pedido.estados).color,
                                                                                                                                 borderRadius: '50%',
                                                                                                                                 marginRight: '5px',
@@ -298,27 +298,61 @@ const fetchBarDetails = async (pedido) => {
                 Descargar CSV del Pedido
             </Button>
             <TableContainer component={Paper}>
-                <Table aria-label="detalles del pedido">
-                    <TableHead>
-                        <TableRow>
-                            <TableCell>ID Barra</TableCell>
-                            <TableCell>Diametro</TableCell>
-                            <TableCell>Longitud Total</TableCell>
-                            <TableCell>Peso Lineal</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {pedido.detalles.map((barra, idx) => (
-                            <TableRow key={idx}>
-                                <TableCell>{barra.id}</TableCell>
-                                <TableCell>{barra.diametroBarra}</TableCell>
-                                <TableCell>{barra.longitudTotal}</TableCell>
-                                <TableCell>{barra.pesoLineal}</TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </TableContainer>
+    <Table aria-label="detalles del pedido">
+        <TableHead>
+            <TableRow>
+                <TableCell>ID Barra</TableCell>
+                <TableCell>Diametro</TableCell>
+                <TableCell>Longitud Total</TableCell>
+                <TableCell>Peso Lineal</TableCell>
+                <TableCell>EJE/VIGA/LOSA</TableCell>
+                <TableCell>PISO</TableCell>
+                <TableCell>CICLO</TableCell>
+                <TableCell>Cantidad</TableCell>
+                <TableCell>Figura</TableCell>
+                <TableCell>Uso</TableCell>
+                <TableCell>A/cm</TableCell>
+                <TableCell>B/cm</TableCell>
+                <TableCell>C/cm</TableCell>
+                <TableCell>D/cm</TableCell>
+                <TableCell>E/cm</TableCell>
+                <TableCell>F/cm</TableCell>
+                <TableCell>G/cm</TableCell>
+                <TableCell>H/cm</TableCell>
+                <TableCell>I/cm</TableCell>
+                <TableCell>J/cm</TableCell>
+                <TableCell>R/cm</TableCell>
+            </TableRow>
+        </TableHead>
+        <TableBody>
+            {pedido.detalles.map((barra, idx) => (
+                <TableRow key={idx}>
+                    <TableCell>{barra.id}</TableCell>
+                    <TableCell>{barra.diametroBarra}</TableCell>
+                    <TableCell>{barra.longitudTotal}</TableCell>
+                    <TableCell>{barra.pesoLineal}</TableCell>
+                    <TableCell>{barra.nombreFiltro1}</TableCell>
+                    <TableCell>{barra.aecPiso}</TableCell>
+                    <TableCell>{barra.aecSecuenciaHormigonado}</TableCell>
+                    <TableCell>{barra.cantidad}</TableCell>
+                    <TableCell>{barra.aecForma}</TableCell>
+                    <TableCell>{barra.aecUsoBarra}</TableCell>
+                    <TableCell>{barra.a}</TableCell>
+                    <TableCell>{barra.b}</TableCell>
+                    <TableCell>{barra.c}</TableCell>
+                    <TableCell>{barra.d}</TableCell>
+                    <TableCell>{barra.e}</TableCell>
+                    <TableCell>{barra.f}</TableCell>
+                    <TableCell>{barra.g}</TableCell>
+                    <TableCell>{barra.h}</TableCell>
+                    <TableCell>{barra.i}</TableCell>
+                    <TableCell>{barra.j}</TableCell>
+                    <TableCell>{barra.r}</TableCell>
+                </TableRow>
+            ))}
+        </TableBody>
+    </Table>
+</TableContainer>
         </AccordionDetails>
     </Accordion>
 ))}
