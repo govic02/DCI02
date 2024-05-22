@@ -25,7 +25,27 @@ const MaestroFierros = ({ urn,proyecto }) => {
                         const detalles = await fetchBarDetails(pedido);
                         return { ...pedido, detalles: detalles || [] };
                     }));
-                    setPedidos(pedidosConDetalles);
+                   
+                    const urlBarras = `${API_BASE_URL}/api/barraurn/${urn}`;
+                    const responseBarras = await axios.get(urlBarras);
+                    const allBars = responseBarras.data; // Assuming the response data structure matches your needs
+                    console.log("todas las barras",allBars);
+                    const requestedIds = pedidos.flatMap(pedido => pedido.ids);
+                    const availableBars = allBars.detalles.filter(bar => !requestedIds.includes(bar.id.toString()));
+                    console.log("todas las barras no pedidas",availableBars);
+
+                    const pedidoNoPedidos = {
+                        nombre_pedido: "No Pedidos",
+                        fecha: new Date().toISOString().split('T')[0], // Fecha actual
+                        pesos: availableBars.reduce((sum, bar) => sum + parseFloat(bar.pesoLineal), 0).toFixed(2),
+                        detalles: availableBars,
+                        estados: { estado: 'No Aplicable', color: 'grey' }
+                    };
+    
+                    // Agrega el pedido "No Pedidos" al array de pedidos
+                    setPedidos([...pedidosConDetalles, pedidoNoPedidos]);
+               
+                    // setPedidos(pedidosConDetalles);
                 } else {
                     console.error(`Respuesta del servidor con estado: ${response.status}`);
                     setPedidos([]);
@@ -54,14 +74,18 @@ const fetchBarDetails = async (pedido) => {
     }
 };
 
-    const handleExpand = async (index) => {
-        const newPedidos = [...pedidos];
+const handleExpand = async (index) => {
+    const newPedidos = [...pedidos];
+    if (newPedidos[index].nombre_pedido === "No Pedidos") {
+        console.log("Detalles de barras no pedidas:", newPedidos[index].detalles);
+    } else {
         const detalles = await fetchBarDetails(newPedidos[index]);
-        console.log("todos los detalles",detalles);
+        console.log("todos los detalles", detalles);
         newPedidos[index].detalles = detalles;
-        console.log("pedidos con detalles",newPedidos);
-        setPedidos(newPedidos);
-    };
+    }
+    console.log("pedidos con detalles", newPedidos);
+    setPedidos(newPedidos);
+};
     const handleDownloadAvailableBarsCSV = async () => {
         try {
             const urlBarras = `${API_BASE_URL}/api/barraurn/${urn}`;
@@ -328,26 +352,26 @@ const fetchBarDetails = async (pedido) => {
             {pedido.detalles.map((barra, idx) => (
                 <TableRow key={idx}>
                     <TableCell>{barra.id}</TableCell>
-                    <TableCell>{barra.diametroBarra}</TableCell>
-                    <TableCell>{barra.longitudTotal}</TableCell>
-                    <TableCell>{barra.pesoLineal}</TableCell>
+                    <TableCell>{typeof barra.diametroBarra === 'number' ? barra.diametroBarra.toFixed(2) : "0.00"}</TableCell>
+                    <TableCell>{typeof barra.longitudTotal === 'number' ? barra.longitudTotal.toFixed(2) : "0.00"}</TableCell>
+                    <TableCell>{typeof barra.pesoLineal === 'number' ? barra.pesoLineal.toFixed(2) : "0.00"}</TableCell>
                     <TableCell>{barra.nombreFiltro1}</TableCell>
                     <TableCell>{barra.aecPiso}</TableCell>
                     <TableCell>{barra.aecSecuenciaHormigonado}</TableCell>
                     <TableCell>{barra.cantidad}</TableCell>
                     <TableCell>{barra.aecForma}</TableCell>
                     <TableCell>{barra.aecUsoBarra}</TableCell>
-                    <TableCell>{barra.a}</TableCell>
-                    <TableCell>{barra.b}</TableCell>
-                    <TableCell>{barra.c}</TableCell>
-                    <TableCell>{barra.d}</TableCell>
-                    <TableCell>{barra.e}</TableCell>
-                    <TableCell>{barra.f}</TableCell>
-                    <TableCell>{barra.g}</TableCell>
-                    <TableCell>{barra.h}</TableCell>
-                    <TableCell>{barra.i}</TableCell>
-                    <TableCell>{barra.j}</TableCell>
-                    <TableCell>{barra.r}</TableCell>
+                    <TableCell>{typeof barra.a === 'number' ? barra.a.toFixed(2) : "0.00"}</TableCell>
+                    <TableCell>{typeof barra.b === 'number' ? barra.b.toFixed(2) : "0.00"}</TableCell>
+                    <TableCell>{typeof barra.c === 'number' ? barra.c.toFixed(2) : "0.00"}</TableCell>
+                    <TableCell>{typeof barra.d === 'number' ? barra.d.toFixed(2) : "0.00"}</TableCell>
+                    <TableCell>{typeof barra.e === 'number' ? barra.e.toFixed(2) : "0.00"}</TableCell>
+                    <TableCell>{typeof barra.f === 'number' ? barra.f.toFixed(2) : "0.00"}</TableCell>
+                    <TableCell>{typeof barra.g === 'number' ? barra.g.toFixed(2) : "0.00"}</TableCell>
+                    <TableCell>{typeof barra.h === 'number' ? barra.h.toFixed(2) : "0.00"}</TableCell>
+                    <TableCell>{typeof barra.i === 'number' ? barra.i.toFixed(2) : "0.00"}</TableCell>
+                    <TableCell>{typeof barra.j === 'number' ? barra.j.toFixed(2) : "0.00"}</TableCell>
+                    <TableCell>{typeof barra.r === 'number' ? barra.r.toFixed(2) : "0.00"}</TableCell>
                 </TableRow>
             ))}
         </TableBody>
