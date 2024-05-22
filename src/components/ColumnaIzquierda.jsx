@@ -155,7 +155,7 @@ const liNormal = {
                                 </li>
                             
                                 <li style={isCollapsed ? liNormalColap : liNormal}>
-                                    <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
+                                    <Link  onClick={() => verificarUsuario()} to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
                                         <img src={isCollapsed ? "images/visualizador.svg" : "images/visualizador.svg"} alt="Estadísticas" style={isCollapsed ?imgStylesColap:imgStyles} />
                                         Visualizador
                                     </Link>
@@ -176,14 +176,14 @@ const liNormal = {
 
                                 {(tipoUsuario === 'administrador' || tipoUsuario === 'Administrador') && (
                                 <li style={isCollapsed ? liNormalColap : liNormal}>
-                                <Link to="/proyectos" style={{ textDecoration: 'none', color: 'inherit' }}>
+                                <Link onClick={() => verificarUsuario()}  to="/proyectos" style={{ textDecoration: 'none', color: 'inherit' }}>
                                     <img src={isCollapsed ? "images/proyectos.svg" : "images/proyectos.svg"} alt="Estadísticas" style={isCollapsed ?imgStylesColap:imgStyles} />
                                     {isCollapsed ? <><br/><span>Proyectos</span></> : 'Proyectos'}
                                     </Link>
                                 </li>
                                 )}
                                 <li style={isCollapsed ? liNormalColap : liNormal}>
-                                <Link to="/Perfil" style={{ textDecoration: 'none', color: 'inherit' }}>
+                                <Link  onClick={() => verificarUsuario()} to="/Perfil" style={{ textDecoration: 'none', color: 'inherit' }}>
                                     <img src={isCollapsed ? "images/micuenta.svg" : "images/micuenta.svg"} alt="Estadísticas" style={isCollapsed ?imgStylesColap:imgStyles} />
                                 
                                     {isCollapsed ? <><br/><span>Perfil</span></> : 'Perfil'}
@@ -192,7 +192,7 @@ const liNormal = {
 
                                 {(tipoUsuario === 'administrador' || tipoUsuario === 'Administrador') && (
                                 <li style={isCollapsed ? liNormalColap : liNormal}>
-                                <Link to="/AdministracionCuentas" style={{ textDecoration: 'none', color: 'inherit' }}>
+                                <Link onClick={() => verificarUsuario()}  to="/AdministracionCuentas" style={{ textDecoration: 'none', color: 'inherit' }}>
                                     <img src={isCollapsed ? "images/administracioncuentas.svg" : "images/administracioncuentas.svg"} alt="Estadísticas" style={isCollapsed ?imgStylesColap:imgStyles} />
                                 Administracion Cuentas
                                 </Link>
@@ -225,13 +225,13 @@ const liNormal = {
                             </li>
                         
                             <li style={isCollapsed ? liNormalColap : liNormal}>
-                                <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
+                                <Link  onClick={() => verificarUsuario()} to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
                                     <img src={isCollapsed ? "images/visualizador.svg" : "images/visualizador.svg"} alt="Estadísticas" style={isCollapsed ?imgStylesColap:imgStylesMob} />
                                   
                                 </Link>
                             </li>
                             <li style={isCollapsed ? liNormalColap : liNormal}>
-                            <Link to="/estadisticas" style={{ textDecoration: 'none', color: 'inherit' }}>
+                            <Link onClick={() => verificarUsuario()} to="/estadisticas" style={{ textDecoration: 'none', color: 'inherit' }}>
                                     <img src={isCollapsed ? "images/estadisticas.svg" : "images/estadisticas.svg"} alt="Estadísticas" style={isCollapsed ?imgStylesColap:imgStylesMob} />
                                 
                             </Link>
