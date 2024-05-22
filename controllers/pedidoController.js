@@ -184,6 +184,16 @@ const crearPedido = async (req, res) => {
         console.log("Recibe llamado a pedido");
         const { ids, fecha, proveedor, id_int1, pesos, largos, listado_pesos, listado_largos, nombre_pedido, urn_actual } = req.body;
 
+
+        const pedidoExistente = await Pedido.findOne({
+            $or: [
+                { urn_actual, nombre_pedido },
+                { urn_actual, ids: { $in: ids } }
+            ]
+        });
+        if (pedidoExistente) {
+            return res.status(305).json({ message: "Pedido repetido" });
+        }
         // Crear un nuevo documento de pedido con la información proporcionada
         const nuevoPedido = new Pedido({
             ids,

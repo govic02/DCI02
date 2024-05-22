@@ -366,12 +366,14 @@ const TabComponent = ({ urnBuscada }) => {
     const onSelect = (k) => {
         setActiveKey(k);
     };
-    const handleOpenModal = () => {
+    const handleOpenModal = async() => {
         let idsRepetidos = [];
         let pedidosConRepetidos = new Set(); // Utilizamos un Set para evitar nombres duplicados
-    
-        // Iteramos sobre cada pedido existente
-        pedidos.forEach(pedido => {
+       
+        try{
+            await fetchPedidosAct();
+             // Iteramos sobre cada pedido existente
+             pedidos.forEach(pedido => {
             // Aseguramos que los IDs del pedido estén como números enteros
             const pedidoIdsNumerico = pedido.ids.map(id => parseInt(id, 10));
             // Filtramos los IDs seleccionados que están presentes en este pedido
@@ -390,6 +392,10 @@ const TabComponent = ({ urnBuscada }) => {
         } else {
             setShowModal(true); // Abre el modal solo si no hay IDs repetidos
         }
+        }catch(error){
+
+        }
+       
     };
     
     
@@ -433,9 +439,12 @@ const TabComponent = ({ urnBuscada }) => {
                 // Opcionalmente, limpiar otros estados si es necesario
                 fetchPedidosAct();
             }
+            if (respuesta.status === 305) {
+                toast.error("Pedido con elementos duplicados, no fue posible crearlo");
+            }
         } catch (error) {
             console.error("Error al crear el pedido", error);
-            toast.error("Error al crear el pedido");
+            toast.error("Error al crear el pedido, vuelva a intentarlo");
             // Mantener el modal abierto para permitir correcciones
         }
         setIsSubmitting(false);
