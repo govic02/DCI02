@@ -2,14 +2,18 @@ import React,{useEffect,useState} from 'react';
 import styles from '../styles/Visualizador.module.css';
 import { Link } from 'react-router-dom';
 import { useMediaQuery } from 'react-responsive';
+import { useAuth } from '../context/AuthContext';
+import axios from 'axios';
+import API_BASE_URL from '../config';
 const ColumnaIzquierda = ({ isCollapsed, handleCollapse }) => {
     const [tipoUsuario, setTipoUsuario] = useState('');
+    const { logout } = useAuth();
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768); 
     const isDesktopOrLaptop = useMediaQuery({
-        query: '(min-width: 421px)'
+        query: '(min-width: 980px)'
     });
     const isTabletOrMobile = useMediaQuery({
-        query: '(max-width: 420px)'
+        query: '(max-width: 979px)'
     });
     useEffect(() => {
         // Desplegar por consola el objeto token cada vez que el componente se carga o el token cambia
@@ -22,7 +26,7 @@ const ColumnaIzquierda = ({ isCollapsed, handleCollapse }) => {
         console.log("Token cargado:", username);
         setTipoUsuario(tipo);
         const handleResize = () => {
-            setIsMobile(window.innerWidth < 768);  // Actualiza el estado basado en el ancho de la ventana
+            setIsMobile(window.innerWidth < 980);  // Actualiza el estado basado en el ancho de la ventana
         };
 
         window.addEventListener('resize', handleResize);
@@ -30,6 +34,19 @@ const ColumnaIzquierda = ({ isCollapsed, handleCollapse }) => {
             window.removeEventListener('resize', handleResize);
         };
     }, []);
+
+    const verificarUsuario = async () => {
+        try {
+            const userId = localStorage.getItem('userId');
+            const response = await axios.get(`${API_BASE_URL}/api/usuarios/${userId}`);
+            console.log("Usuario verificado:", response.data);
+        } catch (error) {
+            logout();
+            window.location.reload();
+            console.error("Error al verificar el usuario:", error);
+        }
+    };
+    
     const estiloLiNormal = {
         fontSize: '14px',
         height: '20px',
@@ -144,7 +161,7 @@ const liNormal = {
                                     </Link>
                                 </li>
                                 <li style={isCollapsed ? liNormalColap : liNormal}>
-                                <Link to="/estadisticas" style={{ textDecoration: 'none', color: 'inherit' }}>
+                                <Link  onClick={() => verificarUsuario()} to="/estadisticas" style={{ textDecoration: 'none', color: 'inherit' }}>
                                         <img src={isCollapsed ? "images/estadisticas.svg" : "images/estadisticas.svg"} alt="Estadísticas" style={isCollapsed ?imgStylesColap:imgStyles} />
                                     Estadísticas 
                                 </Link>
