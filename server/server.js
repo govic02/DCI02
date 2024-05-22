@@ -135,10 +135,11 @@ const authenticateJWT = (req, res, next) => {
 app.post('/api/login', async (req, res) => {
   const { username, password } = req.body;
   console.log(username);
-  console.log(password);
+
   try {
       // Buscar el usuario por username
-      const usuario = await Users.findOne({ username });
+      const usuario = await Users.findOne({ username: new RegExp(`^${username}$`, 'i') });
+     
       console.log("respuesta usuario consulta");
       console.log(usuario);
       if (!usuario) {

@@ -53,7 +53,7 @@ const obtenerUsuario = async (req, res) => {
 const obtenerUsuarioPorUsername = async (req, res) => {
   try {
       const username = req.params.username; // Asumiendo que el username viene como parámetro de la URL
-      const usuario = await Users.findOne({ username: username });
+      const usuario = await Users.findOne({ username: new RegExp('^' + username + '$', 'i') });
       if (!usuario) {
           return res.status(404).send('El usuario con ese username no fue encontrado');
       }
@@ -70,7 +70,7 @@ const crearUsuario = async (req, res) => {
       console.log(req.body);
   
       // Verificar si ya existe un usuario con el mismo email
-      const usuarioExistente = await Users.findOne({ username: req.body.email });
+      const usuarioExistente = await Users.findOne({ username: new RegExp(`^${req.body.email}$`, 'i') });
       if (usuarioExistente) {
         console.log("ya existe");
         return res.status(400).send('Ya existe un usuario registrado con ese correo electrónico.');
