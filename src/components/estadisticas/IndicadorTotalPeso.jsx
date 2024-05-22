@@ -46,45 +46,51 @@ const IndicadorTotalPeso = ({ urn }) => {
     useEffect(() => {
         const fetchDatos = async () => {
             try {
-                // Obtener los pesos totales desde el endpoint específico
                 const urlPesos = `${API_BASE_URL}/api/getPesovsPedidos/${urn}`;
                 const responsePesos = await axios.get(urlPesos);
                 const pesosTotales = responsePesos.data;
     
-                // Obtener los detalles de los pedidos para calcular los pesos por estado
                 const urlPedidos = `${API_BASE_URL}/api/listPedidos?urn=${urn}`;
                 const respuestaPedidos = await axios.get(urlPedidos);
                 const pedidos = respuestaPedidos.data;
     
-                // Inicializar un objeto para almacenar el peso total por estado
                 let pesoPorEstado = Object.keys(statusColors).reduce((acc, estado) => {
                     acc[estado] = 0;
                     return acc;
                 }, {});
     
-                // Sumar el peso de cada pedido a su respectivo estado
                 pedidos.forEach(pedido => {
                     const estadoActual = getLastStatus(pedido.estados).estado;
-                    const pesoPedido = parseFloat(pedido.pesos); // Convierte el peso a número
+                    const pesoPedido = parseFloat(pedido.pesos);
                     if (!isNaN(pesoPedido) && estadoActual in pesoPorEstado) {
                         pesoPorEstado[estadoActual] += pesoPedido;
                     }
                 });
     
                 const estados = Object.keys(pesoPorEstado);
-                const pesosEstados = estados.map(estado => pesoPorEstado[estado]);
-                console.log("pesos estados",pesosEstados);
+                const datasets = estados.map(estado => ({
+                    label: estado.charAt(0).toUpperCase() + estado.slice(1),
+                    data: [0, pesoPorEstado[estado]], // Segundo valor para alinear con la barra de peso total
+                    backgroundColor: statusColors[estado],
+                    stack: 'Stack 1'
+                }));
+    
                 setDatosGrafico({
-                    labels: ['Peso Total del Proyecto', 'Peso Total de Pedidos', ...estados],
-                    datasets: [{
-                        label: 'Pesos',
-                        data: [pesosTotales.pesoTotalProyecto, pesosTotales.pesoTotalPedidos, ...pesosEstados],
-                        backgroundColor: ['#41E0E0', '#E04C41', ...estados.map(estado => statusColors[estado])]
-                    }]
+                    labels: ['Peso Total del Proyecto', 'Distribución del Peso de Pedidos'],
+                    datasets: [
+                        {
+                            label: 'Peso Total del Proyecto',
+                            data: [pesosTotales.pesoTotalProyecto, 0],
+                            backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                            stack: 'Stack 0',
+                        },
+                        ...datasets
+                    ]
                 });
-                setPesoPorEstado( pesoPorEstado);
+    
                 setPesoTotalProyecto(pesosTotales.pesoTotalProyecto);
-                setPesoTotalPedidos(pesosTotales.pesoTotalPedidos);
+                setPesoTotalPedidos(pedidos.reduce((sum, p) => sum + parseFloat(p.pesos), 0));
+                setPesoPorEstado(pesoPorEstado);
     
             } catch (error) {
                 console.error("Error al obtener los datos:", error);
@@ -93,18 +99,35 @@ const IndicadorTotalPeso = ({ urn }) => {
     
         fetchDatos();
     }, [urn]);
-
+    
+    
+    
     const options = {
-        indexAxis: 'y', // Esto convierte el gráfico de barras en horizontal
+        indexAxis: 'y', 
         scales: {
             x: {
-                beginAtZero: true
+                stacked: true ,
+                barThickness: 100 ,
+                categoryPercentage: 0.1,
+                barPercentage: 1 
+                
+            },
+            y: {
+                stacked: true
+                
+                
             }
         },
         responsive: true,
-        maintainAspectRatio: false
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: true
+            }
+        }
     };
-
+    
+    
     const cardStyle = {
         marginLeft: '40px',
         marginRight: '40px',
@@ -119,22 +142,18 @@ const IndicadorTotalPeso = ({ urn }) => {
                 <Typography variant="h5" component="h2" style={{ fontSize: 14, marginBottom: '20px' }}>
                  Peso Total Proyecto vs Pedidos
                 </Typography>
-                <div style={{ height: '60%', width: '100%' }}>
+                <div style={{ height: '200px', width: '100%' }}>
                     <Bar data={datosGrafico} options={options} />
                 </div>
-                <div style={{ marginTop: '20px' }}>
-                    <Typography variant="body2">
-                        <b>Peso Total Proyecto:</b> {pesoTotalProyecto.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} kg
-                    </Typography>
-                    <Typography variant="body2">
-                        <b>Peso Total Pedidos:</b> {pesoTotalPedidos.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} kg
-                    </Typography>
-                    {Object.entries(pesoPorEstado).map(([estado, peso]) => (
-                        <Typography variant="body2" key={estado}>
-                            <b>Peso {estado.charAt(0).toUpperCase() + estado.slice(1)}:</b> {peso.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} kg
-                        </Typography>
-                    ))}
-                </div>
+                <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'space-around', alignItems: 'center' }}>
+    <Typography variant="body2" style={{ textAlign: 'center' }}>
+        <b>Peso Total Proyecto:</b> {pesoTotalProyecto.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} kg
+    </Typography>
+    <Typography variant="body2" style={{ textAlign: 'center' }}>
+        <b>Peso Total Pedidos:</b> {pesoTotalPedidos.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} kg
+    </Typography>
+</div>
+
 
             </CardContent>
         </Card>
@@ -142,3 +161,13 @@ const IndicadorTotalPeso = ({ urn }) => {
 };
 
 export default IndicadorTotalPeso;
+
+/*****
+ * 
+ *     {Object.entries(pesoPorEstado).map(([estado, peso]) => (
+                        <Typography variant="body2" key={estado}>
+                            <b>Peso {estado.charAt(0).toUpperCase() + estado.slice(1)}:</b> {peso.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} kg
+                        </Typography>
+                    ))}
+ * 
+ */

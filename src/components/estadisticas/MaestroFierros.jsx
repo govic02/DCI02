@@ -3,7 +3,7 @@ import axios from 'axios';
 import {
     Accordion, AccordionSummary, AccordionDetails, Typography,
     Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
-    Card, CardContent, Button
+    Card, CardContent, Button, Tabs, Tab
   } from '@mui/material';
   import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import API_BASE_URL from '../../config';
@@ -11,7 +11,7 @@ import { unparse,parse } from 'papaparse';
 
 const MaestroFierros = ({ urn,proyecto }) => {
     const [pedidos, setPedidos] = useState([]);
-
+    const [tabIndex, setTabIndex] = useState(0);
     useEffect(() => {
         const fetchPedidos = async () => {
             try {
@@ -286,101 +286,183 @@ const handleExpand = async (index) => {
         });
         return lastState;
     };
-    return (
+    const handleTabChange = (event, newValue) => {
+        setTabIndex(newValue);
+      };
+
+      
+      return (
         <Card style={cardStyle}>
             <CardContent>
                 <Typography variant="h5" component="h2" style={{ fontSize: 16, marginBottom: '20px', textAlign: 'center' }}>
-                 <h4>  Maestro de Barras</h4>
-                </Typography >
+                    Maestro de Barras
+                </Typography>
                 <div style={{ display: 'flex', justifyContent: 'left', gap: '5px', marginBottom: '20px' }}>
-    <Button onClick={handleDownloadAllPedidosCSV} variant="contained" color="primary">
-        Descargar CSV de Todos los Pedidos
-    </Button>
-    <Button onClick={handleDownloadAvailableBarsCSV} variant="contained" color="primary">
-        Descargar CSV Barras No Solicitadas
-    </Button>
-</div>
-                <div>
-                {pedidos.map((pedido, index) => (
-    <Accordion key={index} onChange={() => handleExpand(index)}>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-        <Typography >
-        
-            <b>{pedido.nombre_pedido}</b> - {pedido.fecha} - {pedido.pesos} kg - [ {getLastStatus(pedido.estados).estado}  <span style={{
-                                                                                                                                display: 'inline-block',
-                                                                                                                                height: '20px',
-                                                                                                                                width: '20px',
-                                                                                                                                backgroundColor: getLastStatus(pedido.estados).color,
-                                                                                                                                borderRadius: '50%',
-                                                                                                                                marginRight: '5px',
-                                                                                                                                verticalAlign: 'middle'
-                                                                                                                            }}></span>]
-        </Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-            <Button onClick={() => handleDownloadPedidoCSV(pedido)} variant="contained" color="primary">
-                Descargar CSV del Pedido
-            </Button>
-            <TableContainer component={Paper}>
-    <Table aria-label="detalles del pedido">
-        <TableHead>
-            <TableRow>
-                <TableCell>ID Barra</TableCell>
-                <TableCell>Diametro</TableCell>
-                <TableCell>Longitud Total</TableCell>
-                <TableCell>Peso Lineal</TableCell>
-                <TableCell>EJE/VIGA/LOSA</TableCell>
-                <TableCell>PISO</TableCell>
-                <TableCell>CICLO</TableCell>
-                <TableCell>Cantidad</TableCell>
-                <TableCell>Figura</TableCell>
-                <TableCell>Uso</TableCell>
-                <TableCell>A/cm</TableCell>
-                <TableCell>B/cm</TableCell>
-                <TableCell>C/cm</TableCell>
-                <TableCell>D/cm</TableCell>
-                <TableCell>E/cm</TableCell>
-                <TableCell>F/cm</TableCell>
-                <TableCell>G/cm</TableCell>
-                <TableCell>H/cm</TableCell>
-                <TableCell>I/cm</TableCell>
-                <TableCell>J/cm</TableCell>
-                <TableCell>R/cm</TableCell>
-            </TableRow>
-        </TableHead>
-        <TableBody>
-            {pedido.detalles.map((barra, idx) => (
-                <TableRow key={idx}>
-                    <TableCell>{barra.id}</TableCell>
-                    <TableCell>{typeof barra.diametroBarra === 'number' ? barra.diametroBarra.toFixed(2) : "0.00"}</TableCell>
-                    <TableCell>{typeof barra.longitudTotal === 'number' ? barra.longitudTotal.toFixed(2) : "0.00"}</TableCell>
-                    <TableCell>{typeof barra.pesoLineal === 'number' ? barra.pesoLineal.toFixed(2) : "0.00"}</TableCell>
-                    <TableCell>{barra.nombreFiltro1}</TableCell>
-                    <TableCell>{barra.aecPiso}</TableCell>
-                    <TableCell>{barra.aecSecuenciaHormigonado}</TableCell>
-                    <TableCell>{barra.cantidad}</TableCell>
-                    <TableCell>{barra.aecForma}</TableCell>
-                    <TableCell>{barra.aecUsoBarra}</TableCell>
-                    <TableCell>{typeof barra.a === 'number' ? barra.a.toFixed(2) : "0.00"}</TableCell>
-                    <TableCell>{typeof barra.b === 'number' ? barra.b.toFixed(2) : "0.00"}</TableCell>
-                    <TableCell>{typeof barra.c === 'number' ? barra.c.toFixed(2) : "0.00"}</TableCell>
-                    <TableCell>{typeof barra.d === 'number' ? barra.d.toFixed(2) : "0.00"}</TableCell>
-                    <TableCell>{typeof barra.e === 'number' ? barra.e.toFixed(2) : "0.00"}</TableCell>
-                    <TableCell>{typeof barra.f === 'number' ? barra.f.toFixed(2) : "0.00"}</TableCell>
-                    <TableCell>{typeof barra.g === 'number' ? barra.g.toFixed(2) : "0.00"}</TableCell>
-                    <TableCell>{typeof barra.h === 'number' ? barra.h.toFixed(2) : "0.00"}</TableCell>
-                    <TableCell>{typeof barra.i === 'number' ? barra.i.toFixed(2) : "0.00"}</TableCell>
-                    <TableCell>{typeof barra.j === 'number' ? barra.j.toFixed(2) : "0.00"}</TableCell>
-                    <TableCell>{typeof barra.r === 'number' ? barra.r.toFixed(2) : "0.00"}</TableCell>
-                </TableRow>
-            ))}
-        </TableBody>
-    </Table>
-</TableContainer>
-        </AccordionDetails>
-    </Accordion>
-))}
+                    <Button onClick={handleDownloadAllPedidosCSV} variant="contained" style={{ backgroundColor: '#DA291C', color: 'white' }} >
+                        Descargar CSV de Todos los Pedidos
+                    </Button>
+                    <Button onClick={handleDownloadAvailableBarsCSV} variant="contained"style={{ backgroundColor: '#DA291C', color: 'white' }} >
+                        Descargar CSV Barras No Solicitadas
+                    </Button>
                 </div>
+                <Tabs value={tabIndex} onChange={handleTabChange} aria-label="simple tabs example">
+                    <Tab label="Pedidos" />
+                    <Tab label="Barras No Solicitadas" />
+                </Tabs>
+                {tabIndex === 0 && (
+                    <div>
+                       {pedidos.filter(p => p.nombre_pedido !== "No Pedidos").map((pedido, index) => (
+                            <Accordion key={index} onChange={() => handleExpand(index)}>
+                                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                                <Typography >
+                                
+                                    <b>{pedido.nombre_pedido}</b> - {pedido.fecha} - {pedido.pesos} kg - [ {getLastStatus(pedido.estados).estado}  <span style={{
+                                                                                                                                                        display: 'inline-block',
+                                                                                                                                                        height: '20px',
+                                                                                                                                                        width: '20px',
+                                                                                                                                                        backgroundColor: getLastStatus(pedido.estados).color,
+                                                                                                                                                        borderRadius: '50%',
+                                                                                                                                                        marginRight: '5px',
+                                                                                                                                                        verticalAlign: 'middle'
+                                                                                                                                                    }}></span>]
+                                </Typography>
+                                </AccordionSummary>
+                                <AccordionDetails>
+                                    <Button onClick={() => handleDownloadPedidoCSV(pedido)} variant="contained" color="primary">
+                                        Descargar CSV del Pedido
+                                    </Button>
+                                    <TableContainer component={Paper}>
+                            <Table aria-label="detalles del pedido">
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell>ID Barra</TableCell>
+                                        <TableCell>Diametro</TableCell>
+                                        <TableCell>Longitud Total</TableCell>
+                                        <TableCell>Peso Lineal</TableCell>
+                                        <TableCell>EJE/VIGA/LOSA</TableCell>
+                                        <TableCell>PISO</TableCell>
+                                        <TableCell>CICLO</TableCell>
+                                        <TableCell>Cantidad</TableCell>
+                                        <TableCell>Figura</TableCell>
+                                        <TableCell>Uso</TableCell>
+                                        <TableCell>A/cm</TableCell>
+                                        <TableCell>B/cm</TableCell>
+                                        <TableCell>C/cm</TableCell>
+                                        <TableCell>D/cm</TableCell>
+                                        <TableCell>E/cm</TableCell>
+                                        <TableCell>F/cm</TableCell>
+                                        <TableCell>G/cm</TableCell>
+                                        <TableCell>H/cm</TableCell>
+                                        <TableCell>I/cm</TableCell>
+                                        <TableCell>J/cm</TableCell>
+                                        <TableCell>R/cm</TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {pedido.detalles.map((barra, idx) => (
+                                        <TableRow key={idx}>
+                                            <TableCell>{barra.id}</TableCell>
+                                            <TableCell>{typeof barra.diametroBarra === 'number' ? barra.diametroBarra.toFixed(2) : "0.00"}</TableCell>
+                                            <TableCell>{typeof barra.longitudTotal === 'number' ? barra.longitudTotal.toFixed(2) : "0.00"}</TableCell>
+                                            <TableCell>{typeof barra.pesoLineal === 'number' ? barra.pesoLineal.toFixed(2) : "0.00"}</TableCell>
+                                            <TableCell>{barra.nombreFiltro1}</TableCell>
+                                            <TableCell>{barra.aecPiso}</TableCell>
+                                            <TableCell>{barra.aecSecuenciaHormigonado}</TableCell>
+                                            <TableCell>{barra.cantidad}</TableCell>
+                                            <TableCell>{barra.aecForma}</TableCell>
+                                            <TableCell>{barra.aecUsoBarra}</TableCell>
+                                            <TableCell>{typeof barra.a === 'number' ? barra.a.toFixed(2) : "0.00"}</TableCell>
+                                            <TableCell>{typeof barra.b === 'number' ? barra.b.toFixed(2) : "0.00"}</TableCell>
+                                            <TableCell>{typeof barra.c === 'number' ? barra.c.toFixed(2) : "0.00"}</TableCell>
+                                            <TableCell>{typeof barra.d === 'number' ? barra.d.toFixed(2) : "0.00"}</TableCell>
+                                            <TableCell>{typeof barra.e === 'number' ? barra.e.toFixed(2) : "0.00"}</TableCell>
+                                            <TableCell>{typeof barra.f === 'number' ? barra.f.toFixed(2) : "0.00"}</TableCell>
+                                            <TableCell>{typeof barra.g === 'number' ? barra.g.toFixed(2) : "0.00"}</TableCell>
+                                            <TableCell>{typeof barra.h === 'number' ? barra.h.toFixed(2) : "0.00"}</TableCell>
+                                            <TableCell>{typeof barra.i === 'number' ? barra.i.toFixed(2) : "0.00"}</TableCell>
+                                            <TableCell>{typeof barra.j === 'number' ? barra.j.toFixed(2) : "0.00"}</TableCell>
+                                            <TableCell>{typeof barra.r === 'number' ? barra.r.toFixed(2) : "0.00"}</TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
+                                </AccordionDetails>
+                            </Accordion>
+                        ))}
+                    </div>
+                )}
+{tabIndex === 1 && (
+                    <div>
+                        {pedidos.filter(p => p.nombre_pedido === "No Pedidos").map((pedido, index) => (
+                            <Accordion key={index}>
+                                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                                    <Typography>
+                                        <b>{pedido.nombre_pedido}</b> - {pedido.fecha} - {pedido.pesos} kg
+                                    </Typography>
+                                </AccordionSummary>
+                                <AccordionDetails>
+                                    <TableContainer component={Paper}>
+                                        <Table aria-label="detalles de barras no solicitadas">
+                                            <TableHead>
+                                                <TableRow>
+                                                    <TableCell>ID Barra</TableCell>
+                                                    <TableCell>Diametro</TableCell>
+                                                    <TableCell>Longitud Total</TableCell>
+                                                    <TableCell>Peso Lineal</TableCell>
+                                                    <TableCell>EJE/VIGA/LOSA</TableCell>
+                                                    <TableCell>PISO</TableCell>
+                                                    <TableCell>CICLO</TableCell>
+                                                    <TableCell>Cantidad</TableCell>
+                                                    <TableCell>Figura</TableCell>
+                                                    <TableCell>Uso</TableCell>
+                                                    <TableCell>A/cm</TableCell>
+                                                    <TableCell>B/cm</TableCell>
+                                                    <TableCell>C/cm</TableCell>
+                                                    <TableCell>D/cm</TableCell>
+                                                    <TableCell>E/cm</TableCell>
+                                                    <TableCell>F/cm</TableCell>
+                                                    <TableCell>G/cm</TableCell>
+                                                    <TableCell>H/cm</TableCell>
+                                                    <TableCell>I/cm</TableCell>
+                                                    <TableCell>J/cm</TableCell>
+                                                    <TableCell>R/cm</TableCell>
+                                                </TableRow>
+                                            </TableHead>
+                                            <TableBody>
+                                                {pedido.detalles.map((barra, idx) => (
+                                                    <TableRow key={idx}>
+                                                        <TableCell>{barra.id}</TableCell>
+                                                        <TableCell>{typeof barra.diametroBarra === 'number' ? barra.diametroBarra.toFixed(2) : "0.00"}</TableCell>
+                                                        <TableCell>{typeof barra.longitudTotal === 'number' ? barra.longitudTotal.toFixed(2) : "0.00"}</TableCell>
+                                                        <TableCell>{typeof barra.pesoLineal === 'number' ? barra.pesoLineal.toFixed(2) : "0.00"}</TableCell>
+                                                        <TableCell>{barra.nombreFiltro1}</TableCell>
+                                                        <TableCell>{barra.aecPiso}</TableCell>
+                                                        <TableCell>{barra.aecSecuenciaHormigonado}</TableCell>
+                                                        <TableCell>{barra.cantidad}</TableCell>
+                                                        <TableCell>{barra.aecForma}</TableCell>
+                                                        <TableCell>{barra.aecUsoBarra}</TableCell>
+                                                        <TableCell>{typeof barra.a === 'number' ? barra.a.toFixed(2) : "0.00"}</TableCell>
+                                                        <TableCell>{typeof barra.b === 'number' ? barra.b.toFixed(2) : "0.00"}</TableCell>
+                                                        <TableCell>{typeof barra.c === 'number' ? barra.c.toFixed(2) : "0.00"}</TableCell>
+                                                        <TableCell>{typeof barra.d === 'number' ? barra.d.toFixed(2) : "0.00"}</TableCell>
+                                                        <TableCell>{typeof barra.e === 'number' ? barra.e.toFixed(2) : "0.00"}</TableCell>
+                                                        <TableCell>{typeof barra.f === 'number' ? barra.f.toFixed(2) : "0.00"}</TableCell>
+                                                        <TableCell>{typeof barra.g === 'number' ? barra.g.toFixed(2) : "0.00"}</TableCell>
+                                                        <TableCell>{typeof barra.h === 'number' ? barra.h.toFixed(2) : "0.00"}</TableCell>
+                                                        <TableCell>{typeof barra.i === 'number' ? barra.i.toFixed(2) : "0.00"}</TableCell>
+                                                        <TableCell>{typeof barra.j === 'number' ? barra.j.toFixed(2) : "0.00"}</TableCell>
+                                                        <TableCell>{typeof barra.r === 'number' ? barra.r.toFixed(2) : "0.00"}</TableCell>
+                                                    </TableRow>
+                                                ))}
+                                            </TableBody>
+                                        </Table>
+                                    </TableContainer>
+                                </AccordionDetails>
+                            </Accordion>
+                        ))}
+                    </div>
+                )}
             </CardContent>
         </Card>
     );
