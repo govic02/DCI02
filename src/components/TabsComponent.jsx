@@ -828,6 +828,7 @@ const TabComponent = ({ urnBuscada }) => {
                                 placeholder="Ingrese el nombre del pedido"
                                 value={pedidoNombre}
                                 onChange={(e) => setPedidoNombre(e.target.value)}
+                                maxLength={25}
                             />
                         </Form.Group>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px' }}>
