@@ -10,10 +10,10 @@ const ColumnaIzquierda = ({ isCollapsed, handleCollapse }) => {
     const { logout } = useAuth();
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768); 
     const isDesktopOrLaptop = useMediaQuery({
-        query: '(min-width: 980px)'
+        query: '(min-width: 580px)'
     });
     const isTabletOrMobile = useMediaQuery({
-        query: '(max-width: 979px)'
+        query: '(max-width: 579px)'
     });
     useEffect(() => {
         // Desplegar por consola el objeto token cada vez que el componente se carga o el token cambia

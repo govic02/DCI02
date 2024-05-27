@@ -430,7 +430,7 @@ PesoPromedioGeneral = async (urn) => {
         if (idsBarras !== undefined) {
             idsBarras.forEach(barra => {
                 const { pesoLineal, longitudTotal } = barra;
-                const longitudEnMetros = longitudTotal / 1000;
+                const longitudEnMetros = longitudTotal / 100;
                 const pesoTotal = pesoLineal * longitudEnMetros; // Calcula el peso total para la barra actual
 
                 totalPesoProyecto += pesoTotal; // Suma acumulativa de todos los pesos
@@ -481,7 +481,7 @@ PesoPromedio = async (urn) => {
             idsBarras.forEach(barra => {
                 const { nombreFiltro2, pesoLineal, longitudTotal } = barra;
                 // Convertir longitud de milímetros a metros si es necesario
-                const longitudEnMetros = longitudTotal / 1000;
+                const longitudEnMetros = longitudTotal / 100;
                 const pesoTotal = pesoLineal * longitudEnMetros;  // Aquí se calcula el peso total
     
                 if (!resultados[nombreFiltro2]) {

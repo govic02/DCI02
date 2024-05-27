@@ -24,10 +24,10 @@ const ColumnaDerecha = ({ isCollapsed, token, urn, selectedIds, onCameraChange, 
     const [showAdministradorVistasMobile, setShowAdministradorVistasMobile] = useState(false); 
 
     const isDesktopOrLaptop = useMediaQuery({
-      query: '(min-width: 980px)'
+      query: '(min-width: 580px)'
     });
     const isTabletOrMobile = useMediaQuery({
-      query: '(max-width:979px)'
+      query: '(max-width:579px)'
     });
     const isPortrait = useMediaQuery({ query: '(orientation: portrait)' });
   

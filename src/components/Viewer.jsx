@@ -115,17 +115,42 @@ class Viewer extends React.Component {
             let esBarraValida = false;
     
             result.properties.forEach(prop => {
-                if (prop.displayName === nombreParametroPesoLineal && parseFloat(prop.displayValue) > 0) {
-                    pesoActual = parseFloat(prop.displayValue);
-                    esBarraValida = true;
-                } else if (prop.displayName === nombreParametrolargo && parseFloat(prop.displayValue) > 0) {
-                    largoActual = parseFloat(prop.displayValue) / 100; // Asume que el largo viene en cm y lo convierte a metros
-                    esBarraValida = true;
+                if (prop.attributeName === nombreParametroPesoLineal && parseFloat(prop.displayValue) > 0) {
+                    if (prop.units) {
+                        if (prop.units.includes("kilograms") || prop.units.includes("kilos") || prop.units.includes("kilogramos")) {
+                            pesoActual = parseFloat(prop.displayValue); // No se necesita conversión
+                        } else if (prop.units.includes("pounds") || prop.units.includes("libras")) {
+                            pesoActual = parseFloat(prop.displayValue) * 0.453592; // Convertir de libras a kilogramos
+                        }
+                    } else {
+                        // Si no hay información de unidades, asumimos que está en kilogramos por defecto
+                        pesoActual = parseFloat(prop.displayValue);
+                    }
+                    esBarraValida = true; // Se encontró peso, marcamos como válida
+                } else if (prop.attributeName === nombreParametrolargo && parseFloat(prop.displayValue) > 0) {
+                    if (prop.units) {
+                        if (prop.units.includes("meters")) {
+                            console.log("encuentro metros");
+                            largoActual = parseFloat(prop.displayValue) //* 100; // Convertir de metros a centímetros
+                        } else if (prop.units.includes("feet")) {
+                            largoActual = parseFloat(prop.displayValue) * 30.48; // Convertir de pies a centímetros
+                        } else if (prop.units.includes("centimeters")) {
+                            console.log("encuentro centimetros");
+                            largoActual = parseFloat(prop.displayValue) /100; // No se necesita conversión
+                        }else if (prop.units.includes("millimeters")) {
+                            console.log("encuentro milimetros");
+                            largoActual = parseFloat(prop.displayValue) /1000; //  milimetros a cm
+                        }
+                    } else {
+                        // Si no hay información de unidades, asumimos que está en centímetros por defecto
+                        largoActual = parseFloat(prop.displayValue);
+                    }
+                    esBarraValida = true; // Se encontró largo, marcamos como válida
                 }
             });
     
             if (esBarraValida) {
-                pesoTotal += pesoActual * largoActual;
+                pesoTotal += pesoActual *(largoActual/100);
                 largoTotal += largoActual;
                 totalBarras += 1;
             }
@@ -230,9 +255,9 @@ class Viewer extends React.Component {
                         // Encuentra valores para los filtros, peso lineal, longitud total, diámetro de barra y fecha
                         const propFiltro1 = element.properties.find(prop => prop.displayName === filtro1)?.displayValue || '';
                         const propFiltro2 = element.properties.find(prop => prop.displayName === filtro2)?.displayValue || '';
-                        const pesoLineal = element.properties.find(prop => prop.displayName === nombreParametroPesoLineal)?.displayValue || '0';
-                        const longitudTotal = element.properties.find(prop => prop.displayName === nombreParametrolargo)?.displayValue || '0';
-                        const diametroBarra = element.properties.find(prop => prop.displayName === nombreParametroDiametro)?.displayValue || '0';
+                        const pesoLineal = element.properties.find(prop => prop.attributeName === nombreParametroPesoLineal)?.displayValue || '0';
+                        const longitudTotal = element.properties.find(prop => prop.attributeName === nombreParametrolargo)?.displayValue || '0';
+                        const diametroBarra = element.properties.find(prop => prop.attributeName === nombreParametroDiametro)?.displayValue || '0';
                         const fecha = element.properties.find(prop => prop.displayName === nombreParametroFecha)?.displayValue || '';
     
                         return {
@@ -472,19 +497,46 @@ class Viewer extends React.Component {
            let esBarraValida = false; // Asumimos que no es válida hasta encontrar las propiedades necesarias
    
            result.properties.forEach(prop => {
-               if (prop.displayName === nombreParametroPesoLineal && parseFloat(prop.displayValue) > 0) {
-                   pesoActual = parseFloat(prop.displayValue);
+               if (prop.attributeName === nombreParametroPesoLineal && parseFloat(prop.displayValue) > 0) {
+                    if (prop.units) {
+                        if (prop.units.includes("kilograms") || prop.units.includes("kilos") || prop.units.includes("kilogramos")) {
+                            pesoActual = parseFloat(prop.displayValue); // No se necesita conversión
+                        } else if (prop.units.includes("pounds") || prop.units.includes("libras")) {
+                            pesoActual = parseFloat(prop.displayValue) * 0.453592; // Convertir de libras a kilogramos
+                        }
+                    } else {
+                        // Si no hay información de unidades, asumimos que está en kilogramos por defecto
+                        pesoActual = parseFloat(prop.displayValue);
+                    }
                    esBarraValida = true; // Se encontró peso, marcamos como válida
-               } else if (prop.displayName === nombreParametrolargo && parseFloat(prop.displayValue) > 0) {
-                   largoActual = parseFloat(prop.displayValue) / 100; // Conversión si es necesario
+               } else if (prop.attributeName === nombreParametrolargo && parseFloat(prop.displayValue) > 0) {
+                 
+                    if (prop.units) {
+                        if (prop.units.includes("meters")) {
+                            largoActual = parseFloat(prop.displayValue) ; // *100 Convertir de metros a centímetros
+                        } else if (prop.units.includes("feet")) {
+                            console.log("encuentro pies");
+                            largoActual = parseFloat(prop.displayValue) * 30.48; // Convertir de pies a centímetros
+                        } else if (prop.units.includes("centimeters")) {
+                            largoActual = parseFloat(prop.displayValue)/100; // No se necesita conversión
+                        }
+                        else if (prop.units.includes("millimeters")) {
+                            console.log("encuentro milimetros");
+                            largoActual = parseFloat(prop.displayValue) /1000; //  milimetros a cm
+                        }
+                    } else {
+                        // Si no hay información de unidades, asumimos que está en centímetros por defecto
+                        largoActual = parseFloat(prop.displayValue);
+                    }
+                //  largoActual = parseFloat(prop.displayValue) / 100; // Conversión si es necesario
                    esBarraValida = true; // Se encontró largo, marcamos como válida
                }
            });
    
            if (esBarraValida) {
                // Solo acumula y cuenta si es una barra válida
-               pesoTotal += pesoActual * largoActual;
-               largoTotal += largoActual;
+               pesoTotal += pesoActual * (largoActual/100);
+               largoTotal += (largoActual/100);
                totalBarras += 1; // Incrementamos el contador de barras válidas
            }
        });

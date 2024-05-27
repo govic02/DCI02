@@ -649,12 +649,10 @@ const TabComponent = ({ urnBuscada }) => {
                             <div style={{  color: '#DA291C' }}><strong>{pesoTotal.toFixed(1)} kg</strong></div> {/* Ejemplo de número, aquí iría el valor real */}
                             <hr style={{ backgroundColor: 'black', height: '2px' }} />
                         </div>
-                        {/* Columna 2 */}
-                        <div style={{ flex: 1, textAlign: 'center' }}>
-                            <div>Largo Total</div>
-                            <div style={{  color: '#DA291C' }}><strong>{largoTotal.toFixed(1)} Mts</strong></div> {/* Ejemplo de número, aquí iría el valor real */}
-                            <hr style={{ backgroundColor: 'black', height: '2px' }} />
-                        </div>
+                        {/* 
+                        
+                        Columna 2 */}
+                        
                         {/* Columna 3 */}
                         <div style={{ flex: 1, textAlign: 'center' }}>
                             <div>Total Barras</div>
@@ -717,7 +715,7 @@ const TabComponent = ({ urnBuscada }) => {
                 </Modal.Header>
                 <Modal.Body>
               
-                <p>Largo Total: <strong>{modalInfo.data.largos} Mts</strong> | Peso Total: <strong>{modalInfo.data.pesos} kg</strong></p>
+                <p>Largo Total: <strong>{modalInfo.data.largos*100} cms</strong> | Peso Total: <strong>{modalInfo.data.pesos} kg</strong></p>
                 <p>Estado: <span style={{ height: '15px', width: '15px', backgroundColor: '#DA291C', borderRadius: '50%', display: 'inline-block' }}></span></p>
                 
                 {/* Añadiendo la tabla de estados con iconos circulares */}
@@ -790,7 +788,7 @@ const TabComponent = ({ urnBuscada }) => {
                 <span> | </span>
                 <span className="fw-bold">Cantidad:</span> <span style={{ color: '#DA291C'  }}>{adicional.cantidad}</span>
                 <span> | </span>
-                <span className="fw-bold">Largo:</span> <span style={{ color: '#DA291C'  }}>{adicional.largo}&nbsp;Mtrs</span>
+                <span className="fw-bold">Largo:</span> <span style={{ color: '#DA291C'  }}>{adicional.largo}&nbsp;Cms</span>
             </div>
             {esAdministradorEditor && (
             <Button variant="outline-danger" onClick={() => borrarAdicional(adicional._id)}>
