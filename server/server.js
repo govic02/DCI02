@@ -83,9 +83,11 @@ app.use(async (req, res, next) => {
 const mailTransport = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-      user: process.env.EMAIL_USERNAME,
-      pass: process.env.EMAIL_PASSWORD
+      user: 'solucionesicdchile@gmail.com',
+      pass: 'jdvs uvxu xswy qhgl'
   }
+  //solucionesicdchile@gmail.com
+  //pass: process.env.EMAIL_PASSWORD
 });
 const sendEmail = async (emailOptions) => {
   try {
