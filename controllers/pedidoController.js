@@ -188,7 +188,7 @@ const crearPedido = async (req, res) => {
         // Extraer información del cuerpo de la solicitud
         console.log("Recibe llamado a pedido");
         const { ids, fecha, proveedor, id_int1, pesos, largos, listado_pesos, listado_largos, nombre_pedido, urn_actual } = req.body;
-        const urlPedido = '';
+        const fileUrl = '0';
 
         const pedidoExistente = await Pedido.findOne({
             $or: [
