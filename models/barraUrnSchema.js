@@ -89,7 +89,9 @@ const itemSchema = new Schema({
 // Define el esquema principal que incluye el subesquema
 const barraUrnSchema = new Schema({
   urn: { type: String, required: true },
-  detalles: [itemSchema] // Lista de objetos con la estructura definida en itemSchema
+  detalles: [itemSchema], // Lista de objetos con la estructura definida en itemSchema
+  largoTipo:{type:String},
+  pesoTipo: {type:String}
 });
 
 // Crea el modelo a partir del esquema

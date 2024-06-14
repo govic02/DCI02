@@ -21,11 +21,11 @@ const Paleta =  ({ urnBuscada })  => {
     const [isVisible, setIsVisible] = useState(true);
     const [colorModalVisible, setColorModalVisible] = useState(false); // Controla la visibilidad del modal de colores
     const [colores, setColores] = useState([
-        { color: '#0E31F3 ', descripcion: 'Azul - Con fecha de Instalación' },
-        { color: '#303031 ', descripcion: 'Gris - Sin fecha plan' },
-        { color: '#FA1F05 ', descripcion: 'Rojo - Fecha plan caducada' },
-        { color: '#FC9E05 ', descripcion: 'Anaranjado - Quedan 7 días o menos para fecha plan' },
-        { color: '#FAF705 ', descripcion: 'Amarillo - Más de 7 días para fecha plan' }
+        { color: '#0E31F3 ', descripcion: 'Ok Instalación' },
+        { color: '#303031 ', descripcion: 'Sin fecha plan' },
+        { color: '#FA1F05 ', descripcion: 'Fecha plan caducada' },
+        { color: '#FC9E05 ', descripcion: 'Fecha plan < 7 días' },
+        { color: '#FAF705 ', descripcion: 'Fecha plan >= 7 días' }
     ]);
     
     
@@ -229,7 +229,7 @@ const Paleta =  ({ urnBuscada })  => {
           {colorModalVisible && (
                 <div style={{
                     position: 'fixed',
-                    width:'350px',
+                    width:'200px',
                     left: '200px',
                     top: '300px',
                     transform: 'translate(-50%, -50%)',
@@ -237,25 +237,28 @@ const Paleta =  ({ urnBuscada })  => {
                     padding: '20px',
                     borderRadius: '10px',
                     boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-                    zIndex: 1001 // Asegúrate de que esté por encima de otros elementos
+                    zIndex: 1001 
                 }}>
-                    <h4>Mapa de Estados</h4>
-                    <ul>
+                    <h5>Mapa de Estados</h5>
+                    <ul style={{ 
+                         paddingLeft: '0', 
+                         listStyleType: 'none', 
+                        textAlign: 'left'}}>
                         {colores.map((item, index) => (
                             <li key={index} style={{
-                                padding: '10px',
-                                marginBottom: '10px',
+                                
+                                marginBottom: '5px',
                                 display: 'flex',
                                 alignItems: 'center' // Alinea verticalmente el recuadro y el texto
                             }}>
                                 <span style={{
                                     display: 'inline-block',
-                                    width: '20px', // Tamaño del recuadro de color
-                                    height: '20px',
+                                    width: '10px', // Tamaño del recuadro de color
+                                    height: '10px',
                                     backgroundColor: item.color,
-                                    marginRight: '10px' // Margen entre el recuadro y el texto
+                                    marginRight: '5px' // Margen entre el recuadro y el texto
                                 }}></span>
-                                <span style={{ color: 'black' }}>{item.descripcion}</span>
+                                <span style={{ color: 'black',fontSize: '12px' }}>{item.descripcion}</span>
                             </li>
                         ))}
                     </ul>
@@ -264,6 +267,7 @@ const Paleta =  ({ urnBuscada })  => {
                             style={{
                                 backgroundColor: '#DA291C', // Color de fondo rojo
                                 color: 'white', // Color del texto
+                                fontSize: '12px',
                                 borderColor: '#DA291C' // Color del borde para que coincida con el fondo
                             }}
                         >

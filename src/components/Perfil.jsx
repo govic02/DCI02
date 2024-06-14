@@ -10,6 +10,7 @@ import ListadoProyectosAdministrador from './Perfil/ListadoProyectosAdministrado
 import { ProyectoProvider } from '../context/ProyectoContext';
 import API_BASE_URL from '../config';
 import { useAuth } from '../context/AuthContext';
+import { Margin } from '@mui/icons-material';
 const Perfil = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) => {
     const [urnSelected, setUrnSelected] = useState('');
    
@@ -50,7 +51,10 @@ const Perfil = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) => {
 
     obtenerUsuarioProyecto();
 }, []);
-
+const listStyle = {
+    maxHeight: '90%',  // Ajusta este valor según las necesidades de tu diseño
+    
+  };
     return (
         <div style={estiloPerfil}>
                <HeaderApp proyectoKey={proyectoKeySeleccionado} urn={urnSelected}/> {/* Instancia el componente HeaderApp */}
@@ -63,8 +67,10 @@ const Perfil = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) => {
            </div>
            <div class='row'>
                 <div class='col-6'>
+                    <div style={listStyle}> 
                    <ListadoProyectosAdministrador onProyectoSeleccionado={handleProyectoSeleccionado}
                         onProyectoKeySeleccionado={setProyectoKeySeleccionado}/>
+                </div>
                 </div>
                 <div class='col-6'>
                     <DatosUsuario />

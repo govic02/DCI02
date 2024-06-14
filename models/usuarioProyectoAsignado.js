@@ -6,6 +6,7 @@ const usuarioProyectoAsignadoSchema = new mongoose.Schema({
   urn: { type: String },
   proyectoKey: { type: String },
   fecha: { type: String },
+  tipoUsuario: { type: String }, 
   hora: { type: String }
 });
 

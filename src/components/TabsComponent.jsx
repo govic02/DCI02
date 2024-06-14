@@ -12,7 +12,7 @@ import Card from 'react-bootstrap/Card';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye,faPlus, faHandPointer,faTrash } from '@fortawesome/free-solid-svg-icons';
 import API_BASE_URL from '../config';
-
+import { useAuth } from '../context/AuthContext';
 const customStyles = {
     multiValue: (base) => ({
         ...base,
@@ -55,20 +55,114 @@ const TabComponent = ({ urnBuscada }) => {
     const [pedidoActual, setPedidoActual]=useState([]);
     const estados = ['paquetizado', 'espera_aprobacion', 'rechazado', 'aceptado', 'fabricacion', 'despacho', 'recepcionado', 'instalado', 'inspeccionado', 'hormigonado'];
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const userId = localStorage.getItem('userId');
+    const { logout } = useAuth();
     const handleOpenModalWithInfo = async (pedido) => {
         setPedidoActual(pedido);
         setModalInfo({ show: true, data: pedido });
         console.log("pedido a mostrar", pedido);
         await cargarAdicionales(pedido._id); // Llama a cargarAdicionales aquí
     };
-
-    const handleNextStateClick = () => {
-        setShowConfirmChange(true); // Muestra la confirmación
+    const permisos = {
+        Constructor: ['paquetizado', 'espera_aprobacion', 'recepcionado', 'instalado', 'hormigonado'],
+        Fabricante: ['paquetizar', 'fabricacion','aceptado', 'rechazado','fabricar', 'despacho'],
+        ITO: ['inspeccionado'],
+        Clientes: [],
+        Invitado: []
     };
+    const handleNextStateClick = () => {
+        console.log("AQUIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII");
+        revisionPermisos ();
+       
+    };
+    const verificarUsuario = async () => {
+        try {
+            const userId = localStorage.getItem('userId');
+            const response = await axios.get(`${API_BASE_URL}/api/usuarios/${userId}`);
+            console.log("Usuario verificado:", response.data);
+        } catch (error) {
+            logout();
+            window.location.reload();
+            console.error("Error al verificar el usuario:", error);
+        }
+    };
+    const obtenerProximoEstado = (estadoActual) => {
+        const index = estados.indexOf(estadoActual);
+        return index !== -1 && index < estados.length - 1 ? estados[index + 1] : null;
+    };
+    const revisionPermisos = async () => {
+        try {
+            verificarUsuario();
+            const respuesta = await fetch(`${API_BASE_URL}/api/usuariosProyectoAsignado/${encodeURIComponent(urnBuscada)}`);
+            console.log("inicio revisión");
+            if (!respuesta.ok) {
+                throw new Error('Error al obtener usuarios asignados');
+            }
+            const usuariosAsignadosRespuesta = await respuesta.json();
+    
+            // Verificar si el usuario actual está en la lista de asignados
+            const usuarioAsignado = usuariosAsignadosRespuesta.find(u => u.idUsuario === userId);
+            if (!usuarioAsignado) {
+                console.error('El usuario no está asignado a este proyecto.');
+                toast.error('No tiene permisos para cambiar el estado de este pedido.');
+                setShowConfirmChange(false); // Muestra la confirmación
+                return;
+            }
+    
+            // Mostrar por consola el tipo de usuario
+            console.log("Tipo de usuario asignado:", usuarioAsignado.tipoUsuario);
+            if(usuarioAsignado.tipoUsuario != "" && usuarioAsignado.tipoUsuario != undefined){
+                // aqui debe buscar  segun el tipo de usuario  si es posible hacer el cambio o no
+                const tipoUsuario = usuarioAsignado.tipoUsuario;
+                const permisosUsuario = permisos[tipoUsuario] || [];
+                const currentEstados = pedidoActual.estados || {};
+    
+                // Encuentra el índice del estado actual más reciente basado en la lista 'estados'
+                let estadoActualIndex = -1;
+                for (let i = estados.length - 1; i >= 0; i--) {
+                    if (currentEstados[estados[i]] && currentEstados[estados[i]].est === 'ok') {
+                        estadoActualIndex = i;
+                        break;
+                    }
+                }
+            
+                console.log("Estado actual:", estadoActualIndex);
+            
+                // Determina el próximo estado si no es el último
+                let nuevoEstado = 'paquetizado'; // Estado inicial por defecto si no hay ningún estado actual
+                if (estadoActualIndex !== -1 && estadoActualIndex < estados.length - 1) {
+                    nuevoEstado = estados[estadoActualIndex + 1];
+                    console.log("estado nuevo",nuevoEstado);
+                    setShowConfirmChange(true); // Muestra la confirmación
+                } else if (estadoActualIndex === estados.length - 1) {
+                    console.log("Ya está en el último estado posible.");
+                    toast.info("Ya está en el último estado posible.");
+                    return; // Retorna aquí si ya está en el último estado
+                }
+                
+
+                if (nuevoEstado && permisosUsuario.includes(nuevoEstado)) {
+                    console.log(` El usuario puede cambiar al estado '${nuevoEstado}'.`);
+                    setShowConfirmChange(true); // Muestra la confirmación
+                } else {
+                    toast.error(` No tiene permisos para cambiar al estado '${nuevoEstado}'.`);
+                    setShowConfirmChange(false); // Muestra la confirmación
+                    return;
+                }
+
+            }
+            // Proceder con el cambio de estado
+            //realizarCambioDeEstado(usuarioAsignado.tipoUsuario);
+        } catch (error) {
+            console.error("Error el usuario no tiene una asignación de tipo de usuario", error);
+            toast.error("Error el usuario no tiene una asignación de tipo de usuario");
+        }
+    };
+    
     const confirmStateChange = async () => {
         const username = localStorage.getItem('username');
         const currentEstados = pedidoActual.estados || {};
-    
+        verificarUsuario();
         // Encuentra el índice del estado actual más reciente basado en la lista 'estados'
         let estadoActualIndex = -1;
         for (let i = estados.length - 1; i >= 0; i--) {
@@ -129,6 +223,7 @@ const TabComponent = ({ urnBuscada }) => {
     
     
     const handleApplyFilterClick = () => {
+        verificarUsuario();
         if (filtrar) {
 
            
@@ -184,6 +279,7 @@ const TabComponent = ({ urnBuscada }) => {
     };
 
     const cargarAdicionales = async (pedidoId) => {
+        verificarUsuario();
         try {
             const response = await axios.get(API_BASE_URL+`/api/getadicionalesPedido/${pedidoId}`);
             if (Array.isArray(response.data)) {
@@ -228,6 +324,7 @@ const TabComponent = ({ urnBuscada }) => {
     useEffect(() => {
         const fetchPedidos = async () => {
             try {
+                verificarUsuario();
                 // Asumiendo que urnBuscada contiene la URN que quieres buscar
                 const urn = urnBuscada; // Asegúrate de que esta variable contiene la URN correcta
                 const url = API_BASE_URL+`/api/listPedidos?urn=${urn}`;
@@ -247,6 +344,7 @@ const TabComponent = ({ urnBuscada }) => {
         fetchPedidos();
     }, [urnBuscada]); // Agrega urnBuscada a las dependencias de useEffect si es una prop o un estado
     const handleDeleteConfirmation = async (pedido) => {
+        verificarUsuario();
         console.log("pedido borrar antes");
         console.log(pedido);
         const isConfirmed = window.confirm("En verdad desea borrar "+pedido.nombre_pedido);
@@ -280,6 +378,7 @@ const TabComponent = ({ urnBuscada }) => {
     }
     const fetchPedidosAct = async () => {
         try {
+            verificarUsuario();
             const urn = urnBuscada;
             const url = API_BASE_URL+`/api/listPedidos?urn=${encodeURIComponent(urn)}`;
             
@@ -327,7 +426,7 @@ const TabComponent = ({ urnBuscada }) => {
     useEffect(() => {
         const fetchFiltros = async () => {
             try {
-                console.log("URN BUSCADA 12");
+                verificarUsuario();
                 console.log(urnBuscada);
                 
                 if (urnBuscada) {
@@ -369,8 +468,9 @@ const TabComponent = ({ urnBuscada }) => {
     const handleOpenModal = async() => {
         let idsRepetidos = [];
         let pedidosConRepetidos = new Set(); // Utilizamos un Set para evitar nombres duplicados
-       
+        verificarUsuario();
         try{
+            
             await fetchPedidosAct();
              // Iteramos sobre cada pedido existente
              pedidos.forEach(pedido => {
@@ -398,10 +498,29 @@ const TabComponent = ({ urnBuscada }) => {
        
     };
     
-    
+    const fetchBarDetails = async (pedido) => {
+        try {
+            verificarUsuario();
+            console.log("datos para consulta ",urnBuscada );
+            console.log("datos para consulta ",pedido );
+            const url = `${API_BASE_URL}/api/barrasPorUrneIds/${urnBuscada}`;
+            const response = await axios.post(url, { ids: pedido.ids });
+            console.log("respuesta datos  barra detalles",response.data)
+            if (response.status === 200) {
+                return response.data;
+            } else {
+                console.error('No se encontraron barras para los IDs proporcionados');
+                return [];
+            }
+        } catch (error) {
+            console.error('Error al obtener detalles de barras:', error);
+            return [];
+        }
+    };
     
     const handleCloseModal = () => setShowModal(false);
     const handleExecuteOrderClick = async () => {
+        verificarUsuario();
         if (!pedidoNombre.trim()) {
             console.log("sin nombre");
             toast.error("Debe agregar un nombre al pedido");
@@ -426,6 +545,8 @@ const TabComponent = ({ urnBuscada }) => {
             largos: `${largoTotal.toFixed(1)}` // Convertir a string si es necesario
             // Agrega cualquier otro dato necesario para tu pedido aquí
         };
+
+       
         try {
             // Realizar la solicitud POST para crear el pedido
             const respuesta = await axios.post(API_BASE_URL+'/api/pedido', datosPedido);
@@ -438,6 +559,27 @@ const TabComponent = ({ urnBuscada }) => {
                 setPedidoNombre(''); // Resetear el nombre del pedido
                 // Opcionalmente, limpiar otros estados si es necesario
                 fetchPedidosAct();
+                let email = localStorage.getItem('username');
+                const detalles = await fetchBarDetails(respuesta.data.pedido); // Obtiene los detalles de las barras del pedido
+                console.log("Barras de pedido con detalles", detalles);
+        
+                // Agrega detalles adicionales para la generación del archivo CSV
+                const pedidoInfo = {
+                    barras:detalles,
+                    nombrePedido: respuesta.data.pedido.nombre_pedido, // Supone que respuesta.data.pedido contiene 'nombre_pedido'
+                    urn: respuesta.data.pedido.urn_actual // Supone que respuesta.data.pedido contiene 'urn_actual'
+                };
+                const respuestaCSV = await axios.post(`${API_BASE_URL}/api/pedidoCVS`, pedidoInfo);
+       
+                const emailData = {
+                    to: email, // Cambia esto por la dirección de correo a la que quieres enviar el mail
+                    subject: 'Nuevo Pedido Creado',
+                    text: `<p>Se ha creado un nuevo pedido con el nombre: ${pedidoNombre}</p>
+                           <p>Peso Total: ${pesoTotal.toFixed(1)} kg</p>
+                           <p>Longitud Total: ${largoTotal.toFixed(1)} mts</p>
+                           <p>Puedes descargar el archivo del pedido desde el siguiente enlace: <a href="${respuestaCSV.data.fileUrl}">Descargar Pedido</a></p>`
+                };
+                await axios.post(`${API_BASE_URL}/api/send-mail`, emailData);
             }
             if (respuesta.status === 305) {
                 toast.error("Pedido con elementos duplicados, no fue posible crearlo");
@@ -451,8 +593,10 @@ const TabComponent = ({ urnBuscada }) => {
         handleCloseModal(); // Cierra el modal después de ejecutar las acciones necesarias
     };
     
+    
     const borrarAdicional = async (idAdicional) => {
         try {
+            verificarUsuario();
             // Realiza la petición DELETE al servidor para eliminar el adicional
             await axios.delete(API_BASE_URL+`/api/adicionalesPedido/eliminar/${idAdicional}`);
     
@@ -474,6 +618,7 @@ const TabComponent = ({ urnBuscada }) => {
         }
     };
     window.onunhandledrejection = function (event) {
+        verificarUsuario();
         console.error("Unhandled rejection (promise):", event.promise, "reason:", event.reason);
         return true; // Previene la propagación y la consola del navegador mostrando el error
       };
@@ -482,6 +627,7 @@ const TabComponent = ({ urnBuscada }) => {
         return true; // Previene el error de ser propagado
     };
     try {
+        verificarUsuario();
         worker.postMessage(largeData);
       } catch (e) {
         console.error('Failed to send data to worker:', e);
@@ -669,7 +815,7 @@ const TabComponent = ({ urnBuscada }) => {
                   </div>
                   <div style={{  flexWrap: 'wrap', justifyContent: 'space-between' ,width:'100%'}}>
             {/* Cards de pedidos existentes */}
-             {/* Ajusta el 32px según el tamaño de tu encabezado */}
+            
             
              <div className="list-group" style={{ 
     fontSize: '8pt', 
@@ -709,23 +855,32 @@ const TabComponent = ({ urnBuscada }) => {
               </div></div>
                 </Tab>
             </Tabs>
+            
             <Modal show={modalInfo.show} onHide={() => setModalInfo({ ...modalInfo, show: false })}      className="custom-modal-style" >
                 <Modal.Header closeButton>
                     <Modal.Title>{modalInfo.data.nombre_pedido}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-              
-                <p>Largo Total: <strong>{modalInfo.data.largos*100} cms</strong> | Peso Total: <strong>{modalInfo.data.pesos} kg</strong></p>
+               {/*Largo Total: <strong>{modalInfo.data.largos*100} cms</strong>*/}
+                <p> Peso Total: <strong>{modalInfo.data.pesos} kg</strong></p>
                 <p>Estado: <span style={{ height: '15px', width: '15px', backgroundColor: '#DA291C', borderRadius: '50%', display: 'inline-block' }}></span></p>
                 
                 {/* Añadiendo la tabla de estados con iconos circulares */}
-                {!showConfirmChange && (
-                        <Button variant="primary" onClick={handleNextStateClick}>
-                            Pasar al siguiente estado
-                        </Button>
-                    )}
-
-                    {/* Confirmación para el cambio de estado */}
+                <div style={{ display: 'flex', alignItems: 'left', marginBottom: '10px' }}>
+                        {!showConfirmChange && (
+                                <Button variant="primary" onClick={handleNextStateClick} style={{ marginRight:'3px' }}>
+                                    Pasar al siguiente estado
+                                </Button>
+                            )}
+                            {modalInfo.data.url && (
+                            <Button href={modalInfo.data.url} variant="primary" style={{ marginRight:'3px',marginBottom: '1px' }}>
+                                Descargar CSV
+                                
+                            </Button>
+                            )}
+                </div>
+                 
+                            {/* Confirmación para el cambio de estado */}
                     {showConfirmChange && (
                         <>
                             <p>¿Está seguro de pasar al siguiente estado? Este cambio no es reversible.</p>

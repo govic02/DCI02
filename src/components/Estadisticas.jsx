@@ -30,6 +30,7 @@ const Estadisticas = () => {
     useEffect(() => {
         const obtenerUsuarioProyecto = async () => {
             try {
+                
                 const response = await fetch(`${API_BASE_URL}/api/getUserProyectId`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },

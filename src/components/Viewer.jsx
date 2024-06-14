@@ -116,41 +116,82 @@ class Viewer extends React.Component {
     
             result.properties.forEach(prop => {
                 if (prop.attributeName === nombreParametroPesoLineal && parseFloat(prop.displayValue) > 0) {
-                    if (prop.units) {
-                        if (prop.units.includes("kilograms") || prop.units.includes("kilos") || prop.units.includes("kilogramos")) {
+                     if (prop.units) {
+                         if (prop.units.includes("kilograms") || prop.units.includes("kilos") || prop.units.includes("kilogramos")) {
+                           console.log("peso actual Kilos",prop.displayValue);
                             pesoActual = parseFloat(prop.displayValue); // No se necesita conversión
-                        } else if (prop.units.includes("pounds") || prop.units.includes("libras")) {
-                            pesoActual = parseFloat(prop.displayValue) * 0.453592; // Convertir de libras a kilogramos
-                        }
-                    } else {
-                        // Si no hay información de unidades, asumimos que está en kilogramos por defecto
-                        pesoActual = parseFloat(prop.displayValue);
-                    }
+                         } else if (prop.units.includes("pounds") || prop.units.includes("libras")) {
+                            console.log("peso actual libras",prop.displayValue);
+                             pesoActual = parseFloat(prop.displayValue) * 1.48816394; // libras x pie ==> kg por mtr
+                         }
+                     } else {
+                         // Si no hay información de unidades, asumimos que está en kilogramos por defecto
+                         pesoActual = parseFloat(prop.displayValue);
+                     }
                     esBarraValida = true; // Se encontró peso, marcamos como válida
                 } else if (prop.attributeName === nombreParametrolargo && parseFloat(prop.displayValue) > 0) {
+                  
                     if (prop.units) {
                         if (prop.units.includes("meters")) {
-                            console.log("encuentro metros");
-                            largoActual = parseFloat(prop.displayValue) //* 100; // Convertir de metros a centímetros
-                        } else if (prop.units.includes("feet")) {
-                            largoActual = parseFloat(prop.displayValue) * 30.48; // Convertir de pies a centímetros
+                            console.log("tipo de unidad metros");
+                            largoActual = parseFloat(prop.displayValue) ; // *100 Convertir de metros a centímetros
+                        } else if (prop.units.includes("feet-")) {
+                            console.log("encuentro pies");
+                            console.log("tipo de unidad pies");
+                            largoActual = parseFloat(prop.displayValue) * 30.48 *(0.01); // 
                         } else if (prop.units.includes("centimeters")) {
-                            console.log("encuentro centimetros");
-                            largoActual = parseFloat(prop.displayValue) /100; // No se necesita conversión
-                        }else if (prop.units.includes("millimeters")) {
-                            console.log("encuentro milimetros");
+                            console.log("tipo de unidad centimetros");
+                            largoActual = parseFloat(prop.displayValue) / 100; //
+                        }
+                        else if (prop.units.includes("millimeters")) {
+                            console.log("tipo de unidad milimetros");
                             largoActual = parseFloat(prop.displayValue) /1000; //  milimetros a cm
                         }
+                        else if (prop.units.includes("inches")) {
+                            console.log("tipo de unidad pulgadas");
+                            console.log("inches");
+                            largoActual = parseFloat(prop.displayValue) *2.54 * (0.01); // 
+                        }
+                        else if (prop.units.includes("feetFractionalInches")) {
+                            console.log("tipo de unidad pies fraccionados pulgadas");
+                          
+                            largoActual = parseFloat(prop.displayValue) *30.48 * (0.01); //
+                            console.log("feetFractionalInches",prop.displayValue);
+                            console.log("feetFractionalInches",largoActual);
+                        }
+                        else if (prop.units.includes("fractionalInches")) {
+                            console.log("tipo de unidad  pulgadas fraccionadas");
+                           
+                            largoActual = parseFloat(prop.displayValue) *2.54 * (0.01); //
+                            console.log(largoActual+"  "+prop.displayValue);
+                            console.log("fractionalInches actual",largoActual);
+                        }
+                        else if (prop.units.includes("decimeters")) {
+                            console.log("tipo de unidad decimetros");
+                            console.log("decimeters");
+                            largoActual = parseFloat(prop.displayValue) *0.1 ; //
+                        }
+                        else if (prop.units.includes("metersCentimeters")) {
+                            console.log("tipo de unidad metros centimetros");
+                            console.log("metersCentimeters");
+                            largoActual = (parseFloat(prop.displayValue)) /100 ; //
+                        }
+                        else if (prop.units.includes("usSurveyFeet")) {
+                            console.log("tipo de unidad US Survey pie");
+                            console.log("usSurveyFeet");
+                            largoActual = (parseFloat(prop.displayValue)) *30.48 *(0.01); //
+                        }//
                     } else {
-                        // Si no hay información de unidades, asumimos que está en centímetros por defecto
+                       
                         largoActual = parseFloat(prop.displayValue);
                     }
+                 //  largoActual = parseFloat(prop.displayValue) / 100; // Conversión si es necesario
                     esBarraValida = true; // Se encontró largo, marcamos como válida
                 }
             });
     
             if (esBarraValida) {
-                pesoTotal += pesoActual *(largoActual/100);
+                pesoTotal += pesoActual *(largoActual);
                 largoTotal += largoActual;
                 totalBarras += 1;
             }
@@ -500,9 +541,11 @@ class Viewer extends React.Component {
                if (prop.attributeName === nombreParametroPesoLineal && parseFloat(prop.displayValue) > 0) {
                     if (prop.units) {
                         if (prop.units.includes("kilograms") || prop.units.includes("kilos") || prop.units.includes("kilogramos")) {
+                            console.log("peso actual Kilos",prop.displayValue);
                             pesoActual = parseFloat(prop.displayValue); // No se necesita conversión
                         } else if (prop.units.includes("pounds") || prop.units.includes("libras")) {
-                            pesoActual = parseFloat(prop.displayValue) * 0.453592; // Convertir de libras a kilogramos
+                            console.log("peso actual libras",prop.displayValue);
+                            pesoActual = parseFloat(prop.displayValue) * 1.48816394; // libras x pie ==> kg por mtr
                         }
                     } else {
                         // Si no hay información de unidades, asumimos que está en kilogramos por defecto
@@ -513,19 +556,56 @@ class Viewer extends React.Component {
                  
                     if (prop.units) {
                         if (prop.units.includes("meters")) {
+                            console.log("tipo de unidad metros");
                             largoActual = parseFloat(prop.displayValue) ; // *100 Convertir de metros a centímetros
-                        } else if (prop.units.includes("feet")) {
+                        } else if (prop.units.includes("feet-")) {
                             console.log("encuentro pies");
-                            largoActual = parseFloat(prop.displayValue) * 30.48; // Convertir de pies a centímetros
+                            console.log("tipo de unidad pies");
+                            largoActual = parseFloat(prop.displayValue) * 30.48 *(0.01); // 
                         } else if (prop.units.includes("centimeters")) {
-                            largoActual = parseFloat(prop.displayValue)/100; // No se necesita conversión
+                            console.log("tipo de unidad centimetros");
+                            largoActual = parseFloat(prop.displayValue) / 100; //
                         }
                         else if (prop.units.includes("millimeters")) {
-                            console.log("encuentro milimetros");
+                            console.log("tipo de unidad milimetros");
                             largoActual = parseFloat(prop.displayValue) /1000; //  milimetros a cm
                         }
+                        else if (prop.units.includes("inches")) {
+                            console.log("tipo de unidad pulgadas");
+                            console.log("inches");
+                            largoActual = parseFloat(prop.displayValue) *2.54 * (0.01); // 
+                        }
+                        else if (prop.units.includes("feetFractionalInches")) {
+                            console.log("tipo de unidad pies fraccionados pulgadas");
+                          
+                            largoActual = parseFloat(prop.displayValue) *30.48 * (0.01); //
+                            console.log("feetFractionalInches",prop.displayValue);
+                            console.log("feetFractionalInches",largoActual);
+                        }
+                        else if (prop.units.includes("fractionalInches")) {
+                            console.log("tipo de unidad  pulgadas fraccionadas");
+                           
+                            largoActual = parseFloat(prop.displayValue) *2.54 * (0.01); //
+                            console.log(largoActual+"  "+prop.displayValue);
+                            console.log("fractionalInches actual",largoActual);
+                        }
+                        else if (prop.units.includes("decimeters")) {
+                            console.log("tipo de unidad decimetros");
+                            console.log("decimeters");
+                            largoActual = parseFloat(prop.displayValue) *0.1 ; //
+                        }
+                        else if (prop.units.includes("metersCentimeters")) {
+                            console.log("tipo de unidad metros centimetros");
+                            console.log("metersCentimeters");
+                            largoActual = (parseFloat(prop.displayValue)) /100 ; //
+                        }
+                        else if (prop.units.includes("usSurveyFeet")) {
+                            console.log("tipo de unidad US Survey pie");
+                            console.log("usSurveyFeet");
+                            largoActual = (parseFloat(prop.displayValue)) *30.48006096 *(0.01); //
+                        }//
                     } else {
-                        // Si no hay información de unidades, asumimos que está en centímetros por defecto
+                       
                         largoActual = parseFloat(prop.displayValue);
                     }
                 //  largoActual = parseFloat(prop.displayValue) / 100; // Conversión si es necesario
@@ -535,8 +615,8 @@ class Viewer extends React.Component {
    
            if (esBarraValida) {
                // Solo acumula y cuenta si es una barra válida
-               pesoTotal += pesoActual * (largoActual/100);
-               largoTotal += (largoActual/100);
+               pesoTotal += pesoActual * (largoActual);
+               largoTotal += (largoActual);
                totalBarras += 1; // Incrementamos el contador de barras válidas
            }
        });
@@ -680,11 +760,13 @@ class Viewer extends React.Component {
     }
     onViewerSelectionChange = (event) => {
         // Manejar el cambio de la selección del visor 
+        const {  nombreParametroPesoLineal,  nombreParametrolargo} = this.state;
         const viewer = this.viewer;
         const dbId = event.dbIdArray[0]; // Obtiene el primer elemento seleccionado
         const seleccionActual = this.viewer.getSelection();
         this.context.actualizarSeleccionActual(seleccionActual);
         console.log("SELECCIONO ELEMENTO");
+        console.log(nombreParametroPesoLineal,  nombreParametrolargo);
         console.log(event.dbIdArray);
         console.log(seleccionActual);
         if (this.state.procesandoSeleccion) {
@@ -701,7 +783,44 @@ class Viewer extends React.Component {
           
       
             viewer.getProperties(dbId, (data) => {
-          
+               console.log("data seleccion", data);
+                data.properties.forEach(prop => {
+                    let valorOriginal = parseFloat(prop.displayValue);
+                    if (prop.attributeName === nombreParametroPesoLineal) {
+                        if (prop.units && (prop.units.includes("pounds") || prop.units.includes("libras"))) {
+                            let valorConvertido = valorOriginal * 1.48816394; // Conversión de libras a kg/m
+                            prop.displayValue = valorConvertido.toString();
+                            if (prop.value) {
+                                prop.value = valorConvertido; // Asegurarse de actualizar el campo value si existe
+                            }
+                        }
+                    } else if (prop.attributeName === nombreParametrolargo) {
+                        let conversionFactor = 1; // Sin cambio por defecto
+                        console.log("ENCUENTRO ELEMENTO LARGO");
+                        if (prop.units) {
+                            if (prop.units.includes("feet-") || prop.units.includes("usSurveyFeet")|| prop.units.includes("feetFractionalInches")) {
+                                conversionFactor = 0.3048;
+                            } else if (prop.units.includes("centimeters")) {
+                                conversionFactor = 0.01;
+                            } else if (prop.units.includes("millimeters")) {
+                                conversionFactor = 0.001;
+                            } else if (prop.units.includes("inches") ) {
+                                console.log("ENCUENTRO EN VISUALIZADOR INCHES FRACC");
+                                conversionFactor = 0.0254;
+                            } else if (prop.units.includes("decimeters")) {
+                                conversionFactor = 0.1;
+                            } else if (prop.units.includes("metersCentimeters")) {
+                                conversionFactor = 0.01;
+                            }
+                            let valorConvertido = valorOriginal * conversionFactor;
+                            prop.displayValue = valorConvertido.toString();
+                            console.log("original");
+                            if (prop.value) {
+                                prop.value = valorConvertido; // Asegurarse de actualizar el campo value si existe
+                            }
+                        }
+                    }
+                });
                 this.context.updateSelectedObjectProps(data);
                console.log("elemento seleccionado",data);
             }, (error) => {

@@ -16,7 +16,7 @@ const { BucketsApi, ObjectsApi, PostBucketsPayload } = forgeSDK;
 import { crearActualizarOrdenNiveles, obtenerOrdenNivelesPorUrn } from '../controllers/OrdenNivelesController.js';
 
 import { obtenerFiltros,actualizarFiltro } from '../controllers/filtrosController.js';
-import {crearPedido,eliminarPedido,obtenerPedidos,actualizarEstadoPedido,transfierePedido,eliminarPedidosPorUrn } from '../controllers/pedidoController.js'; // PEDIDOS
+import {crearPedido,crearArchivoPedido,eliminarPedido,obtenerPedidos,actualizarEstadoPedido,transfierePedido,eliminarPedidosPorUrn } from '../controllers/pedidoController.js'; // PEDIDOS
 import  {actualizarUsuarioProyectoAsignadoPorIdUsuario,obtenerUsuarioProyectoAsignadoPorIdUsuario } from '../controllers/usuarioProyectoAsignadoController.js'; // Asignación proyectos
 import { manipularConfiguracionViewer,obtenerConfiguracionViewer} from '../controllers/ConfiguracionViewerController.js'; 
 import { buscarCrearActualizarObjetoProyectoPlan, obtenerObjetosPorUrn ,CrearObjetoProyectoPlan,obtenerPorDbIdYUrn,procesarObjetosProyectoPlanMasivamente,transfiereObjetoProyectoPlan} from '../controllers/ObjetoProyectoPlanController.js';
@@ -71,6 +71,8 @@ const app = express();
 app.use(cors());
 app.use(express.json({ limit: '500mb' }));
 app.use(express.urlencoded({ limit: '500mb', extended: true }));
+app.use('/public', express.static('public'));
+
 app.use(async (req, res, next) => {
   const token = await getInternalToken();
   req.oauth_token = token;
@@ -109,29 +111,13 @@ app.post('/api/send-mail', async (req, res) => {
       await sendEmail(mailOptions);
       res.status(200).send('Email sent successfully');
   } catch (error) {
-      res.status(500).send('Failed to send email');
+      res.status(200).send('Failed to send email');
   }
 });
 // Middleware para analizar cuerpos de formularios URL-encoded
 
 // Middleware de autenticación
-const authenticateJWT = (req, res, next) => {
-  const authHeader = req.headers.authorization;
-  if (authHeader) {
-      const token = authHeader.split(' ')[1];
 
-      jwt.verify(token, JWT_SECRET, (err, user) => {
-          if (err) {
-              return res.sendStatus(403);
-          }
-
-          req.user = user;
-          next();
-      });
-  } else {
-      res.sendStatus(401);
-  }
-};
 app.post('/api/login', async (req, res) => {
   const { username, password } = req.body;
   console.log(username);
@@ -591,6 +577,7 @@ app.post('/api/setproyectoAdmin',  actualizarUsuarioProyectoAsignadoPorIdUsuario
 
 // PEDIDOS
 app.post('/api/pedido', crearPedido);
+app.post('/api/pedidoCVS', crearArchivoPedido);
 app.post('/api/adicionalesPedido', crearAdicionalPedido);
 app.get('/api/obtenerAdicionalesPorUrn/:urn',obtenerAdicionalesPorUrn);
 app.post('/api/actualizarEstadoPedido', actualizarEstadoPedido); //

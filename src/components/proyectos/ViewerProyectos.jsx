@@ -228,8 +228,8 @@ class ViewerProyectos extends React.Component {
             // Usar el valor de filtro2 como clave
             const clave = barraActual.nombreFiltro2; // Asume que filtro2 es una variable o constante que contiene la cadena 'AEC Piso'
           //  console.log("barra actual: ",barraActual.nombreFiltro2);
-            const pesoActual = barraActual.pesoLineal * barraActual.longitudTotal / 100; // Convertir longitud en metros y calcular peso
-    
+           // const pesoActual = barraActual.pesoLineal * barraActual.longitudTotal / 100; // Convertir longitud en metros y calcular peso
+           const pesoActual = barraActual.pesoLineal * barraActual.longitudTotal; 
             if (!acumulador[clave]) {
                 acumulador[clave] = 0; // Si no existe la clave, inicializarla en 0
             }
@@ -248,7 +248,7 @@ class ViewerProyectos extends React.Component {
         const piso = barra.nombreFiltro2;
         const diametro = barra.diametroBarra;
         const nivel = barra.nivel;
-        const peso = barra.pesoLineal * (barra.longitudTotal / 100); // Asume que longitudTotal está en mm, convertido a m
+        const peso = barra.pesoLineal * (barra.longitudTotal); // Asume que longitudTotal está en mm, convertido a m
 
         // Inicializa el objeto para el piso si aún no existe
         if (!resultadosPorPiso[piso]) {
@@ -342,9 +342,9 @@ class ViewerProyectos extends React.Component {
 
         try {
             const datosParaInsertar = {
-                urn: this.props.urn, // Utiliza la URN desde las props
-                lista: idsBarras.map(barra => ({ // Asegúrate de que este mapeo coincide con lo esperado por tu backend
-                    nombreFiltro1: barra.nombreFiltro1, // Ajusta según tus datos
+                urn: this.props.urn, 
+                lista: idsBarras.map(barra => ({ 
+                    nombreFiltro1: barra.nombreFiltro1, 
                     nombreFiltro2: barra.nombreFiltro2,
                     diametroBarra: barra.diametroBarra,
                     nivel: barra.nivel,
@@ -430,7 +430,7 @@ PesoPromedioGeneral = async (urn) => {
         if (idsBarras !== undefined) {
             idsBarras.forEach(barra => {
                 const { pesoLineal, longitudTotal } = barra;
-                const longitudEnMetros = longitudTotal / 100;
+                const longitudEnMetros = longitudTotal ;
                 const pesoTotal = pesoLineal * longitudEnMetros; // Calcula el peso total para la barra actual
 
                 totalPesoProyecto += pesoTotal; // Suma acumulativa de todos los pesos
@@ -481,7 +481,8 @@ PesoPromedio = async (urn) => {
             idsBarras.forEach(barra => {
                 const { nombreFiltro2, pesoLineal, longitudTotal } = barra;
                 // Convertir longitud de milímetros a metros si es necesario
-                const longitudEnMetros = longitudTotal / 100;
+                //const longitudEnMetros = longitudTotal / 100;
+                const longitudEnMetros = longitudTotal ;
                 const pesoTotal = pesoLineal * longitudEnMetros;  // Aquí se calcula el peso total
     
                 if (!resultados[nombreFiltro2]) {
@@ -539,7 +540,8 @@ porcentajePedidoTotal = async (urn) => {
         //const detalles = idsBarras.detalles;
         let pesoTotalProyecto = 0;
         idsBarras.forEach(barra => {
-            const pesoTotalBarra = (barra.longitudTotal / 100) * barra.pesoLineal;
+          //  const pesoTotalBarra = (barra.longitudTotal / 100) * barra.pesoLineal;
+          const pesoTotalBarra = (barra.longitudTotal ) * barra.pesoLineal;
             pesoTotalProyecto += pesoTotalBarra;
         });
 
@@ -582,7 +584,7 @@ porcentajePedidoTotal = async (urn) => {
 };
 
 
- guardarIdsBarras = async () => {
+   guardarIdsBarras = async () => {
         const { idsBarras } = this.state;
         const { urn } = this.props;
         console.log("objeto con barras",idsBarras);
@@ -610,8 +612,46 @@ porcentajePedidoTotal = async (urn) => {
             toast.error('Error al guardar los datos de barras: ' + error.message);
         }
     }
-// Asegúrate de llamar a generarTotalPesoPisos en el lugar adecuado de tu aplicación
-
+    convertirLongitud (valor, unidades) {
+        let largoActual = parseFloat(valor);
+        if (isNaN(largoActual)) {
+            return 0;
+        }
+        console.log("Unidades recibidas", unidades);
+    
+        // Convertir de metros
+        if (unidades.includes("meters") && !unidades.includes("centimeters")) {
+            return largoActual; // Asume que la longitud ya está en metros
+        }
+        // Convertir de pies
+        if (unidades.includes("feet") || unidades.includes("usSurveyFeet")) {
+            return largoActual * 30.48 * 0.01; // Convertir de pies a centímetros
+        }
+        // Convertir de centímetros
+        if (unidades.includes("centimeters")) {
+            return largoActual / 100; // Ya está en centímetros, ajusta según necesidad
+        }
+        // Convertir de milímetros
+        if (unidades.includes("millimeters")) {
+            return largoActual / 1000; // Convertir de milímetros a centímetros
+        }
+        // Convertir de pulgadas
+        if (unidades.includes("inches")) {
+            return largoActual * 2.54 * 0.01; // Convertir de pulgadas a centímetros
+        }
+        // Convertir de decímetros
+        if (unidades.includes("decimeters")) {
+            return largoActual * 0.1; // Convertir de decímetros a centímetros
+        }
+        // Convertir de metros a centímetros si se incluye ambas unidades
+        if (unidades.includes("metersCentimeters")) {
+            return largoActual / 100; // Asume que el largoActual está en centímetros si incluye "metersCentimeters"
+        }
+    
+        // Devolver el valor sin convertir si las unidades no están especificadas o no coinciden con los casos esperados
+        return largoActual;
+    }
+    
     obtenerIdsBarras = async () => {
         console.log("inicio busqueda de barras", this.state);
         console.log();
@@ -638,15 +678,17 @@ porcentajePedidoTotal = async (urn) => {
                     ).map(element => {
                         const valores = element.properties.reduce((acc, prop) => {
                             acc[prop.displayName] = prop.displayValue || '';
+                            acc[prop.displayName + 'Units'] = prop.units || '';
                             return acc;
                         }, {});
-            
+                        const longitudTotal = this.convertirLongitud(valores[nombreParametrolargo], valores[nombreParametrolargo + 'Units']);
+                        console.log("Longitud Modificada",longitudTotal);
                         return {
                             id: element.dbId,
                             nombreFiltro1: valores[filtro1],
                             nombreFiltro2: valores[filtro2],
                             pesoLineal: parseFloat(valores[nombreParametroPesoLineal] || '0'),
-                            longitudTotal: parseFloat(valores[nombreParametrolargo] || '0'),
+                            longitudTotal: longitudTotal||'0',
                             diametroBarra: parseFloat(valores[nombreParametroDiametro] || '0'),
                             fecha: valores[nombreParametroFecha],
                             nivel: valores[nombreParametroNivel],
@@ -972,7 +1014,7 @@ porcentajePedidoTotal = async (urn) => {
                     const idsBarras = await this.obtenerIdsBarras();
                     if(!idsBarras.length ==0){
                         await this.generarTotalPesoPisos();
-                    console.log("IDs de barras obtenidos:", idsBarras);
+                    console.log("IDs2 de barras obtenidos:", idsBarras);
                     this.setState.idsBarraActual = idsBarras
                     }
                     

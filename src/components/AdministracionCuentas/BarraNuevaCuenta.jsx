@@ -75,11 +75,11 @@ const verificarUsuarioExistente = async () => {
 };
 const handleInputChange = (event, setter) => {
   const { value } = event.target;
-  if (value.length <= 25) {
+  if (value.length <= 55) {
     setter(value);
     setMensajeError('');
   } else {
-    setMensajeError('No se pueden añadir más de 25 caracteres');
+    setMensajeError('No se pueden añadir más de 55 caracteres');
   }
 };
 const crearCuenta = async () => {

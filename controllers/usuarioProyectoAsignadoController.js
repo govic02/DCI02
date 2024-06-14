@@ -29,7 +29,7 @@ const obtenerUsuariosProyectoAsignadoPorUrn = async (req, res) => {
 // Controlador para crear un nuevo registro
 const crearUsuarioProyectoAsignado = async (req, res) => {
   try {
-    const { id, idUsuario, urn, proyectoKey } = req.body;
+    const { id, idUsuario, urn, proyectoKey,tipoUsuario } = req.body;
 
     // Verificar si ya existe una asignación para el idUsuario y urn
     const asignacionExistente = await UsuarioProyectoAsignado.findOne({ idUsuario, urn });
@@ -48,6 +48,7 @@ const crearUsuarioProyectoAsignado = async (req, res) => {
       urn,
       proyectoKey,
       fecha,
+      tipoUsuario,
       hora
     });
     console.log("Creando nueva asignación");

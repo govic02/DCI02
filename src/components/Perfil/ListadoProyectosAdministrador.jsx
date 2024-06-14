@@ -21,6 +21,10 @@ const ListadoProyectosAdministrador = ({ onProyectoSeleccionado,onProyectoKeySel
     marginRight: '25px',
     borderRadius: '20px',
   };
+  const listStyle2 = {
+    maxHeight: '500px',  // Ajusta este valor según las necesidades de tu diseño
+    overflowY: 'auto',   // Habilita el desplazamiento vertical
+  };
   useEffect(() => {
     const fetchToken = async () => {
       try {
@@ -131,7 +135,7 @@ const ListadoProyectosAdministrador = ({ onProyectoSeleccionado,onProyectoKeySel
           <Typography variant="body2" style={{ marginTop: '10px', marginBottom: '35px' }}>
             
           </Typography>
-          <List>
+          <List style={listStyle}>
             {proyectos.map((proyecto, index) => (
               <ListItem
                 key={index}
@@ -142,7 +146,9 @@ const ListadoProyectosAdministrador = ({ onProyectoSeleccionado,onProyectoKeySel
                 <ListItemText primary={proyecto.proyectoKey} />
               </ListItem>
             ))}
+           
           </List>
+          <br></br>
         </CardContent>
       </Card>
     );
@@ -161,7 +167,7 @@ const ListadoProyectosAdministrador = ({ onProyectoSeleccionado,onProyectoKeySel
         <Typography variant="body2" style={{ marginTop: '10px', marginBottom: '35px' }}>
           Directorio de Proyectos Disponibles
         </Typography>
-        <List>
+        <List style={listStyle2}>
           {proyectos.map((proyecto, index) => (
             <ListItem
               key={index}

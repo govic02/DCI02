@@ -1,7 +1,12 @@
 import Pedido from '../models/pedido.js';
 import AdicionalesPedidos from '../models/adicionalesPedidos.js';
+import { parse } from 'json2csv';
+import fs from 'fs';
+import {join, dirname} from 'path';
+import { fileURLToPath } from 'url';
 // Obtener todos los registros
-
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 // Obtener un registro por id_int1
 const obtenerPedido = async (req, res) => {
     try {
@@ -183,7 +188,7 @@ const crearPedido = async (req, res) => {
         // Extraer información del cuerpo de la solicitud
         console.log("Recibe llamado a pedido");
         const { ids, fecha, proveedor, id_int1, pesos, largos, listado_pesos, listado_largos, nombre_pedido, urn_actual } = req.body;
-
+        const urlPedido = '';
 
         const pedidoExistente = await Pedido.findOne({
             $or: [
@@ -191,6 +196,7 @@ const crearPedido = async (req, res) => {
                 { urn_actual, ids: { $in: ids } }
             ]
         });
+
         if (pedidoExistente) {
             return res.status(305).json({ message: "Pedido repetido" });
         }
@@ -205,17 +211,91 @@ const crearPedido = async (req, res) => {
             listado_pesos, // Este campo es opcional
             listado_largos, // Este campo es opcional
             nombre_pedido,
-            urn_actual
+            urn_actual,
+            fileUrl
         });
 
         // Guardar el nuevo pedido en la base de datos
-        await nuevoPedido.save();
+       
+      //  console.log("Guardo datos del pedidos inicio guardado CVs");
+      //  const fields = ['ids', 'fecha', 'nombre_pedido', 'pesos', 'largos'];
+      //  const csvData = parse({ ids, fecha, nombre_pedido, pesos, largos }, { fields });
+      //  const fileName = `${nombre_pedido}-${Date.now()}.csv`;
+     //   const filePath = join(__dirname, '..','public', fileName);
 
+      //  fs.writeFileSync(filePath, csvData);
+        // Guardar la URL del archivo en la base de datos
+       // const fileUrl = `${req.protocol}://${req.get('host')}/public/pedidos/${fileName}`;
+      // const fileUrl = `${req.protocol}://${req.get('host')}/public/${fileName}`;
+
+        await nuevoPedido.save();
+       // await Pedido.updateOne({ _id: savedPedido._id }, { $set: { fileUrl: fileUrl } });
         // Enviar una respuesta con el pedido creado
-        res.status(201).json(nuevoPedido);
+        res.status(201).json({ pedido: nuevoPedido, fileUrl });
     } catch (error) {
         // Enviar una respuesta de error si ocurre algún problema
+        console.log(error.message);
         res.status(400).send(error.message);
+    }
+};
+const crearArchivoPedido = async (req, res) => {
+    try {
+        const { barras, nombrePedido, urn } = req.body; // Asume que la solicitud contiene la lista de objetos y datos adicionales
+        console.log("Request body:", req.body);
+
+        // Mapea los datos al formato deseado para el CSV, incluyendo datos adicionales
+        const formattedData = barras.map(bar => ({
+            'EJE/VIGA/LOSA': bar.nombreFiltro1,
+            'ELEM CONST': bar.nombreFiltro2,
+            'PISO': bar.aecPiso,
+            'CICLO': bar.aecSecuenciaHormigonado,
+            'Cantidad': bar.cantidad,
+            'Ø mm': bar.diametroBarra,
+            'Figura': bar.aecForma,
+            'L/m': bar.longitudTotal,
+            'Uso': bar.aecUsoBarra,
+            'A/cm': bar.a,
+            'B/cm': bar.b,
+            'C/cm': bar.c,
+            'D/cm': bar.d,
+            'E/cm': bar.e,
+            'F/cm': bar.f,
+            'G/cm': bar.g,
+            'H/cm': bar.h,
+            'I/cm': bar.i,
+            'J/cm': bar.j,
+            'AngV': '',
+            'AngV2': '',
+            'AngV3': '',
+            'R/cm': bar.r,
+            'Peso Kg': bar.pesoLineal,
+            'Id': bar.id
+        }));
+
+        
+        const csvFields = Object.keys(formattedData[0]);
+        const csvData = parse(formattedData, { fields: csvFields, delimiter: ';' });
+
+        const fileName = `Pedido-${nombrePedido.replace(/ /g, '_')}-${Date.now()}.csv`;
+        const filePath = join(__dirname, '..', 'public', fileName);
+        const header = `Nombre del Pedido: ${nombrePedido}, URN: ${urn}\n\n`;
+        // Escribe 
+        fs.writeFileSync(filePath,  header +csvData);
+
+        // Construye la URL del archivo para acceso público
+        const fileUrl = `${req.protocol}://${req.get('host')}/public/${fileName}`;
+        const t = await Pedido.findOneAndUpdate(
+            { urn_actual: urn, nombre_pedido: nombrePedido },
+            { $set: { url: fileUrl } },
+            { new: true }
+        );
+        console.log("respuesta de actualización");
+        console.log(t);
+        // Devuelve la respuesta con la URL del archivo
+        res.status(201).json({ message: "Archivo creado con éxito", fileUrl });
+    } catch (error) {
+        console.error("Error al crear el archivo CSV: ", error.message);
+        res.status(500).send(error.message);
     }
 };
 // Actualizar un registro por id_int1
@@ -343,6 +423,7 @@ export {
     obtenerPedidos,
     obtenerPedido,
     crearPedido,
+    crearArchivoPedido,
     actualizarPedido,
     eliminarPedido,
     crearAdicionalPedido,

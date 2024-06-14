@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import API_BASE_URL from '../config'; // Asegúrate de que la ruta sea correcta
 import { useAuth } from '../context/AuthContext';
 import ModalComponent from './login/ModalComponent';
@@ -9,7 +9,32 @@ const Login = ({ onLoginSuccess }) => {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [showModal, setShowModal] = useState(false);
-
+    
+    const sendEmail = async (email) => {
+        try {
+          const response = await fetch(`${API_BASE_URL}/api/send-mail`, { // Asegúrate de que la ruta sea correcta
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              to: email,
+              subject: 'Registro de Inicio de Sesión',
+              text: '<p>Estimado Usuario</p><p> Se ha registrado un ingreso a su cuenta en la platadorma ICD.</p>', // Agrega el mensaje que quieras
+            }),
+          });
+          console.log("respuesta login email ok",response);
+          if (response.ok) {
+            console.log("email enviado correctamente");
+          
+          } else {
+            setError('Failed to send email'); // Si la respuesta del backend no es OK, muestra un error
+          }
+        } catch (error) {
+          setError('An error occurred while sending the email'); // Atrapa errores de red, etc.
+        }
+      };
+    
     const handleLogin = async () => {
         try {
             const response = await fetch(`${API_BASE_URL}/api/login`, {
@@ -26,6 +51,7 @@ const Login = ({ onLoginSuccess }) => {
                 localStorage.setItem('username', data.userData.username);
                 localStorage.setItem('userId', data.userData.userId);
                 localStorage.setItem('fullname', data.userData.fullname);
+                sendEmail(data.userData.username);
                 onLoginSuccess();
             } else {
                 setError('Los datos de usuario o contraseña son incorrectos.');

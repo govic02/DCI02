@@ -22,6 +22,9 @@ const ColumnaDerecha = ({ isCollapsed, token, urn, selectedIds, onCameraChange, 
     const [proyectoKeySeleccionado, setProyectoKeySeleccionado] = useState('');
     const [showTabsComponentMobile, setShowTabsComponentMobile] = useState(false); 
     const [showAdministradorVistasMobile, setShowAdministradorVistasMobile] = useState(false); 
+    const { logout } = useAuth();
+    const [emailSent, setEmailSent] = useState(false);
+    const [error, setError] = useState(null);
 
     const isDesktopOrLaptop = useMediaQuery({
       query: '(min-width: 580px)'
@@ -48,6 +51,8 @@ const ColumnaDerecha = ({ isCollapsed, token, urn, selectedIds, onCameraChange, 
     const guardarIdentificadores = (identificadores) => {
         setIdentificadoresActual(identificadores);
     };
+
+    
     window.onunhandledrejection = function (event) {
       console.error("Unhandled rejection (promise):", event.promise, "reason:", event.reason);
       return true; // Previene la propagación y la consola del navegador mostrando el error
@@ -56,8 +61,22 @@ const ColumnaDerecha = ({ isCollapsed, token, urn, selectedIds, onCameraChange, 
       console.error('Error en el worker:', event.message);
       return true; // Previene el error de ser propagado
   };
+
+  const verificarUsuario = async () => {
+      try {
+          const userId = localStorage.getItem('userId');
+          const response = await axios.get(`${API_BASE_URL}/api/usuarios/${userId}`);
+          console.log("Usuario verificado:", response.data);
+      } catch (error) {
+          logout();
+          window.location.reload();
+          console.error("Error al verificar el usuario:", error);
+      }
+  };
+
   
     useEffect(() => {
+
       const obtenerUsuarioProyecto = async () => {
         console.log("token desde jwt",tokenContexto);
         const tipo = localStorage.getItem('tipo');
@@ -102,6 +121,7 @@ const ColumnaDerecha = ({ isCollapsed, token, urn, selectedIds, onCameraChange, 
     }, );
   
     const handleFilterBarsClick = () => {
+      verificarUsuario();
       if (showAdministradorVistasMobile) {
           setShowAdministradorVistasMobile(false); // Si el Administrador de Vistas está visible, ocultarlo
       }
@@ -109,6 +129,7 @@ const ColumnaDerecha = ({ isCollapsed, token, urn, selectedIds, onCameraChange, 
   };
     
   const handleViewsClick = () => {
+    verificarUsuario();
     if (showTabsComponentMobile) {
         setShowTabsComponentMobile(false); // Si TabsComponentMobile está visible, ocultarlo
     }

@@ -42,7 +42,7 @@ const obtenerUsuario = async (req, res) => {
     try {
         const usuario = await Users.findOne({ idUsu: req.params.idUsu });
         if (!usuario) {
-            return res.status(404).send('El usuario con ese ID no fue encontrado');
+            return res.status(300).send('El usuario con ese ID no fue encontrado');
         }
         res.json(usuario);
     } catch (error) {
@@ -55,7 +55,7 @@ const obtenerUsuarioPorUsername = async (req, res) => {
       const username = req.params.username; // Asumiendo que el username viene como parámetro de la URL
       const usuario = await Users.findOne({ username: new RegExp('^' + username + '$', 'i') });
       if (!usuario) {
-          return res.status(404).send('El usuario con ese username no fue encontrado');
+          return res.status(200).send('El usuario con ese username no fue encontrado');
       }
       res.json(usuario);
   } catch (error) {

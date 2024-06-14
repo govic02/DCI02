@@ -21,6 +21,7 @@ const AdministracionProyecto = (proyectoKey,urn) => {
     const [proyectos, setProyectos] = useState([]);
     const [proyectoSeleccionado, setProyectoSeleccionado] = useState({});
     const [niveles, setNiveles] = useState([ ]);
+    const [tipoUsuario, setTipoUsuario] = useState('');
 
 
       const handleReorder = (newOrder) => {
@@ -210,7 +211,7 @@ const AdministracionProyecto = (proyectoKey,urn) => {
             const respuesta = await fetch(`${API_BASE_URL}/api/usuarios`);
             const usuarios = await respuesta.json();
             
-            const usuariosNoAdmin = usuarios.filter(usuario => usuario.tipoUsuario.toLowerCase() !== "administrador");
+            const usuariosNoAdmin = usuarios //.filter(usuario => usuario.tipoUsuario.toLowerCase() !== "administrador");
             console.log("listado de usuarios",usuariosNoAdmin);
             setUsuariosNoAdmin(usuariosNoAdmin);
     
@@ -229,34 +230,50 @@ const AdministracionProyecto = (proyectoKey,urn) => {
     const obtenerUsuariosAsignados = async () => {
         try {
             const respuesta = await fetch(`${API_BASE_URL}/api/usuariosProyectoAsignado/${encodeURIComponent(proyectoKey.urn)}`);
-             console.log("respuesta usuarios urn"+proyectoKey.urn,respuesta);
-             if (!respuesta.ok) {
+            console.log("Respuesta usuarios urn" + proyectoKey.urn, respuesta);
+            if (!respuesta.ok) {
                 throw new Error('Error al obtener usuarios asignados');
             }
-            
+    
             const usuariosAsignadosRespuesta = await respuesta.json();
-            console.log("respuesta usuarios urn asignados", usuariosAsignadosRespuesta);
+            console.log("Respuesta usuarios urn asignados", usuariosAsignadosRespuesta);
     
             const usuariosDetallados = await Promise.all(
                 usuariosAsignadosRespuesta.map(async (usuario) => {
-                    const resp = await fetch(`${API_BASE_URL}/api/usuarios/${usuario.idUsuario}`);
-                    if(!resp.ok) {
-                        throw new Error('Error al obtener detalles del usuario');
+                    try {
+                        const resp = await fetch(`${API_BASE_URL}/api/usuarios/${usuario.idUsuario}`);
+                        console.log("Respuesta consulta Id usuario", resp);
+    
+                        if (!resp.ok) {
+                            console.error('Error al obtener detalles del usuario con ID:', usuario.idUsuario);
+                            return null; // Retornar null o un objeto especial para indicar el fallo
+                        }
+    
+                        const userData = await resp.json();
+                        console.log("Datos de usuario con asignación", userData);
+                        return {
+                            idUsu: usuario.idUsuario,
+                            fullname: userData.fullname,
+                            username: userData.username,
+                            tipoUsuario: usuario.tipoUsuario || "" 
+                        };
+                    } catch (error) {
+                        console.error('Error en la consulta de detalles para el usuario:', usuario.idUsuario, error);
+                        return null; // Manejar el error pero permitir que el proceso continúe
                     }
-                    const userData = await resp.json();
-                    return {
-                        idUsu: usuario.idUsuario,
-                        fullname: userData.fullname,
-                        username: userData.username,
-                    };
                 })
             );
-            setUsuariosAsignadosProyecto(usuariosDetallados);
+    
+            // Filtrar resultados nulos y errores
+            const usuariosFiltrados = usuariosDetallados.filter(usuario => usuario !== null);
+            console.log("Usuarios para asignación", usuariosFiltrados);
+            setUsuariosAsignadosProyecto(usuariosFiltrados);
         } catch (error) {
             console.error('Error al obtener usuarios asignados:', error);
-           // toast.error('Ocurrió un error al obtener usuarios asignados');
+            // toast.error('Ocurrió un error al obtener usuarios asignados');
         }
     };
+    
     
     useEffect(() => {
         obtenerUsuariosAsignados();
@@ -536,8 +553,9 @@ const AdministracionProyecto = (proyectoKey,urn) => {
     };
     
     const agregarUsuario = async () => {
-        if (!usuarioSeleccionado) {
-            toast.error("Seleccione un usuario antes de agregar.");
+        console.log("tipo usuario seleccionado",tipoUsuario);
+        if (!usuarioSeleccionado||tipoUsuario === "") {
+            toast.error("Seleccione un usuario y tipo de usuario antes de agregar.");
             return;
         }
         const usuarioSeleccionadoId = Number(usuarioSeleccionado);
@@ -557,9 +575,9 @@ const AdministracionProyecto = (proyectoKey,urn) => {
         try {
             const payload = {
                 idUsuario: usuarioEncontrado.idUsu, 
-                urn: proyectoKey.urn, // aquí usas la urn desde proyectoKey
-                proyectoKey: proyectoKey.proyectoKey // si necesitas el proyectoKey completo
-                // Asegúrate de incluir cualquier otro dato necesario que tu backend requiera
+                urn: proyectoKey.urn, // 
+                proyectoKey: proyectoKey.proyectoKey ,
+                tipoUsuario: tipoUsuario// 
             };
             console.log("datos enviados",payload);
             // Llamada a la API para asignar el usuario al proyecto
@@ -626,12 +644,21 @@ const AdministracionProyecto = (proyectoKey,urn) => {
                                     </option>
                                 ))}
                             </Form.Control>
+                            <Form.Control as="select" value={tipoUsuario} onChange={e => setTipoUsuario(e.target.value)}>
+                                <option value="-1">Seleccione un tipo...</option>
+                                <option value="Constructor">Constructor</option>
+                                <option value="Fabricante">Fabricante</option>
+                                <option value="ITO">ITO</option>
+                                <option value="Cliente">Cliente</option>
+                                <option value="Invitado">Invitado</option>
+                            </Form.Control>
                             <Button style={{...botonEstilo, marginTop: '10px'}} onClick={agregarUsuario}>Agregar Usuario </Button>
                         </Form.Group>
                         <Table striped bordered hover>
                             <thead>
                                 <tr>
                                     <th>Nombre</th>
+                                    <th>Tipo</th>
                                     <th>Acciones</th>
                                 </tr>
                             </thead>
@@ -639,6 +666,7 @@ const AdministracionProyecto = (proyectoKey,urn) => {
                                 {usuariosAsignadosProyecto.map(usuario => (
                                     <tr key={usuario.idUsu}>
                                         <td>{usuario.fullname}/{usuario.username}</td>
+                                        <td>{usuario.tipoUsuario ? usuario.tipoUsuario : "No asignado"}</td>
                                         <td>
                                             <Button variant="danger" onClick={() => desasociarUsuario(usuario.idUsu)}>
                                                 Quitar

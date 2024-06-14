@@ -23,21 +23,24 @@ const MaestroFierros = ({ urn,proyecto }) => {
                     // Carga los detalles para todos los pedidos
                     const pedidosConDetalles = await Promise.all(pedidosInicial.map(async pedido => {
                         const detalles = await fetchBarDetails(pedido);
+                        console.log("Detalle Pedidos",detalles);
                         return { ...pedido, detalles: detalles || [] };
                     }));
                    
                     const urlBarras = `${API_BASE_URL}/api/barraurn/${urn}`;
                     const responseBarras = await axios.get(urlBarras);
-                    const allBars = responseBarras.data; // Assuming the response data structure matches your needs
+                    const allBars = await responseBarras.data; // Assuming the response data structure matches your needs
                     console.log("todas las barras",allBars);
                     const requestedIds = pedidos.flatMap(pedido => pedido.ids);
+                    console.log("pedidos barras",requestedIds);
                     const availableBars = allBars.detalles.filter(bar => !requestedIds.includes(bar.id.toString()));
                     console.log("todas las barras no pedidas",availableBars);
 
                     const pedidoNoPedidos = {
                         nombre_pedido: "No Pedidos",
                         fecha: new Date().toISOString().split('T')[0], // Fecha actual
-                        pesos: availableBars.reduce((sum, bar) => sum + parseFloat(bar.pesoLineal), 0).toFixed(2),
+                        pesos: availableBars.reduce((sum, bar) => sum + (parseFloat(bar.pesoLineal) * parseFloat(bar.longitudTotal)), 0).toFixed(2)
+                        ,
                         detalles: availableBars,
                         estados: { estado: 'No Aplicable', color: 'grey' }
                     };
@@ -62,6 +65,7 @@ const fetchBarDetails = async (pedido) => {
     try {
         const url = `${API_BASE_URL}/api/barrasPorUrneIds/${urn}`;
         const response = await axios.post(url, { ids: pedido.ids });
+        console.log("respuesta datos  barra detalles",response.data)
         if (response.status === 200) {
             return response.data;
         } else {
@@ -83,7 +87,7 @@ const handleExpand = async (index) => {
         console.log("todos los detalles", detalles);
         newPedidos[index].detalles = detalles;
     }
-    console.log("pedidos con detalles", newPedidos);
+    console.log("pedidos con detalles Expand", newPedidos);
     setPedidos(newPedidos);
 };
     const handleDownloadAvailableBarsCSV = async () => {
@@ -290,7 +294,19 @@ const handleExpand = async (index) => {
         setTabIndex(newValue);
       };
 
-      
+    function formatNumber(value) {
+     
+        const num = parseFloat(value);
+    
+        // Verifica si 'num' es un número después de la conversión
+        if (!isNaN(num)) {
+            // Redondea a dos decimales si es diferente de cero, de lo contrario devuelve '0'
+            return num !== 0 ? num.toFixed(2) : "0";
+        } else {
+            // Devuelve "0.00" si el valor original no es convertible a un número
+            return "0.00";
+        }
+    }
       return (
         <Card style={cardStyle}>
             <CardContent>
@@ -335,53 +351,61 @@ const handleExpand = async (index) => {
                             <Table aria-label="detalles del pedido">
                                 <TableHead>
                                     <TableRow>
-                                        <TableCell>ID Barra</TableCell>
-                                        <TableCell>Diametro</TableCell>
-                                        <TableCell>Longitud Total</TableCell>
-                                        <TableCell>Peso Lineal</TableCell>
-                                        <TableCell>EJE/VIGA/LOSA</TableCell>
-                                        <TableCell>PISO</TableCell>
-                                        <TableCell>CICLO</TableCell>
-                                        <TableCell>Cantidad</TableCell>
-                                        <TableCell>Figura</TableCell>
-                                        <TableCell>Uso</TableCell>
-                                        <TableCell>A/cm</TableCell>
-                                        <TableCell>B/cm</TableCell>
-                                        <TableCell>C/cm</TableCell>
-                                        <TableCell>D/cm</TableCell>
-                                        <TableCell>E/cm</TableCell>
-                                        <TableCell>F/cm</TableCell>
-                                        <TableCell>G/cm</TableCell>
-                                        <TableCell>H/cm</TableCell>
-                                        <TableCell>I/cm</TableCell>
-                                        <TableCell>J/cm</TableCell>
-                                        <TableCell>R/cm</TableCell>
+                                    <TableCell>EJE/VIGA/LOSA</TableCell>
+                                    <TableCell>ELEM CONST</TableCell>
+                                    <TableCell>PISO</TableCell>
+                                    <TableCell>CICLO</TableCell>
+                                    <TableCell>Cantidad</TableCell>
+                                    <TableCell>Ø mm</TableCell>
+                                    <TableCell>Figura</TableCell>
+                                    <TableCell>L/m</TableCell>
+                                    <TableCell>Uso</TableCell>
+                                    <TableCell>A/cm</TableCell>
+                                    <TableCell>B/cm</TableCell>
+                                    <TableCell>C/cm</TableCell>
+                                    <TableCell>D/cm</TableCell>
+                                    <TableCell>E/cm</TableCell>
+                                    <TableCell>F/cm</TableCell>
+                                    <TableCell>G/cm</TableCell>
+                                    <TableCell>H/cm</TableCell>
+                                    <TableCell>I/cm</TableCell>
+                                    <TableCell>J/cm</TableCell>
+                                    <TableCell>AngV</TableCell>
+                                    <TableCell>AngV2</TableCell>
+                                    <TableCell>AngV3</TableCell>
+                                    <TableCell>R/cm</TableCell>
+                                    <TableCell>Peso Kg</TableCell>
+                                    <TableCell>ID Barra</TableCell>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
                                     {pedido.detalles.map((barra, idx) => (
                                         <TableRow key={idx}>
-                                            <TableCell>{barra.id}</TableCell>
-                                            <TableCell>{typeof barra.diametroBarra === 'number' ? barra.diametroBarra.toFixed(2) : "0.00"}</TableCell>
-                                            <TableCell>{typeof barra.longitudTotal === 'number' ? barra.longitudTotal.toFixed(2) : "0.00"}</TableCell>
-                                            <TableCell>{typeof barra.pesoLineal === 'number' ? barra.pesoLineal.toFixed(2) : "0.00"}</TableCell>
                                             <TableCell>{barra.nombreFiltro1}</TableCell>
+                                            <TableCell>''</TableCell>
                                             <TableCell>{barra.aecPiso}</TableCell>
                                             <TableCell>{barra.aecSecuenciaHormigonado}</TableCell>
                                             <TableCell>{barra.cantidad}</TableCell>
+                                            <TableCell>{typeof barra.diametroBarra === 'number' ? barra.diametroBarra.toFixed(2) : "0.00"}</TableCell>
                                             <TableCell>{barra.aecForma}</TableCell>
+                                            <TableCell>{typeof barra.longitudTotal === 'number' ? barra.longitudTotal.toFixed(2) : "0.00"}</TableCell>
                                             <TableCell>{barra.aecUsoBarra}</TableCell>
-                                            <TableCell>{typeof barra.a === 'number' ? barra.a.toFixed(2) : "0.00"}</TableCell>
-                                            <TableCell>{typeof barra.b === 'number' ? barra.b.toFixed(2) : "0.00"}</TableCell>
-                                            <TableCell>{typeof barra.c === 'number' ? barra.c.toFixed(2) : "0.00"}</TableCell>
-                                            <TableCell>{typeof barra.d === 'number' ? barra.d.toFixed(2) : "0.00"}</TableCell>
-                                            <TableCell>{typeof barra.e === 'number' ? barra.e.toFixed(2) : "0.00"}</TableCell>
-                                            <TableCell>{typeof barra.f === 'number' ? barra.f.toFixed(2) : "0.00"}</TableCell>
-                                            <TableCell>{typeof barra.g === 'number' ? barra.g.toFixed(2) : "0.00"}</TableCell>
-                                            <TableCell>{typeof barra.h === 'number' ? barra.h.toFixed(2) : "0.00"}</TableCell>
-                                            <TableCell>{typeof barra.i === 'number' ? barra.i.toFixed(2) : "0.00"}</TableCell>
-                                            <TableCell>{typeof barra.j === 'number' ? barra.j.toFixed(2) : "0.00"}</TableCell>
-                                            <TableCell>{typeof barra.r === 'number' ? barra.r.toFixed(2) : "0.00"}</TableCell>
+                                            <TableCell>{formatNumber(barra.a)}</TableCell>
+                                            <TableCell>{formatNumber(barra.b)}</TableCell>
+                                            <TableCell>{formatNumber(barra.c)}</TableCell>
+                                            <TableCell>{formatNumber(barra.d)}</TableCell>
+                                            <TableCell>{formatNumber(barra.e)}</TableCell>
+                                            <TableCell>{formatNumber(barra.f)}</TableCell>
+                                            <TableCell>{formatNumber(barra.g)}</TableCell>
+                                            <TableCell>{formatNumber(barra.h)}</TableCell>
+                                            <TableCell>{formatNumber(barra.i)}</TableCell>
+                                            <TableCell>{formatNumber(barra.j)}</TableCell>
+                                            <TableCell>''</TableCell>
+                                            <TableCell>''</TableCell>
+                                            <TableCell>''</TableCell>
+                                            <TableCell>{formatNumber(barra.r)}</TableCell>
+                                            <TableCell>{typeof barra.pesoLineal === 'number' ? barra.pesoLineal.toFixed(2) : "0.00"}</TableCell>
+                                            <TableCell>{barra.id}</TableCell>
                                         </TableRow>
                                     ))}
                                 </TableBody>
@@ -398,7 +422,7 @@ const handleExpand = async (index) => {
                             <Accordion key={index}>
                                 <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                                     <Typography>
-                                        <b>{pedido.nombre_pedido}</b> - {pedido.fecha} - {pedido.pesos} kg
+                                        <b>{pedido.nombre_pedido}</b> - {pedido.fecha} - {Number(pedido.pesos).toLocaleString('es-ES')} kg
                                     </Typography>
                                 </AccordionSummary>
                                 <AccordionDetails>
@@ -406,15 +430,14 @@ const handleExpand = async (index) => {
                                         <Table aria-label="detalles de barras no solicitadas">
                                             <TableHead>
                                                 <TableRow>
-                                                    <TableCell>ID Barra</TableCell>
-                                                    <TableCell>Diametro</TableCell>
-                                                    <TableCell>Longitud Total</TableCell>
-                                                    <TableCell>Peso Lineal</TableCell>
-                                                    <TableCell>EJE/VIGA/LOSA</TableCell>
+                                                <TableCell>EJE/VIGA/LOSA</TableCell>
+                                                    <TableCell>ELEM CONST</TableCell>
                                                     <TableCell>PISO</TableCell>
                                                     <TableCell>CICLO</TableCell>
                                                     <TableCell>Cantidad</TableCell>
+                                                    <TableCell>Ø mm</TableCell>
                                                     <TableCell>Figura</TableCell>
+                                                    <TableCell>L/m</TableCell>
                                                     <TableCell>Uso</TableCell>
                                                     <TableCell>A/cm</TableCell>
                                                     <TableCell>B/cm</TableCell>
@@ -426,33 +449,42 @@ const handleExpand = async (index) => {
                                                     <TableCell>H/cm</TableCell>
                                                     <TableCell>I/cm</TableCell>
                                                     <TableCell>J/cm</TableCell>
+                                                    <TableCell>AngV</TableCell>
+                                                    <TableCell>AngV2</TableCell>
+                                                    <TableCell>AngV3</TableCell>
                                                     <TableCell>R/cm</TableCell>
+                                                    <TableCell>Peso Kg</TableCell>
+                                                    <TableCell>ID Barra</TableCell>
                                                 </TableRow>
                                             </TableHead>
                                             <TableBody>
                                                 {pedido.detalles.map((barra, idx) => (
                                                     <TableRow key={idx}>
-                                                        <TableCell>{barra.id}</TableCell>
-                                                        <TableCell>{typeof barra.diametroBarra === 'number' ? barra.diametroBarra.toFixed(2) : "0.00"}</TableCell>
-                                                        <TableCell>{typeof barra.longitudTotal === 'number' ? barra.longitudTotal.toFixed(2) : "0.00"}</TableCell>
-                                                        <TableCell>{typeof barra.pesoLineal === 'number' ? barra.pesoLineal.toFixed(2) : "0.00"}</TableCell>
-                                                        <TableCell>{barra.nombreFiltro1}</TableCell>
-                                                        <TableCell>{barra.aecPiso}</TableCell>
-                                                        <TableCell>{barra.aecSecuenciaHormigonado}</TableCell>
-                                                        <TableCell>{barra.cantidad}</TableCell>
-                                                        <TableCell>{barra.aecForma}</TableCell>
-                                                        <TableCell>{barra.aecUsoBarra}</TableCell>
-                                                        <TableCell>{typeof barra.a === 'number' ? barra.a.toFixed(2) : "0.00"}</TableCell>
-                                                        <TableCell>{typeof barra.b === 'number' ? barra.b.toFixed(2) : "0.00"}</TableCell>
-                                                        <TableCell>{typeof barra.c === 'number' ? barra.c.toFixed(2) : "0.00"}</TableCell>
-                                                        <TableCell>{typeof barra.d === 'number' ? barra.d.toFixed(2) : "0.00"}</TableCell>
-                                                        <TableCell>{typeof barra.e === 'number' ? barra.e.toFixed(2) : "0.00"}</TableCell>
-                                                        <TableCell>{typeof barra.f === 'number' ? barra.f.toFixed(2) : "0.00"}</TableCell>
-                                                        <TableCell>{typeof barra.g === 'number' ? barra.g.toFixed(2) : "0.00"}</TableCell>
-                                                        <TableCell>{typeof barra.h === 'number' ? barra.h.toFixed(2) : "0.00"}</TableCell>
-                                                        <TableCell>{typeof barra.i === 'number' ? barra.i.toFixed(2) : "0.00"}</TableCell>
-                                                        <TableCell>{typeof barra.j === 'number' ? barra.j.toFixed(2) : "0.00"}</TableCell>
-                                                        <TableCell>{typeof barra.r === 'number' ? barra.r.toFixed(2) : "0.00"}</TableCell>
+                                                            <TableCell>{barra.nombreFiltro1}</TableCell>
+                                            <TableCell>''</TableCell>
+                                            <TableCell>{barra.aecPiso}</TableCell>
+                                            <TableCell>{barra.aecSecuenciaHormigonado}</TableCell>
+                                            <TableCell>{barra.cantidad}</TableCell>
+                                            <TableCell>{typeof barra.diametroBarra === 'number' ? barra.diametroBarra.toFixed(2) : "0.00"}</TableCell>
+                                            <TableCell>{barra.aecForma}</TableCell>
+                                            <TableCell>{typeof barra.longitudTotal === 'number' ? barra.longitudTotal.toFixed(2) : "0.00"}</TableCell>
+                                            <TableCell>{barra.aecUsoBarra}</TableCell>
+                                            <TableCell>{formatNumber(barra.a)}</TableCell>
+                                            <TableCell>{formatNumber(barra.b)}</TableCell>
+                                            <TableCell>{formatNumber(barra.c)}</TableCell>
+                                            <TableCell>{formatNumber(barra.d)}</TableCell>
+                                            <TableCell>{formatNumber(barra.e)}</TableCell>
+                                            <TableCell>{formatNumber(barra.f)}</TableCell>
+                                            <TableCell>{formatNumber(barra.g)}</TableCell>
+                                            <TableCell>{formatNumber(barra.h)}</TableCell>
+                                            <TableCell>{formatNumber(barra.i)}</TableCell>
+                                            <TableCell>{formatNumber(barra.j)}</TableCell>
+                                            <TableCell>''</TableCell>
+                                            <TableCell>''</TableCell>
+                                            <TableCell>''</TableCell>
+                                            <TableCell>{formatNumber(barra.r)}</TableCell>
+                                            <TableCell>{typeof barra.pesoLineal === 'number' ? barra.pesoLineal.toFixed(2) : "0.00"}</TableCell>
+                                            <TableCell>{barra.id}</TableCell>
                                                     </TableRow>
                                                 ))}
                                             </TableBody>

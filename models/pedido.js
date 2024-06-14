@@ -1,6 +1,7 @@
 
 import mongoose from 'mongoose';
 
+
 const estadoDetalleSchema = new mongoose.Schema({
     est: { type: String, required: true },
     fecha: { type: Date, default: Date.now },
@@ -18,6 +19,7 @@ const pedidoSchema = new mongoose.Schema({
     listado_largos: { type: String },
     nombre_pedido: { type: String, required: true },
     urn_actual: { type: String, required: true },
+    url:{ type: String },
     estados: {
         paquetizado: estadoDetalleSchema,
         espera_aprobacion: estadoDetalleSchema,
