@@ -117,7 +117,7 @@ const ListadoProyectos = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) 
         console.log("datos borrado");
         console.log(bucketKey);
         console.log(objectKey);
-        handleListItemClick(proyectos[0].objectKey, proyectos[0].urn);
+       
           fetch(`${API_BASE_URL}/api/deleteObject`, {
               method: 'POST',
               headers: {
@@ -133,17 +133,33 @@ const ListadoProyectos = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) 
               }
           })
           .then(data => {
-            console.log('Éxito:', data);
+            console.log('Éxito en Borrado inicial :', data);
+            //  urnSelected
             toast.success(`${objectKey} ha sido borrado exitosamente`);
 
             // Si el objeto se eliminó exitosamente, procede a eliminar los pedidos asociados
-            return fetch(`${API_BASE_URL}/api/eliminarPedidoURN/${proyectos[0].urn}`, {
+            return fetch(`${API_BASE_URL}/api/eliminarPedidoURN/${urnSelected}`, {
                 method: 'DELETE'
             });
         })
-        .then(response => {
-           
-            return response.json();
+        
+        .then(data => {
+          console.log('Pedidos eliminados exitosamente:', data);
+          toast.success('Pedidos asociados eliminados exitosamente');
+          console.log("eliminacion de filtros asociados a URN");
+          // Procede a eliminar los filtros asociados a la URN
+          return fetch(`${API_BASE_URL}/api/filtrosOpcionesProyectoEliminar/${urnSelected}`, {
+            method: 'DELETE'
+          });
+        })
+        .then(data => {
+          console.log('Filtros eliminados exitosamente:', data);
+          toast.success('Datos asociados eliminados exitosamente');
+          console.log('Inicio borrado configuración');
+          // Procede a eliminar la configuración del visor asociada a la URN
+          return fetch(`${API_BASE_URL}/api/configuracionViewerEliminar/${urnSelected}`, {
+            method: 'DELETE'
+          });
         })
         .then(data => {
             console.log('Pedidos eliminados exitosamente:', data);
@@ -159,12 +175,14 @@ const ListadoProyectos = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) 
                     onProyectoSeleccionado(proyectos[0].proyectoKey, urn); // Llamar a la función onProyectoSeleccionado
                 }
             });
+            handleListItemClick(proyectos[0].objectKey, proyectos[0].urn);
         })
           
           .catch(error => {
               console.error('Error:', error);
               toast.error(`Error al intentar borrar ${objectKey}`);
               fetchFilters();
+              handleListItemClick(proyectos[0].objectKey, proyectos[0].urn);
               // Aquí puedes agregar lógica adicional si es necesario
           });
          

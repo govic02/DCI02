@@ -1,7 +1,6 @@
 import React, { useRef ,useState,useEffect} from 'react';
 import Viewer from './Viewer';
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+
 import TabsComponent from './TabsComponent';
 import TabsComponentMobile from './TabsComponentMobile';
 import AdministradorDeVistas from './visualizador/AdministradorDeVistas';
@@ -15,7 +14,8 @@ import { useMediaQuery } from 'react-responsive';
 import './styles/columna.css'; // Ajusta la ruta según dónde se encuentre el archivo CSS
 import 'bootstrap/dist/css/bootstrap.min.css'; // 
 import ViewerMobile from './ViewerMobile';
-
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 const ColumnaDerecha = ({ isCollapsed, token, urn, selectedIds, onCameraChange, onSelectionChange, refViewer }) => {
   const { token: tokenContexto } = useAuth();
     const [urnSelected, setUrnSelected] = useState('');
@@ -25,14 +25,16 @@ const ColumnaDerecha = ({ isCollapsed, token, urn, selectedIds, onCameraChange, 
     const { logout } = useAuth();
     const [emailSent, setEmailSent] = useState(false);
     const [error, setError] = useState(null);
-
     const isDesktopOrLaptop = useMediaQuery({
-      query: '(min-width: 580px)'
+      query: '(min-width: 580px) and (min-height: 580px)'
     });
     const isTabletOrMobile = useMediaQuery({
-      query: '(max-width:579px)'
+      query: '(max-width: 579px) or (max-height: 579px)'
     });
     const isPortrait = useMediaQuery({ query: '(orientation: portrait)' });
+    const isPortraitAndWidthMoreThan400 = useMediaQuery({
+      query: '(orientation: portrait) and (min-width: 400px)'
+    });
   
     const estiloColapsado = {
         width: '100%',
@@ -121,7 +123,7 @@ const ColumnaDerecha = ({ isCollapsed, token, urn, selectedIds, onCameraChange, 
     }, );
   
     const handleFilterBarsClick = () => {
-      verificarUsuario();
+      //verificarUsuario();
       if (showAdministradorVistasMobile) {
           setShowAdministradorVistasMobile(false); // Si el Administrador de Vistas está visible, ocultarlo
       }
@@ -129,7 +131,7 @@ const ColumnaDerecha = ({ isCollapsed, token, urn, selectedIds, onCameraChange, 
   };
     
   const handleViewsClick = () => {
-    verificarUsuario();
+    //verificarUsuario();
     if (showTabsComponentMobile) {
         setShowTabsComponentMobile(false); // Si TabsComponentMobile está visible, ocultarlo
     }
@@ -166,60 +168,58 @@ const ColumnaDerecha = ({ isCollapsed, token, urn, selectedIds, onCameraChange, 
 
             </div>
         </div>}
-        {isTabletOrMobile && 
+        {isTabletOrMobile && (
         <div>
-
           <div className="container-fluid p-0">
             <div className="row no-gutters">
-                <div className="col-12">
-                   <HeaderApp className="header-app" proyectoKey={proyectoKeySeleccionado} urn={urnSelected} />
-                </div>
+              <div className="col-12">
+                <HeaderApp className="header-app" proyectoKey={proyectoKeySeleccionado} urn={urnSelected} />
+              </div>
             </div>
           </div>
-          <div className="container-fluid p-0">
-            <div className="row no-gutters">
+          {isPortrait ? (
+            <div className="text-center mt-5">
+              <h2>Por favor, coloca el dispositivo en horizontal</h2>
+            </div>
+          ) : (
+            <div className="container-fluid p-0">
+              <div className="row no-gutters">
                 <div className="col-12">
-
-                 <ActionsProvider viewerRef={refViewer}>
-                    <div className="row ">
-                      
-                          <div className="col-6" style={{height:'-200px'}}>
-                          <ViewerMobile                            runtime={{ accessToken: token }}
-                              urn={urnSelected}
-                              selectedIds={selectedIds}
-                              onCameraChange={onCameraChange}
-                              onSelectionChange={onSelectionChange}
-                              ref={refViewer}
-                              token = {token}
-                              guardarIdentificadores={guardarIdentificadores} // Pasar la función para guardar identificadores
-                          />
-                          </div>
-                          
-                          <div className="col-12">
-                          {showTabsComponentMobile && <TabsComponentMobile urnBuscada={urnSelected} />}
-                          </div>
-                          <div className="col-12">
-                          {showAdministradorVistasMobile && <AdministradorDeVistasMobile identificadoresActual={identificadoresActual} urnBuscada={urnSelected} />}
-                            
-                          </div>
-                          <div className="bottom-buttons">
-                                <button className="bottom-button" onClick={handleFilterBarsClick}>Filtro/Barras</button>
-                                <button className="bottom-button" onClick={handleViewsClick}>Vistas</button>
-                            </div>
-                          
+                  <ActionsProvider viewerRef={refViewer}>
+                    <div className="row">
+                      <div className="col-6" style={{ height: '-200px' }}>
+                        <ViewerMobile
+                          runtime={{ accessToken: token }}
+                          urn={urnSelected}
+                          selectedIds={selectedIds}
+                          onCameraChange={onCameraChange}
+                          onSelectionChange={onSelectionChange}
+                          ref={refViewer}
+                          token={token}
+                          guardarIdentificadores={guardarIdentificadores}
+                        />
+                      </div>
+                      <div className="col-12">
+                        {showTabsComponentMobile && <TabsComponentMobile urnBuscada={urnSelected} />}
+                      </div>
+                      <div className="col-12">
+                        {showAdministradorVistasMobile && <AdministradorDeVistasMobile identificadoresActual={identificadoresActual} urnBuscada={urnSelected} />}
+                      </div>
+                      <div className="bottom-buttons">
+                        <button className="bottom-button" onClick={handleFilterBarsClick}>Filtro/Barras</button>
+                        <button className="bottom-button" onClick={handleViewsClick}>Vistas</button>
+                      </div>
                     </div>
-                 </ActionsProvider>
+                  </ActionsProvider>
                 </div>
+              </div>
             </div>
-          </div>
-          
-          
-          </div>
-          }
-        {isPortrait && <div>Coloca el Dispositivo en horizontal</div>}
-        {/* Aquí puedes añadir tu contenido o componentes basados en la resolución */}
-      </div>
-);
+          )}
+        </div>
+      )}
+      <ToastContainer />
+    </div>
+  );
 };
 
 export default ColumnaDerecha;

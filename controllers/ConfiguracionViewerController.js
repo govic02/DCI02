@@ -55,7 +55,27 @@ const obtenerConfiguracionViewer = async (req, res) => {
     res.status(500).json({ mensaje: 'Error al obtener la configuración del visor', error });
   }
 };
+const eliminarConfiguracionViewerPorUrn = async (req, res) => {
+  const urn = req.params.urn;
+  console.log("Eliminando configuración del visor asociada a la URN:", urn);
+  try {
+    if (!urn) {
+      return res.status(400).json({ mensaje: 'Se requiere una URN para realizar la eliminación' });
+    }
+
+    const resultado = await ConfiguracionViewer.deleteMany({ urn });
+
+    if (resultado.deletedCount === 0) {
+      return res.status(200).json({ mensaje: 'No se encontraron configuraciones del visor con la URN proporcionada' });
+    }
+
+    res.send({ mensaje: 'Configuraciones del visor eliminadas con éxito', documentosEliminados: resultado.deletedCount });
+  } catch (error) {
+    console.error('Error al eliminar configuraciones del visor:', error);
+    res.status(500).json({ mensaje: 'Error interno al intentar eliminar las configuraciones del visor' });
+  }
+};
 // Exporta todas las funciones del controlador como un objeto
 export { 
-  manipularConfiguracionViewer,obtenerConfiguracionViewer
+  manipularConfiguracionViewer,obtenerConfiguracionViewer,eliminarConfiguracionViewerPorUrn
 };

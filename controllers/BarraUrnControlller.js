@@ -94,14 +94,14 @@ const insertarObjetoConDetalles = async (req, res) => {
     }));
 
     // Crea el documento a insertar
-    const barraUrn = new BarraUrn({
-        urn,
-        detalles: detallesFormateados
-    });
+    const barraUrn = await BarraUrn.findOneAndUpdate(
+        { urn },
+        { detalles: detallesFormateados },
+        { upsert: true, new: true }
+    );
 
     try {
         // Guarda el documento en la base de datos
-        await barraUrn.save();
         console.log("inserción barras proyecto por urn exitoso");
         res.status(201).json(barraUrn);
     } catch (error) {

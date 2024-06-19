@@ -588,25 +588,31 @@ porcentajePedidoTotal = async (urn) => {
         const { idsBarras } = this.state;
         const { urn } = this.props;
         console.log("objeto con barras",idsBarras);
+        const batchSize = 1000; 
+        const numBatches = Math.ceil(idsBarras.length / batchSize);
+        toast.success('Inicio proceso de carga de barras');
         try {
-            const response = await fetch(`${API_BASE_URL}/api/barraurn`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    urn: urn,
-                    lista: idsBarras
-                })
-            });
-
-            if (!response.ok) {
-                throw new Error('Error al guardar los datos de barras');
+            for (let i = 0; i < numBatches; i++) {
+                const batch = idsBarras.slice(i * batchSize, (i + 1) * batchSize);
+                const response = await fetch(`${API_BASE_URL}/api/barraurn`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        urn: urn,
+                        lista: batch
+                    })
+                });
+    
+                if (!response.ok) {
+                    throw new Error('Error al guardar los datos de barras');
+                }
+    
+                const responseData = await response.json();
+                console.log("Datos de barras guardados con éxito:", responseData);
+                toast.success('Datos de barras guardados con éxito grupo '+i+'  de '+numBatches-1);
             }
-
-            const responseData = await response.json();
-            console.log("Datos de barras guardados con éxito:", responseData);
-            toast.success('Datos de barras guardados con éxito');
         } catch (error) {
             console.error("Error al guardar los datos de barras:", error);
             toast.error('Error al guardar los datos de barras: ' + error.message);
@@ -617,7 +623,7 @@ porcentajePedidoTotal = async (urn) => {
         if (isNaN(largoActual)) {
             return 0;
         }
-        console.log("Unidades recibidas", unidades);
+     //   console.log("Unidades recibidas", unidades);
     
         // Convertir de metros
         if (unidades.includes("meters") && !unidades.includes("centimeters")) {
@@ -682,7 +688,7 @@ porcentajePedidoTotal = async (urn) => {
                             return acc;
                         }, {});
                         const longitudTotal = this.convertirLongitud(valores[nombreParametrolargo], valores[nombreParametrolargo + 'Units']);
-                        console.log("Longitud Modificada",longitudTotal);
+                       // console.log("Longitud Modificada",longitudTotal);
                         return {
                             id: element.dbId,
                             nombreFiltro1: valores[filtro1],
@@ -1006,11 +1012,12 @@ porcentajePedidoTotal = async (urn) => {
             ]);
     
             // Actualiza el estado con los resultados obtenidos.
-            this.setState({ idsConFecha, idsSinFecha });
+            //this.setState({ idsConFecha, idsSinFecha });
             
             this.cargarConfiguracion();
             await this.obtenerFiltros(this.props.urn).then(async () => {
                 try {
+                    console.log("proceso Id Barras Proyecto");
                     const idsBarras = await this.obtenerIdsBarras();
                     if(!idsBarras.length ==0){
                         await this.generarTotalPesoPisos();

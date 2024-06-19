@@ -18,7 +18,7 @@ import { crearActualizarOrdenNiveles, obtenerOrdenNivelesPorUrn } from '../contr
 import { obtenerFiltros,actualizarFiltro } from '../controllers/filtrosController.js';
 import {crearPedido,crearArchivoPedido,eliminarPedido,obtenerPedidos,actualizarEstadoPedido,transfierePedido,eliminarPedidosPorUrn } from '../controllers/pedidoController.js'; // PEDIDOS
 import  {actualizarUsuarioProyectoAsignadoPorIdUsuario,obtenerUsuarioProyectoAsignadoPorIdUsuario } from '../controllers/usuarioProyectoAsignadoController.js'; // Asignación proyectos
-import { manipularConfiguracionViewer,obtenerConfiguracionViewer} from '../controllers/ConfiguracionViewerController.js'; 
+import { manipularConfiguracionViewer,obtenerConfiguracionViewer,eliminarConfiguracionViewerPorUrn} from '../controllers/ConfiguracionViewerController.js'; 
 import { buscarCrearActualizarObjetoProyectoPlan, obtenerObjetosPorUrn ,CrearObjetoProyectoPlan,obtenerPorDbIdYUrn,procesarObjetosProyectoPlanMasivamente,transfiereObjetoProyectoPlan} from '../controllers/ObjetoProyectoPlanController.js';
 import {guardarSumaPisosGeneral,obtenerRegistroPorUrn} from '../controllers/RespuestaSumaPesosController.js';
 import{ obtenerUsuario, obtenerUsuarios, obtenerUsuarioPorUsername,crearUsuario,actualizarUsuario,eliminarUsuario,obtenerUsuariosAdministradores} from '../controllers/usersController.js'
@@ -46,7 +46,8 @@ import {
   obtenerFiltroOpcionesProyectoPorId,
   obtenerFiltrosOpcionesProyectoPorUrn,
   actualizarFiltroOpcionesProyecto,
-  eliminarFiltroOpcionesProyecto
+  eliminarFiltroOpcionesProyecto,
+  eliminarFiltrosOpcionesProyectoPorUrn
 } from '../controllers/FiltrosOpcionesProyectoController.js'; 
 import { crearAdicionalPedido,obtenerAdicionalesPorPedidoId ,eliminarAdicionalPedido,obtenerAdicionalesPorUrn,transfiereAdicionalesPedidos } from '../controllers/pedidoController.js';
 import {crearActualizarLongitudPromedio ,obtenerLongitudPromedioPorUrn,eliminarLongitudPromedioPorUrn} from '../controllers/LongitudesPromedioController.js';
@@ -345,146 +346,7 @@ app.post('/api/objects', upload.single('fileToUpload'), async (req, res) => {
   }
 });
 
-/*
-app.post('/api/objects', upload.single('fileToUpload'), async (req, res) => {
-  const file = req.file;
-  const { originalname, username, bucketKey } = req.body;
 
-  if (!file) {
-      return res.status(400).json({ error: 'No se ha proporcionado un archivo válido' });
-  }
-
-  const tempDir = path.join(__dirname, 'temp');
-  if (!fs.existsSync(tempDir)) {
-      fs.mkdirSync(tempDir, { recursive: true });
-  }
-  // Nombre temporal para el archivo ensamblado
-  const tempFilePath = path.join(tempDir, originalname);
-  fs.appendFileSync(tempFilePath, file.buffer);
-
-  const totalChunks = req.body.totalChunks;  // Total de fragmentos esperados
-  const receivedChunkNumber = req.body.chunkNumber;  // Número del fragmento recibido
-
-  // Verificar si es el último fragmento
-  if (receivedChunkNumber == totalChunks ) {
-      // Proceso para cuando todos los fragmentos han sido recibidos
-      const assembledFilePath = tempFilePath;  // El archivo ensamblado está completo
-
-      // tamaño del nuevo fragmento para la API externa
-      const chunkSize = 500 * 1024 * 1024;  // 350 MB por fragmento
-      const fileSize = fs.statSync(assembledFilePath).size;
-      const buffer = fs.readFileSync(assembledFilePath);
-      
-      const nbChunks = Math.ceil(fileSize / chunkSize);
-
-      for (let i = 0; i < nbChunks; i++) {
-          const start = i * chunkSize;
-          const end = Math.min(start + chunkSize, fileSize);
-          const chunkBuffer = buffer.slice(start, end);
-
-          // stream para enviar
-          const memoryStream = new stream.Readable();
-          memoryStream.push(chunkBuffer);
-          memoryStream.push(null);
-          console.log();
-          const range = `bytes ${start}-${end - 1}/${fileSize}`;
-          const sessionId = randomString(12);  // Asume una función que genera una cadena aleatoria
-          const length =  end - start;
-          try {
-              const response = await new ObjectsApi().uploadChunk(
-                  bucketKey, originalname,
-                  length, range, sessionId,
-                  memoryStream, {}, { autoRefresh: false }, req.oauth_token
-              );
-              console.log("Chunk enviado "+i );
-              console.log("respuesta " );
-              console.log(response);
-              if (response.statusCode !== 200 && response.statusCode !== 202) {
-                  throw new Error(`Error al subir el fragmento: ${response.statusCode}`);
-              }
-          } catch (error) {
-              console.error('Error al subir el fragmento:', error);
-              return res.status(500).json({ error: 'Error interno del servidor' });
-          }
-      }
-
-      // Eliminar archivo temporal
-      fs.unlinkSync(assembledFilePath);
-      console.log("PROCESO DE ENVIO TERMINADO DE ARCHIVO");
-      res.status(200).json({ message: 'Archivo completo subido y procesado exitosamente' });
-  } else {
-      res.status(202).json({ message: `Fragmento ${receivedChunkNumber + 1} de ${totalChunks} recibido` });
-  }
-});
-*/
-
-/*
-app.post('/api/objects',  multer({ storage: multer.memoryStorage() }).single('fileToUpload'), async (req, res, next) => {
-    
-  console.log("tamaño archivo");
-  console.log(req.file.size);
-  const fileSize = req.file.size;
-  const username = req.body.username
-  console.log("usuario que está subiendo archivo",username);
-  //const chunkSize = 512 * 1024;
-  const chunkSize = 350 * 1024 * 1024; // 200 MB en bytes
-  const nbChunks = Math.round(0.5 + fileSize / chunkSize);
-  let finalRes = null;
-  console.log(req.file);
-  if (!req.file || !req.file.buffer) {
-      return res.status(400).json({ error: 'No se ha proporcionado un archivo válido' });
-  }
-  const sessionId =  randomString(12);
-  
-  console.log(sessionId);
-  console.log(req.oauth_token);
-  for (let i = 0; i < nbChunks; i++) {
-      const start = i * chunkSize;
-      const end = Math.min(fileSize, (i + 1) * chunkSize) - 1;
-      const range = `bytes ${start}-${end}/${fileSize}`;
-      const length = end - start + 1;
-      const memoryStream = new stream.Readable(); 
-      const buffer = Buffer.from(req.file.buffer.slice(start, end + 1));
-    
-      memoryStream.push(buffer);
-      memoryStream.push(null); // Marca el final del stream
-      const { bucketKey } = req.body;
-      const objectKey = req.file.originalname;
-     
-      try {
-          const response = await new ObjectsApi().uploadChunk(
-                                        bucketKey, objectKey,
-                                        length, range, sessionId,
-                                        memoryStream, {}, { autoRefresh: false },  req.oauth_token
-                                  );
-          finalRes = response;
-
-          if (response.statusCode === 202) {
-              console.log('Se ha subido una parte del archivo.');
-              continue;
-          } else if (response.statusCode === 200) {
-              console.log('La última parte se ha subido.');
-              // username
-              sendCompletionEmail( username);
-             res.status(200).json({ok:true});
-
-
-             
-          } else {
-              console.log('Error en la respuesta:', response.data); 
-              console.log(response.statusCode);
-             
-              break;
-          }
-      } catch (error) {
-          console.error('Error al subir el archivo:', error);
-          break;
-      }}
-  
-
-});
-
-*/
 async function sendCompletionEmail(userEmail) {
   const mailOptions = {
       from: process.env.EMAIL_USERNAME,
@@ -538,7 +400,7 @@ app.post('/api/jobs', async (req, res, next) => {
   }
 });
 app.post('/api/deleteObject', async (req, res, next) => {
-  console.log("LLEGA");
+  console.log("inicio operacion borrado");
   
   let finalRes = null;
   const bucket_name = req.body.bucketKey;
@@ -591,10 +453,12 @@ app.post('/api/setFiltros',actualizarFiltro);
 app.get('/api/vistasGuardadasPorUrn/:urn', obtenerVistasPorUrn);
 app.get('/api/filtrosPorUrn/:urn', obtenerFiltrosOpcionesProyectoPorUrn);
 app.get('/api/listPedidos', obtenerPedidos); 
+app.delete('/api/filtrosOpcionesProyectoEliminar/:urn', eliminarFiltrosOpcionesProyectoPorUrn);
+
 
 app.post('/api/configuracionViewer',  manipularConfiguracionViewer); //
 app.get('/api/configuracionViewer',  obtenerConfiguracionViewer);
-
+app.delete('/api/configuracionViewerEliminar/:urn', eliminarConfiguracionViewerPorUrn);
 app.get('/api/getadicionalesPedido/:pedidoId', obtenerAdicionalesPorPedidoId);
 
 app.delete('/api/adicionalesPedido/eliminar/:id', eliminarAdicionalPedido);

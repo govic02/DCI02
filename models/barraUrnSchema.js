@@ -25,7 +25,7 @@ const itemSchema = new Schema({
   aecUsoBarra: { type: String },
   aecUsoBarraBloquear: { type: String },
   aecCantidad: { type: Number },
-  aecId: { type: Number },
+  aecId: { type: String },
   aecPiso: { type: String },
   aecUbicacion: { type: String },
   aecSecuenciaHormigonado: { type: String },

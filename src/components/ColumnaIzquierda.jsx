@@ -10,11 +10,16 @@ const ColumnaIzquierda = ({ isCollapsed, handleCollapse }) => {
     const { logout } = useAuth();
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768); 
     const isDesktopOrLaptop = useMediaQuery({
-        query: '(min-width: 580px)'
-    });
-    const isTabletOrMobile = useMediaQuery({
-        query: '(max-width: 579px)'
-    });
+        query: '(min-width: 580px) and (min-height: 580px)'
+      });
+      const isTabletOrMobile = useMediaQuery({
+        query: '(max-width: 579px) or (max-height: 579px)'
+      });
+      const isPortrait = useMediaQuery({ query: '(orientation: portrait)' });
+      const isPortraitAndWidthMoreThan400 = useMediaQuery({
+        query: '(orientation: portrait) and (min-width: 400px)'
+      });
+    
     useEffect(() => {
         // Desplegar por consola el objeto token cada vez que el componente se carga o el token cambia
         const tipo = localStorage.getItem('tipo');
@@ -124,6 +129,14 @@ const liNormal = {
     justifyContent: 'flex-end',
     height:'64px'
 };
+    if (isTabletOrMobile && isPortraitAndWidthMoreThan400) {
+        return (
+        <div className="text-center mt-5">
+            
+        </div>
+        );
+    }
+
     return (
        
         <div>

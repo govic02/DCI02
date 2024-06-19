@@ -137,7 +137,26 @@ const eliminarFiltroOpcionesProyecto = async (req, res) => {
     res.status(500).json({ mensaje: 'Error al eliminar el filtro', error });
   }
 };
+const eliminarFiltrosOpcionesProyectoPorUrn = async (req, res) => {
+  try {
+    const urn = req.params.urn;
+    console.log("Eliminando filtros asociados a la URN:", urn);
+    if (!urn) {
+      return res.status(400).send('Se requiere una URN para realizar la eliminación');
+    }
 
+    const resultado = await FiltrosOpcionesProyecto.deleteMany({ urn: urn });
+
+    if (resultado.deletedCount === 0) {
+      return res.status(404).send('No se encontraron filtros con la URN proporcionada');
+    }
+
+    res.send({ mensaje: 'Filtros eliminados con éxito', documentosEliminados: resultado.deletedCount });
+  } catch (error) {
+    console.error('Error al eliminar filtros:', error);
+    res.status(500).send('Error interno al intentar eliminar los filtros');
+  }
+};
 export {
   crearFiltroOpcionesProyecto,
   crearFiltroOpcionesProyectoSiNoExiste,
@@ -145,5 +164,6 @@ export {
   obtenerFiltroOpcionesProyectoPorId,
   actualizarFiltroOpcionesProyecto,
   eliminarFiltroOpcionesProyecto,
-  obtenerFiltrosOpcionesProyectoPorUrn
+  obtenerFiltrosOpcionesProyectoPorUrn,
+  eliminarFiltrosOpcionesProyectoPorUrn
 };

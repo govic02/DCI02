@@ -6,6 +6,9 @@ import axios from 'axios';
 import API_BASE_URL from '../config';
 import moment from 'moment'; 
 import { toast } from 'react-toastify';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 const { Autodesk } = window;
 var { filtroPiso } ="";
 var { filtroHa } ="";
@@ -132,7 +135,7 @@ class Viewer extends React.Component {
                 } else if (prop.attributeName === nombreParametrolargo && parseFloat(prop.displayValue) > 0) {
                   
                     if (prop.units) {
-                        if (prop.units.includes("meters")) {
+                        if (prop.units.includes("autodesk.unit.unit:meters")) {
                             console.log("tipo de unidad metros");
                             largoActual = parseFloat(prop.displayValue) ; // *100 Convertir de metros a centímetros
                         } else if (prop.units.includes("feet-")) {
@@ -536,7 +539,7 @@ class Viewer extends React.Component {
            let pesoActual = 0;
            let largoActual = 0;
            let esBarraValida = false; // Asumimos que no es válida hasta encontrar las propiedades necesarias
-   
+           let cantidadActual = 0;
            result.properties.forEach(prop => {
                if (prop.attributeName === nombreParametroPesoLineal && parseFloat(prop.displayValue) > 0) {
                     if (prop.units) {
@@ -555,7 +558,7 @@ class Viewer extends React.Component {
                } else if (prop.attributeName === nombreParametrolargo && parseFloat(prop.displayValue) > 0) {
                  
                     if (prop.units) {
-                        if (prop.units.includes("meters")) {
+                        if (prop.units.includes("autodesk.unit.unit:meters")) {
                             console.log("tipo de unidad metros");
                             largoActual = parseFloat(prop.displayValue) ; // *100 Convertir de metros a centímetros
                         } else if (prop.units.includes("feet-")) {
@@ -610,14 +613,17 @@ class Viewer extends React.Component {
                     }
                 //  largoActual = parseFloat(prop.displayValue) / 100; // Conversión si es necesario
                    esBarraValida = true; // Se encontró largo, marcamos como válida
+               }else if (prop.attributeName === 'Quantity' && parseFloat(prop.displayValue) > 0) {
+                  cantidadActual = parseFloat(prop.displayValue);
                }
            });
-   
+           
            if (esBarraValida) {
                // Solo acumula y cuenta si es una barra válida
                pesoTotal += pesoActual * (largoActual);
                largoTotal += (largoActual);
-               totalBarras += 1; // Incrementamos el contador de barras válidas
+              // totalBarras += 1; // Incrementamos el contador de barras válidas
+               totalBarras +=cantidadActual;
            }
        });
    
@@ -784,40 +790,48 @@ class Viewer extends React.Component {
       
             viewer.getProperties(dbId, (data) => {
                console.log("data seleccion", data);
+               const convertirYRedondear = (valor, factor) => {
+                return parseFloat((valor * factor).toFixed(2));
+              };
                 data.properties.forEach(prop => {
                     let valorOriginal = parseFloat(prop.displayValue);
+
                     if (prop.attributeName === nombreParametroPesoLineal) {
                         if (prop.units && (prop.units.includes("pounds") || prop.units.includes("libras"))) {
                             let valorConvertido = valorOriginal * 1.48816394; // Conversión de libras a kg/m
-                            prop.displayValue = valorConvertido.toString();
+                            valorConvertido =  parseFloat(( valorConvertido).toFixed(2));
+                            prop.displayValue = valorConvertido.toString() + 'kg';
                             if (prop.value) {
                                 prop.value = valorConvertido; // Asegurarse de actualizar el campo value si existe
                             }
+                        }else{
+                            prop.displayValue =  prop.displayValue+' kg'
                         }
-                    } else if (prop.attributeName === nombreParametrolargo) {
-                        let conversionFactor = 1; // Sin cambio por defecto
-                        console.log("ENCUENTRO ELEMENTO LARGO");
-                        if (prop.units) {
-                            if (prop.units.includes("feet-") || prop.units.includes("usSurveyFeet")|| prop.units.includes("feetFractionalInches")) {
-                                conversionFactor = 0.3048;
-                            } else if (prop.units.includes("centimeters")) {
-                                conversionFactor = 0.01;
-                            } else if (prop.units.includes("millimeters")) {
-                                conversionFactor = 0.001;
-                            } else if (prop.units.includes("inches") ) {
-                                console.log("ENCUENTRO EN VISUALIZADOR INCHES FRACC");
-                                conversionFactor = 0.0254;
-                            } else if (prop.units.includes("decimeters")) {
-                                conversionFactor = 0.1;
-                            } else if (prop.units.includes("metersCentimeters")) {
-                                conversionFactor = 0.01;
-                            }
-                            let valorConvertido = valorOriginal * conversionFactor;
-                            prop.displayValue = valorConvertido.toString();
-                            console.log("original");
-                            if (prop.value) {
-                                prop.value = valorConvertido; // Asegurarse de actualizar el campo value si existe
-                            }
+                    } else  if (prop.units) {
+                        let conversionFactor = 1; // Factor de conversión por defecto
+
+                        if (prop.units.includes("feet-") || prop.units.includes("usSurveyFeet") || prop.units.includes("feetFractionalInches")) {
+                            conversionFactor = 0.3048;
+                        } else if (prop.units.includes("centimeters")) {
+                            conversionFactor = 0.01;
+                        } else if (prop.units.includes("millimeters")) {
+                            conversionFactor = 0.001;
+                        } else if (prop.units.includes("inches")) {
+                            console.log("ENCUENTRO EN VISUALIZADOR INCHES FRACC");
+                            conversionFactor = 0.0254;
+                        } else if (prop.units.includes("decimeters")) {
+                            conversionFactor = 0.1;
+                        } else if (prop.units.includes("metersCentimeters")) {
+                            conversionFactor = 0.01;
+                        }else if (prop.units.includes("autodesk.unit.unit:meters")) {
+                            conversionFactor = 1;
+                        }
+
+                        let valorConvertido = convertirYRedondear(valorOriginal, conversionFactor);
+                        prop.displayValue = valorConvertido.toString() + ' m';
+
+                        if (prop.value) {
+                            prop.value = valorConvertido; // Actualizar el campo value si existe
                         }
                     }
                 });

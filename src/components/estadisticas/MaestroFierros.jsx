@@ -31,8 +31,14 @@ const MaestroFierros = ({ urn,proyecto }) => {
                     const responseBarras = await axios.get(urlBarras);
                     const allBars = await responseBarras.data; // Assuming the response data structure matches your needs
                     console.log("todas las barras",allBars);
-                    const requestedIds = pedidos.flatMap(pedido => pedido.ids);
+                   
+                   //const requestedIds = pedidos.flatMap(pedido => pedido.ids);
+                    const requestedIds = pedidosConDetalles.flatMap(pedido => 
+                        pedido.detalles.map(detalle => detalle.id.toString())
+                    );
                     console.log("pedidos barras",requestedIds);
+
+                    
                     const availableBars = allBars.detalles.filter(bar => !requestedIds.includes(bar.id.toString()));
                     console.log("todas las barras no pedidas",availableBars);
 
