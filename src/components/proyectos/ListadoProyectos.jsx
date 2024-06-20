@@ -15,11 +15,10 @@ const ListadoProyectos = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) 
   const [tokenVar, setToken] = useState(null);
   const [proyectos, setProyectos] = useState([]);
   const [bucketKey, setBucketKey] = useState('');
-  const [urnSelected, setUrnSelected] = useState(''); // Variable para almacenar la urn
-  const [idUsuarioSelected, setIdUsuarioSelected] = useState(''); // Variable para almacenar el id de usuario
-  const [proyectoKeySelected, setProyectoKeySelected] = useState(''); // Variable para almacenar el proyectoKey
-  const userId = localStorage.getItem('userId'); // ID del usuario
-  
+  const [urnSelected, setUrnSelected] = useState(''); 
+  const [idUsuarioSelected, setIdUsuarioSelected] = useState(''); 
+  const [proyectoKeySelected, setProyectoKeySelected] = useState(''); 
+  const userId = localStorage.getItem('userId');
   const cardStyle = {
     marginTop: '25px',
     marginLeft: '20px',
@@ -350,70 +349,7 @@ const ListadoProyectos = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) 
     toast.success(` Carga en proceso , puede demorar algunos minutos`);
   };
   
-  /*
-  const handleFileUpload = () => {
-    
-    console.log(bucketKey);
-    console.log("entro");
   
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.rvt,.ifc'; 
-    input.onchange = async (event) => {
-      const file = event.target.files[0];
-      if (!file) return;
-
-      const fileName = file.name; // Obtiene el nombre del archivo sin la extensión
-      console.log("nombre archivo",fileName);
-
-      const fileExtension = fileName.slice(((fileName.lastIndexOf(".") - 1) >>> 0) + 2); // Extrae la extensión del archivo
-      if (!['rvt', 'ifc'].includes(fileExtension.toLowerCase())) {
-        toast.error('Solo puede subir archivos con extensiones .rvt o .ifc');
-        return;
-    }
-      const proyectoExistente = proyectos.some(proyecto => proyecto.objectKey === fileName);
-
-      if (proyectoExistente) {
-            toast.error(`Ya existe un archivo con el nombre ${fileName}. Por favor, elige otro archivo.`);
-            return;
-      }
-      const formData = new FormData();
-      formData.append('fileToUpload', file);
-      formData.append('bucketKey', bucketKey); // Ajusta esto según tu lógica de obtención de la clave del bucket
-      const username = localStorage.getItem('username');
-      formData.append('username', username);
-      try {
-        toast.success(` Inicio de proceso de carga, el proceso puede tardar algunos minutos. Te notificaremos una vez esté listo`);
-        const response = await fetch(`${API_BASE_URL}/api/objects`, {
-          headers: {
-            Authorization: `${tokenVar}`
-          },
-          method: 'POST',
-          body: formData,
-          processData: false,
-          contentType: false
-        });
-        console.log("respuesta");
-        console.log(response);
-        if (response.ok) {
-          // Aquí puedes actualizar la interfaz o mostrar un mensaje de éxito
-          console.log('Se ha iniciado el proceso de subida exitosamente. Recibirá un correo electrónico de notificación una vez que el archivo esté disponible');
-          toast.success(`Se ha completado el proceso de subida exitosamente. Recibirá un correo electrónico de notificación una vez que el archivo esté disponible`);
-          fetchFilters();
-        } else {
-          // Aquí puedes manejar el caso de error
-          console.error('Error al subir el archivo:', response.statusText);
-          toast.error(` Error en el proceso de carga, vuelva a intentarlo`);
-        }
-      } catch (error) {
-        console.error('Error al subir el archivo:', error);
-        toast.error(` Error en el proceso de carga , vuelva a intentarlo`);
-      }
-    };
-    input.click();
-    toast.success(` Carga en proceso , puede demorar algunos minutos`);
-  };
-*/
   const handleFileTranslate = async ()=>{
     console.log("busco traducir"+bucketKey ,urnSelected);
     translateObject({ id: urnSelected, parents: [bucketKey] });

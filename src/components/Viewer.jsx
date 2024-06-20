@@ -811,24 +811,24 @@ class Viewer extends React.Component {
                         let conversionFactor = 1; // Factor de conversión por defecto
 
                         if (prop.units.includes("feet-") || prop.units.includes("usSurveyFeet") || prop.units.includes("feetFractionalInches")) {
-                            conversionFactor = 0.3048;
+                            conversionFactor = 30.48;
                         } else if (prop.units.includes("centimeters")) {
-                            conversionFactor = 0.01;
+                            conversionFactor = 1;
                         } else if (prop.units.includes("millimeters")) {
-                            conversionFactor = 0.001;
+                            conversionFactor = 0.1;
                         } else if (prop.units.includes("inches")) {
                             console.log("ENCUENTRO EN VISUALIZADOR INCHES FRACC");
-                            conversionFactor = 0.0254;
+                            conversionFactor = 2.54
                         } else if (prop.units.includes("decimeters")) {
-                            conversionFactor = 0.1;
+                            conversionFactor = 10;
                         } else if (prop.units.includes("metersCentimeters")) {
-                            conversionFactor = 0.01;
+                            conversionFactor =  100;
                         }else if (prop.units.includes("autodesk.unit.unit:meters")) {
-                            conversionFactor = 1;
+                            conversionFactor = 100;
                         }
 
                         let valorConvertido = convertirYRedondear(valorOriginal, conversionFactor);
-                        prop.displayValue = valorConvertido.toString() + ' m';
+                        prop.displayValue = valorConvertido.toString() + ' cm';
 
                         if (prop.value) {
                             prop.value = valorConvertido; // Actualizar el campo value si existe

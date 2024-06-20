@@ -521,6 +521,26 @@ const TabComponent = ({ urnBuscada }) => {
     const handleCloseModal = () => setShowModal(false);
     const handleExecuteOrderClick = async () => {
         verificarUsuario();
+
+        try {
+            const respuesta = await fetch(`${API_BASE_URL}/api/usuariosProyectoAsignado/${encodeURIComponent(urnBuscada)}`);
+            if (!respuesta.ok) {
+                throw new Error('Error al obtener usuarios asignados');
+            }
+            const usuariosAsignadosRespuesta = await respuesta.json();
+    
+            const usuarioAsignado = usuariosAsignadosRespuesta.find(u => u.idUsuario === userId);
+            if (!usuarioAsignado || usuarioAsignado.tipoUsuario !== 'Constructor') {
+                toast.error('No tiene permisos para crear un pedido. Debe tener el rol de Constructor.');
+                return;
+            }
+        } catch (error) {
+            console.error('Error al verificar el rol del usuario:', error);
+            toast.error('Error al verificar el rol del usuario. Inténtelo de nuevo.');
+            return;
+        }
+
+        
         if (!pedidoNombre.trim()) {
             console.log("sin nombre");
             toast.error("Debe agregar un nombre al pedido");
@@ -653,7 +673,31 @@ const TabComponent = ({ urnBuscada }) => {
       
         cargarAdicionales();
       }, [modalInfo.data._id]); // Este efecto se ejecuta cada vez que cambia el pedido seleccionado
-      
+      useEffect(() => {
+        const verificarUsuarioYAsignaciones = async () => {
+            try {
+                const tipoUsuario = localStorage.getItem('tipo');
+                const esAdminOEditor = tipoUsuario === 'Administrador' || tipoUsuario === 'administrador' || tipoUsuario === 'Editor';
+
+                const respuesta = await fetch(`${API_BASE_URL}/api/usuariosProyectoAsignado/${encodeURIComponent(urnBuscada)}`);
+                if (!respuesta.ok) {
+                    throw new Error('Error al obtener usuarios asignados');
+                }
+                const usuariosAsignadosRespuesta = await respuesta.json();
+
+                const usuarioAsignado = usuariosAsignadosRespuesta.find(u => u.idUsuario === userId);
+                if (usuarioAsignado && (esAdminOEditor || usuarioAsignado.tipoUsuario === 'Constructor')) {
+                    setAdministradorEditor(true);
+                } else {
+                    setAdministradorEditor(false);
+                }
+            } catch (error) {
+                console.error('Error al verificar usuario y asignaciones:', error);
+            }
+        };
+
+        verificarUsuarioYAsignaciones();
+    }, [modalInfo.data._id]);
     const buttonStyle = {
         marginRight: '5px', 
         fontSize: '8pt', // ajustado a 8pt según tu requerimiento
