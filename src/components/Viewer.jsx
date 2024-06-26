@@ -299,11 +299,42 @@ class Viewer extends React.Component {
                         // Encuentra valores para los filtros, peso lineal, longitud total, diámetro de barra y fecha
                         const propFiltro1 = element.properties.find(prop => prop.displayName === filtro1)?.displayValue || '';
                         const propFiltro2 = element.properties.find(prop => prop.displayName === filtro2)?.displayValue || '';
-                        const pesoLineal = element.properties.find(prop => prop.attributeName === nombreParametroPesoLineal)?.displayValue || '0';
-                        const longitudTotal = element.properties.find(prop => prop.attributeName === nombreParametrolargo)?.displayValue || '0';
+                        let  pesoLineal = element.properties.find(prop => prop.attributeName === nombreParametroPesoLineal)?.displayValue || '0';
+                        let longitudTotal = element.properties.find(prop => prop.attributeName === nombreParametrolargo)?.displayValue || '0';
                         const diametroBarra = element.properties.find(prop => prop.attributeName === nombreParametroDiametro)?.displayValue || '0';
                         const fecha = element.properties.find(prop => prop.displayName === nombreParametroFecha)?.displayValue || '';
-    
+                        
+                        const propPeso = element.properties.find(prop => prop.attributeName === nombreParametroPesoLineal);
+                        if (propPeso) {
+                            pesoLineal = parseFloat(propPeso.displayValue || '0');
+                            if (propPeso.units) {
+                                if (propPeso.units.includes("kilograms") || propPeso.units.includes("kilos") || propPeso.units.includes("kilogramos")) {
+                                    console.log("Peso actual Kilos", propPeso.displayValue);
+                                } else if (propPeso.units.includes("pounds") || propPeso.units.includes("libras")) {
+                                    console.log("Peso actual libras", propPeso.displayValue);
+                                    pesoLineal = pesoLineal * 0.453592; // Convertir de libras a kilogramos
+                                }
+                            }
+                        }
+                        const propLargo = element.properties.find(prop => prop.attributeName === nombreParametrolargo);
+                        if (propLargo && parseFloat(propLargo.displayValue) > 0) {
+                            longitudTotal = parseFloat(propLargo.displayValue);
+                            if (propLargo.units) {
+                                if (propLargo.units.includes("autodesk.unit.unit:meters")) {
+                                    longitudTotal = longitudTotal * 100; // Convertir de metros a centímetros
+                                } else if (propLargo.units.includes("feet")) {
+                                    longitudTotal = longitudTotal * 30.48; // Convertir de pies a centímetros
+                                } else if (propLargo.units.includes("centimeters")) {
+                                    longitudTotal = longitudTotal; // Ya está en centímetros
+                                } else if (propLargo.units.includes("millimeters")) {
+                                    longitudTotal = longitudTotal / 10; // Convertir de milímetros a centímetros
+                                } else if (propLargo.units.includes("inches")) {
+                                    longitudTotal = longitudTotal * 2.54; // Convertir de pulgadas a centímetros
+                                } else if (propLargo.units.includes("usSurveyFeet")) {
+                                    longitudTotal = longitudTotal * 30.48006096; // Convertir de US Survey Feet a centímetros
+                                } // Añadir otras conversiones si es necesario
+                            }
+                        }
                         return {
                             id: element.dbId,
                             [filtro1]: propFiltro1,

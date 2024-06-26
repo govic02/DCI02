@@ -623,10 +623,10 @@ porcentajePedidoTotal = async (urn) => {
         if (isNaN(largoActual)) {
             return 0;
         }
-     //   console.log("Unidades recibidas", unidades);
+       console.log("Unidades recibidas", unidades);
     
         // Convertir de metros
-        if (unidades.includes("meters") && !unidades.includes("centimeters")) {
+        if (unidades.includes("autodesk.unit.unit:meters") && !unidades.includes("centimeters")) {
             return largoActual; // Asume que la longitud ya está en metros
         }
         // Convertir de pies
