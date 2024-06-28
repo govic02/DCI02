@@ -247,8 +247,8 @@ class Viewer extends React.Component {
     consultaFiltro = (filtros) => {
         return new Promise((resolve, reject) => {
             if (!this.viewer || !this.viewer.model) {
-                reject(new Error("El modelo del visualizador no está cargado."));
-                return;
+                console.log("Error El modelo del visualizador no está cargado.");
+                resolve({});
             }
             this.viewer.model.getBulkProperties([], filtros, (result) => {
                 let test = result.filter(x => x.properties.length === filtros.length);
@@ -276,14 +276,18 @@ class Viewer extends React.Component {
                 resolve(data);
             }, (error) => {
                 console.log(error);
-                reject(error);
+              
+                resolve({}); 
+                return;
             });
         });
     };
     obtenerIdsBarras = async () => {
         return new Promise(async (resolve, reject) => {
             if (!this.viewer || !this.viewer.model) {
-                return reject(new Error("El modelo del visualizador no está cargado."));
+                console.log("El modelo del visualizador no está cargado.");
+                resolve({}); 
+                return;;
             }
     
             try {
@@ -354,7 +358,9 @@ class Viewer extends React.Component {
                 });
             } catch (error) {
                 console.error("Error al obtener IDs de barras:", error);
-                reject(error);
+               
+                resolve({}); 
+                return;
             }
         });
     };
@@ -388,7 +394,7 @@ class Viewer extends React.Component {
             console.log("filtro datos 2", datosFiltro2);
         } catch (error) {
             console.error("Error en obtenerFiltros:", error);
-            throw error;  // Puedes lanzar el error si quieres manejarlo más arriba en la cadena de promesas
+           // throw error;  
         }
     };
     
@@ -477,7 +483,9 @@ class Viewer extends React.Component {
                 });
             } catch (error) {
                 console.error("Error al gestionar IDs con/sin fecha:", error);
-                reject(error);
+               
+                resolve({}); 
+                return;
             }
         });
     }
@@ -541,11 +549,15 @@ class Viewer extends React.Component {
     };
 
     cleanModel =() =>{
-        this.viewer.isolate();
-        this.props.guardarIdentificadores([]);
-        this.viewer.fitToView(this.viewer.model);
-        this.context.actualizarResultadoFierros([]);
-       this.restaurarColoresOriginales();
+        if (this.viewer) {
+            console.log("limpio visor");
+            this.viewer.isolate([]);
+            this.props.guardarIdentificadores([]);
+            this.viewer.fitToView(this.viewer.model);
+            this.context.actualizarResultadoFierros([]);
+        this.restaurarColoresOriginales();
+        }
+        
     }
 
     filtrar =  async (identificadores) => {
@@ -680,8 +692,10 @@ class Viewer extends React.Component {
         return new Promise(async (resolve, reject) => {
             if (!this.viewer || !this.viewer.model) {
                 console.error("El modelo del visualizador no está cargado.");
-                reject("El modelo del visualizador no está cargado."); // Rechaza la promesa si el modelo no está cargado
+                
+                resolve({}); 
                 return;
+                
             }
     
             const { urn } = this.props; // Asumiendo que la URN se pasa como prop
@@ -725,7 +739,9 @@ class Viewer extends React.Component {
                 });
             } catch (error) {
                 console.error("Error al consultar la base de datos:", error);
-                reject(error); // Rechaza la promesa en caso de error
+             
+                resolve({}); 
+                return;
             }
         });
     };
@@ -735,7 +751,9 @@ class Viewer extends React.Component {
     obtenerIdsSinFecha = async () => {
         return new Promise((resolve, reject) => {
             if (!this.viewer || !this.viewer.model) {
-                return reject(new Error("El modelo del visualizador no está cargado."));
+                console.log("El modelo del visualizador no está cargado.");
+                resolve({}); 
+                return;
             }
     
             const { nombreParametroFecha, urn } = this.state;
@@ -756,7 +774,9 @@ class Viewer extends React.Component {
                 console.log("IDS SIN FECHA:", idsSinFecha);
                 resolve(idsSinFecha);
             }, (error) => {
-                reject(error);
+                console.log("error",error);
+                resolve({}); 
+                return;
             });
         });
     };

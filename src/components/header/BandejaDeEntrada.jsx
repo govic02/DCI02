@@ -40,7 +40,7 @@ const BandejaDeEntrada = ({ open, onClose,urn }) => {
             console.log("USUARIOS ACTUALES PARA REMITIR",combinedUsers);
             setUsuariosProyecto(combinedUsers);
         } catch (error) {
-            console.error('Error al cargar usuarios', error);
+            console.log('Error al cargar usuarios', error);
             setError('cargando usuarios');
         }
     
@@ -166,7 +166,7 @@ const BandejaDeEntrada = ({ open, onClose,urn }) => {
     
             setMensajes(conversationsWithUsernames.length > 0 ? conversationsWithUsernames : [{ id: 'dummy', asunto: 'Sin Mensajes', usuario: 'N/A' }]);
         } catch (error) {
-            console.error('Error al cargar conversaciones', error);
+            console.log('Error al cargar conversaciones', error);
             setError('Error al cargar conversaciones');
             setMensajes([{ }]);
         }
@@ -209,10 +209,10 @@ const BandejaDeEntrada = ({ open, onClose,urn }) => {
                 setEnvio(true);
                 //fetchConversations(); 
             } else {
-                console.error("Error al enviar mensaje:", response.data);
+                console.log("Error al enviar mensaje:", response.data);
             }
         } catch (error) {
-            console.error("Error al enviar mensaje:", error);
+            console.log("Error al enviar mensaje:", error);
         }
     };
     

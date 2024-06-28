@@ -12,17 +12,14 @@ import Login from './Login'; // Asegúrate de importar el componente Login
 import './App.css';
 import { VisibilityProvider } from '../context/VisibilityContext';
 import { AuthProvider } from '../context/AuthContext';
-
+import ErrorBoundary from '../ErrorBoundary';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useMediaQuery } from 'react-responsive';
 const App = ({ token, urn ,data}) => {
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const handleLogin = () => {
-        // Aquí deberías implementar la lógica para establecer el token de autenticación
-        console.log("Implementar la lógica de login aquí");
-    };
+  
     useEffect(() => {
         // Verificar si ya existe un token en localStorage
         const token = localStorage.getItem('token');
@@ -35,6 +32,7 @@ const App = ({ token, urn ,data}) => {
     if (!isLoggedIn) {
         return (<AuthProvider><Login onLoginSuccess={() => setIsLoggedIn(true)} /></AuthProvider>);
     }
+    
 
     return (
         <Router>
@@ -52,9 +50,16 @@ const App = ({ token, urn ,data}) => {
                                 {/* Contenido Principal */}
                                 <div className={`col-${isCollapsed ? '11' : '10'}`}>
                                     <Routes>
-                                        <Route path="/" element={<ColumnaDerecha isCollapsed={isCollapsed} token={token} urn={urn} />} />
+                                        <Route path="/" element={
+                                             <ErrorBoundary>
+                                                 <ColumnaDerecha isCollapsed={isCollapsed} token={token} urn={urn} />
+                                            </ErrorBoundary>
+                                            } />
                                         <Route path="/estadisticas" element={<Estadisticas />} />
-                                        <Route path="/proyectos" element={<Proyectos token={token} urn={urn}/>} />
+                                        <Route path="/proyectos" element={
+                                            <ErrorBoundary>
+                                            <Proyectos token={token} urn={urn}/></ErrorBoundary>
+                                            } />
                                         <Route path="/AdministracionCuentas" element={<AdministracionCuentas />} />
                                         <Route path="/Perfil" element={<Perfil />} />
                                         <Route path="/ConfiguracionVisualizador" element={<ConfiguracionVisualizador />} />

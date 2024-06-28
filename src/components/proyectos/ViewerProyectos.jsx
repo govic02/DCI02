@@ -9,7 +9,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import API_BASE_URL from '../../config';
 import { ProyectoContext } from '../../context/ProyectoContext'; // Asegúrate de que la ruta es correcta
-
+import ErrorBoundary from '../..//ErrorBoundary';
 
 const { Autodesk } = window;
 
@@ -49,15 +49,16 @@ class ViewerProyectos extends React.Component {
             .then(() => {
                 this.setupViewer();
                 this.checkDataAndGenerateWeights();
+                this.context.registerAction('generarTotalPesoPisos', this.generarTotalPesoPisos);
+                this.context.registerAction('PesoPromedio', this.PesoPromedio);//PesoPromedioGeneral
+                this.context.registerAction('PesoPromedioGeneral', this.PesoPromedioGeneral); // 
+                this.context.registerAction('diametroPromedioGeneral', this.diametroPromedioGeneral);
+                this.context.registerAction('porcentajePedidoTotal', this.porcentajePedidoTotal);
+                this.context.registerAction("obtenerFiltrosOrden", this.obtenerFiltrosOrden);
             })
-            .catch(err => console.error(err));
+            .catch(err => console.log(err));
 
-            this.context.registerAction('generarTotalPesoPisos', this.generarTotalPesoPisos);
-            this.context.registerAction('PesoPromedio', this.PesoPromedio);//PesoPromedioGeneral
-            this.context.registerAction('PesoPromedioGeneral', this.PesoPromedioGeneral); // 
-            this.context.registerAction('diametroPromedioGeneral', this.diametroPromedioGeneral);
-            this.context.registerAction('porcentajePedidoTotal', this.porcentajePedidoTotal);
-            this.context.registerAction("obtenerFiltrosOrden", this.obtenerFiltrosOrden);
+           
            
     }
 
@@ -82,7 +83,7 @@ class ViewerProyectos extends React.Component {
                 console.log('Detalles recibidos:', result.detalles);
             }
         } catch (error) {
-            console.error('Error checking data:', error);
+            console.log('Error checking data:', error);
             // Opcionalmente podrías intentar llamar a generarTotalPesoPisos incluso en caso de error
             this.generarTotalPesoPisos();
         }
@@ -172,19 +173,19 @@ class ViewerProyectos extends React.Component {
                             this.viewer.loadDocumentNode(doc, doc.getRoot().getDefaultGeometry());
                         } catch (error) {
                             // Captura errores durante la carga del documento
-                            console.error("Error al cargar el documento:", error);
+                            console.log("Error al cargar el documento:", error);
                             toast.info('Error al cargar el documento. Intenta nuevamente más tarde.');
                         }
                     },
                     (code, message, errors) => { 
                         console.log("no se pudo cargar debe traducir");
                         toast.info('No se pudo abrir, proceso de traducción del archivo iniciado');
-                        console.error(code, message, errors);
+                        console.log(code, message, errors);
                     }
                 );
             } catch (error) {
                 // Captura errores durante la carga de la URN
-                console.error("Error al cargar la URN:", error);
+                console.log("Error al cargar la URN:", error);
                 toast.info('Error al cargar. Verifica la URN e intenta nuevamente.');
             }
         }
@@ -216,10 +217,10 @@ class ViewerProyectos extends React.Component {
                 console.log(resultado.variableTiempo);
                 
             } else {
-                console.error('Configuración no encontrada:', resultado.mensaje);
+                console.log('Configuración no encontrada:', resultado.mensaje);
             }
         } catch (error) {
-            console.error('Error al cargar la configuración:', error);
+            console.log('Error al cargar la configuración:', error);
         }
     };
    sumarPesosPorFiltro2 = (idsBarras) => {
@@ -337,7 +338,7 @@ class ViewerProyectos extends React.Component {
            // console.log('Datos de pesos por diámetro en piso guardados con éxito:', await respuesta.json());
            // console.log("Datos desde server",respuestaDiametros);
         } catch (error) {
-            console.error("Error al enviar total de peso por diámetro en piso:", error);
+            console.log("Error al enviar total de peso por diámetro en piso:", error);
         }
 
         try {
@@ -368,7 +369,7 @@ class ViewerProyectos extends React.Component {
       
        
     } catch (error) {
-        console.error("Error generando total de peso por pisos:", error);
+        console.log("Error generando total de peso por pisos:", error);
     }
 };
 
@@ -401,7 +402,7 @@ diametroPromedioGeneral = async (urn) => {
                 });
     
                 if (!response.ok) {
-                    console.error("Error en la inserción", response.statusText);
+                    console.log("Error en la inserción", response.statusText);
                     return;
                 }
     
@@ -415,7 +416,7 @@ diametroPromedioGeneral = async (urn) => {
         }
         
     } catch (error) {
-        console.error("Error al procesar los datos de las barras:", error);
+        console.log("Error al procesar los datos de las barras:", error);
         throw error;  // Re-lanza el error para manejarlo en la función que llama
     }
 };
@@ -450,7 +451,7 @@ PesoPromedioGeneral = async (urn) => {
                 });
 
                 if (!response.ok) {
-                    console.error("Error en la inserción", response.statusText);
+                    console.log("Error en la inserción", response.statusText);
                     return;
                 }
 
@@ -463,7 +464,7 @@ PesoPromedioGeneral = async (urn) => {
             }
         }
     } catch (error) {
-        console.error("Error al procesar los datos de las barras:", error);
+        console.log("Error al procesar los datos de las barras:", error);
         throw error; // Re-lanza el error para manejarlo en la función que llama
     }
 };
@@ -520,7 +521,7 @@ PesoPromedio = async (urn) => {
         
 
     } catch (error) {
-        console.error("Error fetching or processing bar data:", error);
+        console.log("Error fetching or processing bar data:", error);
         throw error; // Re-throw to handle it in the calling function
     }
 };
@@ -579,7 +580,7 @@ porcentajePedidoTotal = async (urn) => {
         console.log('Saved weight data:', saveResult);
 
     } catch (error) {
-        console.error("Error in porcentajePedidoTotal:", error);
+        console.log("Error in porcentajePedidoTotal:", error);
     }
 };
 
@@ -614,7 +615,7 @@ porcentajePedidoTotal = async (urn) => {
                 toast.success('Datos de barras guardados con éxito grupo '+i+'  de '+numBatches-1);
             }
         } catch (error) {
-            console.error("Error al guardar los datos de barras:", error);
+            console.log("Error al guardar los datos de barras:", error);
             toast.error('Error al guardar los datos de barras: ' + error.message);
         }
     }
@@ -623,7 +624,7 @@ porcentajePedidoTotal = async (urn) => {
         if (isNaN(largoActual)) {
             return 0;
         }
-       console.log("Unidades recibidas", unidades);
+      // console.log("Unidades recibidas", unidades);
     
         // Convertir de metros
         if (unidades.includes("autodesk.unit.unit:meters") && !unidades.includes("centimeters")) {
@@ -664,7 +665,9 @@ porcentajePedidoTotal = async (urn) => {
         await this.obtenerFiltros(this.props.urn);
         return new Promise(async (resolve, reject) => {
             if (!this.viewer || !this.viewer.model) {
-                return reject(new Error("El modelo del visualizador no está cargado."));
+                console.log("El modelo del visualizador no está cargado.");
+                resolve({}); 
+                return;
             }
     
             try {
@@ -779,8 +782,10 @@ porcentajePedidoTotal = async (urn) => {
                     resolve(idsBarras);
                 });
             } catch (error) {
-                console.error("Error al procesar los datos de Autodesk Forge", error);
-                reject(error);
+                console.log("Error al procesar los datos de Autodesk Forge", error);
+               
+                resolve({}); 
+                return;
             }
             
             
@@ -789,7 +794,8 @@ porcentajePedidoTotal = async (urn) => {
     consultaFiltro = (filtros) => {
         return new Promise((resolve, reject) => {
             if (!this.viewer || !this.viewer.model) {
-                reject(new Error("El modelo del visualizador no está cargado."));
+                console.log("El modelo del visualizador no está cargado.");
+                resolve({}); 
                 return;
             }
             this.viewer.model.getBulkProperties([], filtros, (result) => {
@@ -817,7 +823,9 @@ porcentajePedidoTotal = async (urn) => {
                 resolve(data);
                 resolve(data);
             }, (error) => {
-                reject(error);
+                console.log("error",error);
+                resolve({}); 
+                return;
             });
         });
     };
@@ -858,13 +866,17 @@ porcentajePedidoTotal = async (urn) => {
                         // Una vez completado todo, resuelve la promesa.
                         resolve();
                     } catch (error) {
-                        console.error("Error al consultar los filtros:", error);
-                        reject(error);
+                        console.log("Error al consultar los filtros:", error);
+                       
+                        resolve({}); 
+                        return;
                     }
                 });
             } catch (error) {
-                console.error("Error al obtener los filtros:", error);
-                reject(error);
+                console.log("Error al obtener los filtros:", error);
+               
+                resolve({}); 
+                return;
             }
         });
     };
@@ -904,20 +916,26 @@ porcentajePedidoTotal = async (urn) => {
                         // Una vez completado todo, resuelve la promesa.
                         resolve(datosFiltro2);
                     } catch (error) {
-                        console.error("Error al consultar los filtros:", error);
-                        reject(error);
+                        console.log("Error al consultar los filtros:", error);
+                        
+                        resolve({}); 
+                        return;
                     }
                 });
             } catch (error) {
-                console.error("Error al obtener los filtros:", error);
-                reject(error);
+                console.log("Error al obtener los filtros:", error);
+                
+                resolve({}); 
+                return;
             }
         });
     };
     obtenerIdsConFecha = async () => {
         return new Promise((resolve, reject) => {
             if (!this.viewer || !this.viewer.model) {
-                return reject(new Error("El modelo del visualizador no está cargado."));
+                console.log("El modelo del visualizador no está cargado.");
+                resolve({}); 
+                return;
             } else {
                 const { nombreParametroFecha, urn } = this.state;
                 console.log("NOMBRE DEL PARAMETRO FECHA");
@@ -946,7 +964,9 @@ porcentajePedidoTotal = async (urn) => {
                     console.log("IDs con fecha y su valor:", idsConFechaYValor);
                     resolve(idsConFechaYValor);
                 }, (error) => {
-                    reject(error);
+                    console.log("error",error);
+                    resolve({}); 
+                    return;
                 });
             }
         });
@@ -959,7 +979,7 @@ porcentajePedidoTotal = async (urn) => {
             const idsSinFecha = await this.obtenerIdsSinFecha();
             this.setState({ idsConFecha, idsSinFecha });
         } catch (error) {
-            console.error("Error al obtener IDs:", error);
+            console.log("Error al obtener IDs:", error);
             // A pesar del error, el flujo del programa continúa, evitando bloquear la pantalla.
         }
     }
@@ -967,7 +987,9 @@ porcentajePedidoTotal = async (urn) => {
     obtenerIdsSinFecha = async () => {
         return new Promise((resolve, reject) => {
             if (!this.viewer || !this.viewer.model) {
-                return reject(new Error("El modelo del visualizador no está cargado."));
+                console.log("El modelo del visualizador no está cargado.");
+                resolve({}); 
+                return;
             }
     
             const { nombreParametroFecha, urn } = this.state;
@@ -988,7 +1010,9 @@ porcentajePedidoTotal = async (urn) => {
                 console.log("IDS SIN FECHA:", idsSinFecha);
                 resolve(idsSinFecha);
             }, (error) => {
-                reject(error);
+                console.log("error", error);
+                resolve({}); 
+                return;
             });
         });
     };
@@ -997,7 +1021,7 @@ porcentajePedidoTotal = async (urn) => {
             Autodesk.Viewing.Document.load(
                 'urn:' + this.props.urn,
                 (doc) => this.viewer.loadDocumentNode(doc, doc.getRoot().getDefaultGeometry()),
-                (code, message, errors) => console.error(code, message, errors)
+                (code, message, errors) => console.log(code, message, errors)
             );
         }
     };
@@ -1026,11 +1050,11 @@ porcentajePedidoTotal = async (urn) => {
                     }
                     
                 } catch (error) {
-                    console.error("Error al obtener IDs de barras:", error);
+                    console.log("Error al obtener IDs de barras:", error);
                 }
             });
         } catch (error) {
-            console.error("Error al obtener IDs:", error);
+            console.log("Error al obtener IDs:", error);
         }
     };
     
@@ -1049,8 +1073,8 @@ porcentajePedidoTotal = async (urn) => {
 
 ViewerProyectos.propTypes = {
     urn: PropTypes.string.isRequired,
-    idUsuario: PropTypes.string.isRequired, // Nueva prop idUsuario
-    proyectoKey: PropTypes.string.isRequired, // Nueva prop proyectoKey
+    idUsuario: PropTypes.string, // Nueva prop idUsuario
+    proyectoKey: PropTypes.string, // Nueva prop proyectoKey
     runtime: PropTypes.object
     
 };

@@ -41,7 +41,7 @@ const AdministracionProyecto = (proyectoKey,urn) => {
         marginTop: '20px',
        
         marginLeft: '20px',
-        height: '485px',
+        height: '100%',
         width:'100%',
         overflow: 'auto'
     };
@@ -245,7 +245,7 @@ const AdministracionProyecto = (proyectoKey,urn) => {
                         console.log("Respuesta consulta Id usuario", resp);
     
                         if (!resp.ok) {
-                            console.error('Error al obtener detalles del usuario con ID:', usuario.idUsuario);
+                            console.log('Error al obtener detalles del usuario con ID:', usuario.idUsuario);
                             return null; // Retornar null o un objeto especial para indicar el fallo
                         }
     

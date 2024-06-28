@@ -16,6 +16,7 @@ import 'bootstrap/dist/css/bootstrap.min.css'; //
 import ViewerMobile from './ViewerMobile';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import ErrorBoundary from '../ErrorBoundary';
 const ColumnaDerecha = ({ isCollapsed, token, urn, selectedIds, onCameraChange, onSelectionChange, refViewer }) => {
   const { token: tokenContexto } = useAuth();
     const [urnSelected, setUrnSelected] = useState('');
@@ -43,8 +44,7 @@ const ColumnaDerecha = ({ isCollapsed, token, urn, selectedIds, onCameraChange, 
     const estiloExpandido = {
         width: '100%',
     };
-    console.log("Recu");
-    console.log(urn);
+   
     const estiloActual = isCollapsed ? estiloColapsado : estiloExpandido;
     const tabsRef = useRef(null);
     const refViewer2 = useRef({refViewer});
@@ -111,10 +111,10 @@ const ColumnaDerecha = ({ isCollapsed, token, urn, selectedIds, onCameraChange, 
             }
           } else {
             const errorData = await response.text(); // O response.json() dependiendo de cómo el servidor envía errores
-            throw new Error(errorData || 'Error al obtener los proyectos');
+            console.log("error carga usuario proyecto");
           }
         } catch (error) {
-          console.error('Error al obtener el usuario-proyecto asignado:', error);
+          console.log('Error al obtener el usuario-proyecto asignado:', error);
           toast.error('Error al obtener el usuario-proyecto asignado');
         }
     };
@@ -144,7 +144,7 @@ const ColumnaDerecha = ({ isCollapsed, token, urn, selectedIds, onCameraChange, 
         
         <div>
             <div style={estiloActual}>
-    
+            <ErrorBoundary>
               <HeaderApp proyectoKey={proyectoKeySeleccionado}  urn={urnSelected}/> {/* Instancia el componente HeaderApp aquí */}
               <ActionsProvider  viewerRef={refViewer}>
                       <div style={{ position: 'fixed', top: '64px', width: '100%', height: '88%', marginBottom: '30px' }}>
@@ -165,7 +165,7 @@ const ColumnaDerecha = ({ isCollapsed, token, urn, selectedIds, onCameraChange, 
                       </div>
 
             </ActionsProvider>
-
+</ErrorBoundary>
             </div>
         </div>}
         {isTabletOrMobile && (

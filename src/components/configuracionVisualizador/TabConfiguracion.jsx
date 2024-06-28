@@ -131,25 +131,20 @@ const TabConfiguracion = (urn) => {
         borderColor: '#DA291C',
         color: 'white',
     }
-    const tabContentStyle = {
-        backgroundColor: 'white',
-        borderRadius: '0 20px 20px 20px',
-        padding: '15px',
-        height: '100%',
-       
-        fontWeight: 'bold'
-    };
+  
 
-    const tabHeaderStyle = {
-        borderRadius: '30px 30px 0 0',
+
+    const gridContainerStyle = {
+        display: 'grid',
+        gridTemplateColumns: 'repeat(4, 1fr)',
+        gap: '1rem',
     };
 
     return (
         <div style={tabStyle}>
-            <Tabs defaultActiveKey="filtrosVisuales" id="tab-configuracion" onSelect={onSelect} style={tabHeaderStyle}>
-                <Tab eventKey="filtrosVisuales" title={<span><img src={getTabImage('filtrosVisuales')} alt="Filtros Visuales" /> Filtros Visuales</span>}>
-                    <div style={tabContentStyle}>
-                        <Form.Group className="mb-3">
+                          <div>
+                       <div style={gridContainerStyle}>
+                       <Form.Group className="mb-3">
                             <Form.Label>Filtro Visual 01</Form.Label>
                             <Form.Control type="text" value={filtroVisual01} onChange={(e) => setFiltroVisual01(e.target.value)} />
                         </Form.Group>
@@ -178,16 +173,19 @@ const TabConfiguracion = (urn) => {
                             <Form.Control type="text" value={variableTiempo} onChange={(e) => setVariableTiempo(e.target.value)} />
                         </Form.Group>
                       
-                        <Button style={buttonStyle} onClick={guardarConfiguracion}>Guardar</Button>
+                     
+                       </div>
+                       
                     </div>
-                </Tab>
-                
-            </Tabs>
+         
               {/* Botón Guardar */}
               <div className="mt-3">
-               
+              <Button style={buttonStyle} onClick={guardarConfiguracion}>Guardar</Button>
+
             </div>
+            <br></br> <br></br>
         </div>
+       
     );
 };
 

@@ -28,11 +28,33 @@ const RootComponent = () => {
         return <App token={token} />;
     }
 };
+const workerCode = `
+    self.onmessage = function(e) {
+        const data = e.data;
+        // Procesa los datos recibidos y responde
+        self.postMessage({ result: 'Processed ' + data });
+    };
+`;
+const blob = new Blob([workerCode], { type: 'application/javascript' });
+const worker = new Worker(URL.createObjectURL(blob));
+
+try {
+    worker.postMessage('largeData');
+    worker.onmessage = function(event) {
+        console.log('Mensaje recibido del worker:', event.data);
+    };
+} catch (e) {
+    console.log('Failed to send data to worker:', e);
+    // Implementa la lógica para manejar este error, como dividir los datos.
+}
 self.onerror = function (event) {
-    console.error('Error en el worker:', event.message);
+    console.log('Error en el worker:', event.message);
     return true; // Previene el error de ser propagado
 };
-
+window.onerror = function (message, source, lineno, colno, error) {
+    console.log("Se capturó un error global:", message, source, lineno, colno, error);
+    return true; // Previene la propagación del error
+};
 // Manejador de errores global
 function handleError(error, url, lineNo, columnNo, errorObj) {
     console.log("Se capturó un error global:", error);
@@ -40,13 +62,14 @@ function handleError(error, url, lineNo, columnNo, errorObj) {
     return true;
 }
 window.onunhandledrejection = function (event) {
-    console.error("Unhandled rejection (promise):", event.promise, "reason:", event.reason);
+    console.log("Unhandled rejection (promise):", event.promise, "reason:", event.reason);
     return true; // Previene la propagación y la consola del navegador mostrando el error
 };
+
 try {
     worker.postMessage(largeData);
   } catch (e) {
-    console.error('Failed to send data to worker:', e);
+    console.log('Failed to send data to worker:', e);
     // Implementa la lógica para manejar este error, como dividir los datos.
   }
 

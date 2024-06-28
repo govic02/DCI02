@@ -5,7 +5,7 @@ import ListadoProyectos from './proyectos/ListadoProyectos';
 import AdministracionProyectos from './proyectos/AdministracionProyecto';
 import API_BASE_URL from '../config';
 import { ProyectoProvider } from '../context/ProyectoContext'; // Asegúrate de que la ruta es correcta
-
+import ErrorBoundary from '../ErrorBoundary';
 const Proyectos = ({ token, selectedIds, onCameraChange, onSelectionChange, refViewer }) => {
     const [proyectoSeleccionado, setProyectoSeleccionado] = useState(null);
     const [proyectoKeySeleccionado, setProyectoKeySeleccionado] = useState(null);
@@ -58,10 +58,10 @@ const Proyectos = ({ token, selectedIds, onCameraChange, onSelectionChange, refV
             setUrnSelected(data[0].urn); // Establecer el estado de urnSelected con la urn obtenida
             setProyectoKeySeleccionado(data[0].proyectoKey);
           } catch (error) {
-            console.error('Error al obtener el usuario-proyecto asignado:', error);
+            console.log('Error al obtener el usuario-proyecto asignado:', error);
             toast.error('Error al obtener el usuario-proyecto asignado');
           }
-          console.log("");
+         
       };
       //
     
@@ -107,6 +107,7 @@ const Proyectos = ({ token, selectedIds, onCameraChange, onSelectionChange, refV
     }
     return (
       <div>
+       
       <HeaderApp proyectoKey={proyectoKeySeleccionado} urn={urnSelected}/>
       <ProyectoProvider>
         <div style={estiloProyectos}>
@@ -120,6 +121,7 @@ const Proyectos = ({ token, selectedIds, onCameraChange, onSelectionChange, refV
                 </div>
                 <div className='col-8' style={estiloViewerContainer}>
                     <div className='row'>
+                    <ErrorBoundary>
                     <ViewerProyectos
                                     className="custom-viewer"
                                     runtime={{ accessToken: token }}
@@ -131,7 +133,7 @@ const Proyectos = ({ token, selectedIds, onCameraChange, onSelectionChange, refV
                                     
 
                                 />
-                        
+                        </ErrorBoundary>
                     </div>
                 </div>
             </div>
