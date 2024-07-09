@@ -21,7 +21,7 @@ const MaestroFierros = ({ urn,proyecto }) => {
                     // Asigna la lista inicial de pedidos
                     const pedidosInicial = response.data;
                     // Carga los detalles para todos los pedidos
-                    const pedidosConDetalles = await Promise.all(pedidosInicial.map(async pedido => {
+                        const pedidosConDetalles = await Promise.all(pedidosInicial.map(async pedido => {
                         const detalles = await fetchBarDetails(pedido);
                         console.log("Detalle Pedidos",detalles);
                         return { ...pedido, detalles: detalles || [] };

@@ -76,7 +76,7 @@ const GraficosPedidoDiametro = ({ urn }) => {
                             if (!pesosPorPedidoYDiametro[pedido.nombre_pedido][barra.diametroBarra]) {
                                 pesosPorPedidoYDiametro[pedido.nombre_pedido][barra.diametroBarra] = 0;
                             }
-                            pesosPorPedidoYDiametro[pedido.nombre_pedido][barra.diametroBarra] += barra.pesoLineal;
+                            pesosPorPedidoYDiametro[pedido.nombre_pedido][barra.diametroBarra] += (parseFloat(barra.pesoLineal) * parseFloat(barra.longitudTotal));
                             totalIdsEncontradas++;
                         }
                         else {
@@ -84,6 +84,7 @@ const GraficosPedidoDiametro = ({ urn }) => {
                         }
                     });
                 });
+                console.log("pesos obtenidos",pesosPorPedidoYDiametro);
                 setDiametrosEncontrados([...diametrosSet]);
                 console.log("D ENCONTRADOS :",diametrosSet);
                 console.log("Total IDs en pedidos:", totalIdsPedidos);
