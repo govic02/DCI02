@@ -15,6 +15,7 @@ const GraficosPedidoDiametro = ({ urn }) => {
         labels: [],
         datasets: [],
     });
+    const [diametrosEncontrados, setDiametrosEncontrados] = useState([]);
     const generarColorAleatorio = () => {
         const r = Math.floor(Math.random() * 256); // Valor aleatorio entre 0 y 255
         const g = Math.floor(Math.random() * 256); // Valor aleatorio entre 0 y 255
@@ -45,34 +46,50 @@ const GraficosPedidoDiametro = ({ urn }) => {
     useEffect(() => {
         const fetchDatos = async () => {
             try {
-                const urlBarras = `${API_BASE_URL}/api/barraurn/${urn}`;
+                const urlBarras = `${API_BASE_URL}/api/barraurn/${encodeURIComponent(urn)}`;
                 const respuestaBarras = await axios.get(urlBarras);
                 const barras = respuestaBarras.data.detalles;
-    
+                console.log("Barras desde servidor ",barras);
+                console.log("total barras",respuestaBarras);
                 const urlPedidos = `${API_BASE_URL}/api/listPedidos?urn=${urn}`;
                 const respuestaPedidos = await axios.get(urlPedidos);
                 const pedidos = respuestaPedidos.data;
                 
                 // Preparar un objeto para almacenar el peso por diámetro en cada pedido
                 let pesosPorPedidoYDiametro = {};
+                let diametrosSet = new Set();
+                let totalIdsPedidos = 0;
+                let totalIdsEncontradas = 0;
+
                 pedidos.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
                 console.log("pedidos desde grafico pedidos", pedidos);
                 pedidos.forEach(pedido => {
                     if (!pesosPorPedidoYDiametro[pedido.nombre_pedido]) {
                         pesosPorPedidoYDiametro[pedido.nombre_pedido] = {};
                     }
-    
+                    totalIdsPedidos += pedido.ids.length;
                     pedido.ids.forEach(id => {
-                        const barra = barras.find(barra => barra.id.toString() === id);
+                        const barra = barras.find(barra => barra.id.toString() === id.toString());
                         if (barra) {
+                            //console.log("Barra : ",barra);
+                            diametrosSet.add(barra.diametroBarra);
                             if (!pesosPorPedidoYDiametro[pedido.nombre_pedido][barra.diametroBarra]) {
                                 pesosPorPedidoYDiametro[pedido.nombre_pedido][barra.diametroBarra] = 0;
                             }
                             pesosPorPedidoYDiametro[pedido.nombre_pedido][barra.diametroBarra] += barra.pesoLineal;
+                            totalIdsEncontradas++;
+                        }
+                        else {
+                          //  console.log(`Barra con id ${id} no encontrada en la lista de barras.`);
                         }
                     });
                 });
-    
+                setDiametrosEncontrados([...diametrosSet]);
+                console.log("D ENCONTRADOS :",diametrosSet);
+                console.log("Total IDs en pedidos:", totalIdsPedidos);
+                console.log("Total IDs encontradas en barras:", totalIdsEncontradas);
+                console.log("Barras ",barras);
+                console.log("original", respuestaBarras);
                 // Convertir los datos para el gráfico
                 let labels = Object.keys(pesosPorPedidoYDiametro); // Nombres de pedidos como labels del eje X
                 let datasets = [];
@@ -98,7 +115,7 @@ const GraficosPedidoDiametro = ({ urn }) => {
                         datasets[datasetIndex].data[idx] = peso;
                     });
                 });
-    
+                console.log("Diámetros encontrados:", Object.keys(diametrosVistos));
                 setDatosGrafico({
                     labels,
                     datasets,

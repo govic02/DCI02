@@ -220,7 +220,7 @@ const handleExpand = async (index) => {
                     'ELEM CONST': '', // No tiene correspondencia, va vacío
                     'PISO': barra.aecPiso,
                     'CICLO': barra.aecSecuenciaHormigonado,
-                    'Cantidad': barra.cantidad,
+                    'Cantidad': barra.cantidad !== undefined ? barra.cantidad : barra.Quantity,
                     'Ø mm': barra.diametroBarra,
                     'Figura': barra.aecForma,
                     'L/m': barra.longitudTotal,
@@ -391,21 +391,22 @@ const handleExpand = async (index) => {
                                             <TableCell>''</TableCell>
                                             <TableCell>{barra.aecPiso}</TableCell>
                                             <TableCell>{barra.aecSecuenciaHormigonado}</TableCell>
-                                            <TableCell>{barra.cantidad}</TableCell>
+                                            <TableCell>{barra.cantidad !== undefined ? barra.cantidad : barra.Quantity}</TableCell>
                                             <TableCell>{typeof barra.diametroBarra === 'number' ? barra.diametroBarra.toFixed(2) : "0.00"}</TableCell>
                                             <TableCell>{barra.aecForma}</TableCell>
                                             <TableCell>{typeof barra.longitudTotal === 'number' ? barra.longitudTotal.toFixed(2) : "0.00"}</TableCell>
                                             <TableCell>{barra.aecUsoBarra}</TableCell>
-                                            <TableCell>{formatNumber(barra.a)}</TableCell>
-                                            <TableCell>{formatNumber(barra.b)}</TableCell>
-                                            <TableCell>{formatNumber(barra.c)}</TableCell>
-                                            <TableCell>{formatNumber(barra.d)}</TableCell>
-                                            <TableCell>{formatNumber(barra.e)}</TableCell>
-                                            <TableCell>{formatNumber(barra.f)}</TableCell>
-                                            <TableCell>{formatNumber(barra.g)}</TableCell>
-                                            <TableCell>{formatNumber(barra.h)}</TableCell>
-                                            <TableCell>{formatNumber(barra.i)}</TableCell>
-                                            <TableCell>{formatNumber(barra.j)}</TableCell>
+                                            <TableCell>{formatNumber(barra.a !== undefined ? barra.a : barra.A)}</TableCell>
+                                            <TableCell>{formatNumber(barra.b !== undefined ? barra.b : barra.B)}</TableCell>
+                                            <TableCell>{formatNumber(barra.c !== undefined ? barra.c : barra.C)}</TableCell>
+                                            <TableCell>{formatNumber(barra.d !== undefined ? barra.d : barra.D)}</TableCell>
+                                            <TableCell>{formatNumber(barra.e !== undefined ? barra.e : barra.E)}</TableCell>
+                                            <TableCell>{formatNumber(barra.f !== undefined ? barra.f : barra.F)}</TableCell>
+                                            <TableCell>{formatNumber(barra.g !== undefined ? barra.g : barra.G)}</TableCell>
+                                            <TableCell>{formatNumber(barra.h !== undefined ? barra.h : barra.H)}</TableCell>
+                                            <TableCell>{formatNumber(barra.i !== undefined ? barra.i : barra.I)}</TableCell>
+                                            <TableCell>{formatNumber(barra.j !== undefined ? barra.j : barra.J)}</TableCell>
+      
                                             <TableCell>''</TableCell>
                                             <TableCell>''</TableCell>
                                             <TableCell>''</TableCell>

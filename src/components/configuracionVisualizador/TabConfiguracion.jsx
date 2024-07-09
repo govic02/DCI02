@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Tabs, Tab, Form, Button } from 'react-bootstrap';
 import API_BASE_URL from '../../config';
+import Select from 'react-select';
 const TabConfiguracion = (urn) => {
     const [activeKey, setActiveKey] = useState('filtrosVisuales');
     const [filtroVisual01, setFiltroVisual01] = useState('');

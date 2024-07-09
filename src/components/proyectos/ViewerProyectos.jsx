@@ -115,7 +115,10 @@ class ViewerProyectos extends React.Component {
         this.viewer.start();
     
         this.viewer.loadExtension('HandleSelectionExtension');
-        this.viewer.addEventListener(Autodesk.Viewing.GEOMETRY_LOADED_EVENT, this.onModelLoaded);
+        this.viewer.addEventListener(Autodesk.Viewing.GEOMETRY_LOADED_EVENT, () => {
+            console.log("Geometría cargada");
+            this.onModelLoaded();
+        });
         this.viewer.addEventListener(Autodesk.Viewing.CAMERA_CHANGE_EVENT, this.onViewerCameraChange);
         this.viewer.addEventListener(Autodesk.Viewing.SELECTION_CHANGED_EVENT, this.onViewerSelectionChange);
         this.updateViewerState({});
@@ -170,7 +173,10 @@ class ViewerProyectos extends React.Component {
                     (doc) => {
                         try {
                             // Intenta cargar el documento
-                            this.viewer.loadDocumentNode(doc, doc.getRoot().getDefaultGeometry());
+                            this.viewer.loadDocumentNode(doc, doc.getRoot().getDefaultGeometry()).then(() => {
+                                console.log("Documento cargado correctamente");
+                                this.onModelLoaded(); // Llama a onModelLoaded después de cargar el documento
+                            });
                         } catch (error) {
                             // Captura errores durante la carga del documento
                             console.log("Error al cargar el documento:", error);
@@ -360,6 +366,7 @@ class ViewerProyectos extends React.Component {
             const barrasInsertadas = await axios.post(urlBarras, datosParaInsertar);
             console.log("PESOS POR diametro piso", diametroPiso);
             console.log("Barras insertadas",barrasInsertadas);
+            this.guardarIdsBarras();
         }
         catch(error){
             console.log("error en envvío",error);
@@ -677,7 +684,7 @@ porcentajePedidoTotal = async (urn) => {
                 this.viewer.model.getBulkProperties([], {
                     propFilter: [
                         'Category', filtro1, filtro2, nombreParametroPesoLineal, nombreParametrolargo, nombreParametroDiametro, nombreParametroFecha, nombreParametroNivel,
-                        'Partición', 'Número de armadura', 'Imagen', 'Marca de tabla de planificación', 'Comentarios', 'Marca', 'AEC Grupo', 'AEC Forma', 'AEC Código Interno', 'AEC Bloquear barras','AEC Piso','AEC Secuencia Hormigonado', 'AEC Uso Barra', 'AEC Uso Barra (Bloquear)', 'AEC Cantidad', 'AEC Id', 'AEC Ubicación', 'AEC Sub Uso Barra', 'Fase de creación', 'Fase de derribo', 'Estados de visibilidad en vista', 'Geometría', 'Estilo', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J','I', 'K', 'O', 'R', 'Volumen de refuerzo', 'Regla de diseño', 'Cantidad', 'Espaciado', 'Forma', 'Imagen de forma', 'Gancho al inicio', 'Rotación del gancho al inicio', 'Tratamiento de extremo al inicio', 'Gancho al final', 'Rotación del gancho al final', 'Tratamiento de extremo al final', 'Modificar longitudes de gancho', 'Categoría de anfitrión', 'Marca de anfitrión', 'Modificaciones de redondeo', 'Nombre de tipo', 'Material', 'Subcategoría', 'Diámetro de curvatura estándar', 'Diámetro de curvatura de gancho estándar', 'Diámetro de curvatura de estribo/tirante', 'Longitudes de gancho', 'Radio máximo de curvatura', 'Deformación', 'Imagen de tipo', 'Nota clave', 'Modelo', 'Fabricante', 'Comentarios de tipo', 'URL', 'Descripción', 'Descripción de montaje', 'Código de montaje', 'Marca de tipo', 'Costo'
+                        'Partición', 'Número de armadura', 'Imagen', 'Marca de tabla de planificación', 'Comentarios', 'Marca', 'AEC Grupo', 'AEC Forma', 'AEC Código Interno', 'AEC Bloquear barras','AEC Piso','AEC Secuencia Hormigonado', 'AEC Uso Barra', 'AEC Uso Barra (Bloquear)', 'AEC Cantidad', 'AEC Id', 'AEC Ubicación', 'AEC Sub Uso Barra', 'Fase de creación', 'Fase de derribo', 'Estados de visibilidad en vista', 'Geometría', 'Estilo', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J','I', 'K', 'O', 'R', 'Volumen de refuerzo', 'Regla de diseño', 'Cantidad','Quantity', 'Espaciado', 'Forma', 'Imagen de forma', 'Gancho al inicio', 'Rotación del gancho al inicio', 'Tratamiento de extremo al inicio', 'Gancho al final', 'Rotación del gancho al final', 'Tratamiento de extremo al final', 'Modificar longitudes de gancho', 'Categoría de anfitrión', 'Marca de anfitrión', 'Modificaciones de redondeo', 'Nombre de tipo', 'Material', 'Subcategoría', 'Diámetro de curvatura estándar', 'Diámetro de curvatura de gancho estándar', 'Diámetro de curvatura de estribo/tirante', 'Longitudes de gancho', 'Radio máximo de curvatura', 'Deformación', 'Imagen de tipo', 'Nota clave', 'Modelo', 'Fabricante', 'Comentarios de tipo', 'URL', 'Descripción', 'Descripción de montaje', 'Código de montaje', 'Marca de tipo', 'Costo'
                     ]
                 }, (result) => {
                     let idsBarras = result.filter(element => 
@@ -739,7 +746,7 @@ porcentajePedidoTotal = async (urn) => {
                             r: valores['R'],
                             volumenRefuerzo: parseFloat(valores['Volumen de refuerzo'] || '0'),
                             reglaDiseno: valores['Regla de diseño'],
-                            cantidad: parseFloat(valores['Cantidad'] || '0'),
+                            cantidad: parseFloat(valores['Cantidad'] || valores['Quantity'] || '0'),
                             espaciado: valores['Espaciado'],
                             forma: valores['Forma'],
                             imagenForma: valores['Imagen de forma'],
@@ -825,6 +832,34 @@ porcentajePedidoTotal = async (urn) => {
             }, (error) => {
                 console.log("error",error);
                 resolve({}); 
+                return;
+            });
+        });
+    };
+    obtenerPropiedadesModelo = () => {
+        return new Promise((resolve, reject) => {
+            if (!this.viewer || !this.viewer.model) {
+                console.log("El modelo del visualizador no está cargado.");
+                resolve([]);
+                return;
+            }
+    
+            this.viewer.model.getBulkProperties([], {}, (result) => {
+                let propiedades = new Set();
+    
+                result.forEach(element => {
+                    element.properties.forEach(prop => {
+                        propiedades.add(prop.displayName);
+                    });
+                });
+    
+                console.log("Propiedades encontradas:");
+                console.log(Array.from(propiedades)); // Muestra las propiedades por consola
+    
+                resolve(Array.from(propiedades));
+            }, (error) => {
+                console.log("Error al obtener las propiedades:", error);
+                resolve([]);
                 return;
             });
         });
@@ -1020,21 +1055,44 @@ porcentajePedidoTotal = async (urn) => {
         if (this.props.urn && this.props.urn !== prevProps.urn) {
             Autodesk.Viewing.Document.load(
                 'urn:' + this.props.urn,
-                (doc) => this.viewer.loadDocumentNode(doc, doc.getRoot().getDefaultGeometry()),
-                (code, message, errors) => console.log(code, message, errors)
+                (doc) => {
+                    this.viewer.tearDown(); // Limpia el visor actual
+                    this.viewer.start(); // Reinicia el visor
+                    this.viewer.loadDocumentNode(doc, doc.getRoot().getDefaultGeometry(), {
+                        onLoadFinished: () => {
+                            console.log("Modelo cargado correctamente");
+                            this.updateViewerState({});
+                            this.cargarConfiguracion();
+                            this.onModelLoaded(); // Llama a onModelLoaded después de cargar el modelo
+                        },
+
+
+                        onLoadError: (errorCode, errorMessage, statusCode, statusText) => {
+                            console.log("Error al cargar el modelo:", errorCode, errorMessage, statusCode, statusText);
+                        }
+                    });
+                },
+                (code, message, errors) => {
+                    console.log("no se pudo cargar debe traducir");
+                    toast.info('No se pudo abrir, proceso de traducción del archivo iniciado');
+                    console.log(code, message, errors);
+                }
             );
         }
     };
 
     onModelLoaded = async () => {
-        
+        console.log("modelo cargado, busco--2");
         try {
+            console.log("modelo cargado, busco--");
+            const propiedades = await this.obtenerPropiedadesModelo();
+            console.log("Propiedades obtenidas para completar forms:", propiedades);
             // Espera a que ambas funciones asincrónicas se completen.
             const [idsConFecha, idsSinFecha] = await Promise.all([
               //  this.obtenerIdsConFecha(),
                /// this.obtenerIdsSinFecha()
             ]);
-    
+        
             // Actualiza el estado con los resultados obtenidos.
             //this.setState({ idsConFecha, idsSinFecha });
             
@@ -1043,16 +1101,20 @@ porcentajePedidoTotal = async (urn) => {
                 try {
                     console.log("proceso Id Barras Proyecto");
                     const idsBarras = await this.obtenerIdsBarras();
+                    await  this.guardarIdsBarras();
                     if(!idsBarras.length ==0){
                         await this.generarTotalPesoPisos();
-                    console.log("IDs2 de barras obtenidos:", idsBarras);
-                    this.setState.idsBarraActual = idsBarras
+                        console.log("IDs2 de barras obtenidos:", idsBarras);
+                        this.setState.idsBarraActual = idsBarras
+                   
                     }
                     
                 } catch (error) {
                     console.log("Error al obtener IDs de barras:", error);
                 }
             });
+        
+
         } catch (error) {
             console.log("Error al obtener IDs:", error);
         }

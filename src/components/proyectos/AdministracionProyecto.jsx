@@ -51,7 +51,7 @@ const AdministracionProyecto = (proyectoKey,urn) => {
         borderRadius: '0 20px 20px 20px',
         padding: '15px',
         height: '100%',
-        overflowY: 'auto',
+        overflowY: 'auto'
     };
 
     const tabHeaderStyle = {
@@ -64,8 +64,8 @@ const AdministracionProyecto = (proyectoKey,urn) => {
         color: 'white',
         marginTop: '25px', // Espacio adicional debajo del botón
         display: 'block', // Hace que el botón sea un bloque
-        marginLeft: 'auto', // Margen automático a la izquierda
-        marginRight: '35px', // Margen automático a la derecha
+       
+        marginRight: '5px', // Margen automático a la derecha
         marginBotom: '35px',
         paddingBotom: '35px'
     };
@@ -610,29 +610,58 @@ const AdministracionProyecto = (proyectoKey,urn) => {
     return (
         <div style={tabStyle}>
             <Tabs defaultActiveKey="informacionGeneral" id="tab-administracion-proyecto" onSelect={onSelect} style={tabHeaderStyle}>
-                <Tab eventKey="informacionGeneral" title={<span><img src={getTabImage('informacionGeneral')} alt="" />Proyecto</span>}>
-                    <div style={tabContentStyle}>
+            <Tab eventKey="informacionGeneral" title={<span><img src={getTabImage('informacionGeneral')} alt="" />Proyecto</span>}>
+                <div style={tabContentStyle}>
                     <TabConfiguracion urn={proyectoKey.urn} />
-                    <Form.Label>Proyecto al cual se transferirán los datos</Form.Label>
-                    <Form.Control as="select" value={proyectoSeleccionado.urn || ''} onChange={handleSelectProject}>
-                        <option value="">Seleccione un proyecto...</option>
-                        {proyectos.map((proyecto) => (
-                            <option key={proyecto.urn} value={proyecto.urn}>
-                                {proyecto.nombre} 
-                            </option>
-                        ))}
-                    </Form.Control>
-                        <Button style={botonEstilo} onClick={transferirDatos}>Transferir Datos</Button>
-
-                        <p></p>  
-                         <Button onClick={guardarDatosModelo} style={{...botonEstilo, marginTop: '10px'}}>Calcular  Estadísticas</Button><p></p> <p></p><br></br>
-                         {Object.entries(tickets).map(([task, status]) => (
-                            <Alert key={task} variant="success">
-                                {task}: {status}
-                            </Alert>
-                        ))}
+                    <div style={{ marginLeft: '40px' }}>
+                    <div className="row">
+                        <div className="col-4">
+                            <Form.Label>Proyecto al cual se transferirán los datos</Form.Label>
+                            <Form.Control as="select" value={proyectoSeleccionado.urn || ''} onChange={handleSelectProject}>
+                                <option value="">Seleccione un proyecto...</option>
+                                {proyectos.map((proyecto) => (
+                                    <option key={proyecto.urn} value={proyecto.urn}>
+                                        {proyecto.nombre} 
+                                    </option>
+                                ))}
+                            </Form.Control>
+                        </div>
+                        
+                        <div className="col-4">
+                           
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' , marginLeft:'50px'}}>
+                            <Form.Label>Cálculo de Estadísticas</Form.Label>
+                            
+                                  <Button onClick={guardarDatosModelo} style={{...botonEstilo, marginTop: '10px'}}>Calcular Estadísticas</Button>
+                            </div>
+                             
+                        </div> 
+                        <div className="col-4">
+                           
+                        </div>
                     </div>
-                </Tab>
+                    <div className="row">
+                        <div className="col-4"><Button style={botonEstilo} onClick={transferirDatos}>Transferir Datos</Button>
+                       
+                        </div>
+                        <div className="col-4">
+                           
+                           </div>
+                        <div className="col-4">
+                           
+                        </div>
+                    </div>
+                    <div className="row">
+                        <div className="col-12">
+                            {Object.entries(tickets).map(([task, status]) => (
+                                <Alert key={task} variant="success">
+                                    {task}: {status}
+                                </Alert>
+                            ))}
+                        </div>
+                    </div></div>
+                </div>
+            </Tab>
                 <Tab eventKey="configuracionAdicional" title={<span><img src={getTabImage('configuracionAdicional')} alt="" /> Usuarios</span>}>
                     <div style={tabContentStyle}>
                         <Form.Group className="mb-3">
