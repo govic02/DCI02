@@ -93,7 +93,7 @@ const crearCuenta = async () => {
       password: contrasena,
       tipoUsuario: tipoUsuario,
     };
-    console.log("datos para ingresar",usuario);
+  //console.log("datos para ingresar",usuario);
     const response = await fetch(`${API_BASE_URL}/api/usuarios`, {
       method: 'POST',
       headers: {
@@ -107,7 +107,7 @@ const crearCuenta = async () => {
     }
 
     // Opcional: Redireccionar a otra ruta después de la creación exitosa
-    console.log("creación exitosa"); 
+  //console.log("creación exitosa"); 
     window.location.reload();
   } catch (error) {
     console.error('Error al crear el usuario:', error);

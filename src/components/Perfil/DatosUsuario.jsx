@@ -43,7 +43,7 @@ const DatosUsuario = () => {
       };
 
       const response = await axios.put(`${API_BASE_URL}/api/usuarios/${userId}`, datosActualizacion);
-      console.log('Datos actualizados con éxito:', response.data);
+    //console.log('Datos actualizados con éxito:', response.data);
       toast.success('Datos actualizados con éxito!');
       localStorage.setItem('fullname',nombreCompleto);
       setMensajeError('');

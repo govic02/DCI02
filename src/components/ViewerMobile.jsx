@@ -77,10 +77,10 @@ class ViewerMobile extends React.Component {
                 this.calcularPesoYActualizarContexto(resultado_fierros.map(barra => barra.id));
                 this.context.actualizarResultadoFierros(resultado_fierros); // Actualiza con los objetos completos de las barras
                 this.context.actualizarSeleccionActual(seleccionActual);
-                console.log("Barras que intersectan con la selección:", resultado_fierros);
+              //console.log("Barras que intersectan con la selección:", resultado_fierros);
             } else {
                 toast.warn('No se encontraron barras que intersectan con la selección.');
-                console.log("No se encontraron barras que intersectan con la selección.");
+              //console.log("No se encontraron barras que intersectan con la selección.");
                 this.context.actualizarResultadoFierros([]);
                 this.context.actualizarSeleccionActual(seleccionActual);
                 this.viewer.isolate([]); // Limpia el aislamiento si no hay coincidencias
@@ -128,9 +128,9 @@ class ViewerMobile extends React.Component {
             }
         });
     
-        console.log("Peso Total:", pesoTotal.toFixed(1));
-        console.log("Largo Total:", largoTotal.toFixed(1));
-        console.log("Total Barras:", totalBarras);
+      //console.log("Peso Total:", pesoTotal.toFixed(1));
+      //console.log("Largo Total:", largoTotal.toFixed(1));
+      //console.log("Total Barras:", totalBarras);
     
         // Actualizar el contexto con los nuevos valores
         this.context.updatePesoTotal(pesoTotal);
@@ -150,9 +150,9 @@ class ViewerMobile extends React.Component {
                 // Actualiza el estado con el nombre del parámetro de fecha obtenido
                 this.setState({ nombreParametroFecha: configuracion.variableTiempo || '' });
                 this.setState({ nombreParametroBarra: configuracion.variableBarra|| '' });
-                console.log("parametro fecha buscado");
-                console.log( configuracion.variableBarra);
-                console.log(configuracion.variableTiempo);
+              //console.log("parametro fecha buscado");
+              //console.log( configuracion.variableBarra);
+              //console.log(configuracion.variableTiempo);
             } else {
                 console.error('Configuración no encontrada:', resultado.mensaje);
             }
@@ -187,12 +187,12 @@ class ViewerMobile extends React.Component {
                     }
                     // Más lógica de procesamiento si es necesario
                 });
-                console.log("Resultado obtenido:");
-                console.log(data); // Muestra el resultado por consola
+              //console.log("Resultado obtenido:");
+              //console.log(data); // Muestra el resultado por consola
                 resolve(data);
                 resolve(data);
             }, (error) => {
-                console.log(error);
+              //console.log(error);
                 reject(error);
             });
         });
@@ -249,11 +249,11 @@ class ViewerMobile extends React.Component {
 
     obtenerFiltros = async (urnBuscada) => {
         try {
-            console.log("URN antes de AXIOS:", urnBuscada);
+          //console.log("URN antes de AXIOS:", urnBuscada);
            // const response = await axios.get(`${API_BASE_URL}/api/filtros`);
            //api/configuracionViewer
            const response = await axios.get(`${API_BASE_URL}/api/configuracionViewer`);
-           console.log("Respuesta Filtros:", response.data);
+         //console.log("Respuesta Filtros:", response.data);
     
             const filtrado1 = response.data.filtro01;
             const filtrado2 = response.data.filtro02;
@@ -261,7 +261,7 @@ class ViewerMobile extends React.Component {
             // Actualiza el estado con los nuevos filtros y fierros.
             await this.setStateAsync({ filtro1: filtrado1, filtro2: filtrado2, fierros: response.data.variableBarra });
     
-            console.log("Filtros actualizados en el estado:", filtrado1, filtrado2);
+          //console.log("Filtros actualizados en el estado:", filtrado1, filtrado2);
     
             // Consulta de filtros después de actualizar el estado
             const datosFiltro1 = await this.consultaFiltro([filtrado1]);
@@ -270,8 +270,8 @@ class ViewerMobile extends React.Component {
             this.context.updateDatosFiltro1(datosFiltro1);
             this.context.updateDatosFiltro2(datosFiltro2);
     
-            console.log("filtro datos 1", datosFiltro1);
-            console.log("filtro datos 2", datosFiltro2);
+          //console.log("filtro datos 1", datosFiltro1);
+          //console.log("filtro datos 2", datosFiltro2);
         } catch (error) {
             console.error("Error en obtenerFiltros:", error);
               // Puedes lanzar el error si quieres manejarlo más arriba en la cadena de promesas
@@ -339,7 +339,7 @@ class ViewerMobile extends React.Component {
         await this.obtenerFiltros(this.props.urn).then(async () => {
             try {
                 const idsBarras = await this.obtenerIdsBarras();
-                console.log("IDs de barras obtenidos:", idsBarras);
+              //console.log("IDs de barras obtenidos:", idsBarras);
             } catch (error) {
                 console.error("Error al obtener IDs de barras:", error);
             }
@@ -367,14 +367,14 @@ class ViewerMobile extends React.Component {
         if (this.viewer) {
             // Elimina todos los colores temáticos aplicados en el visor
             this.viewer.clearThemingColors(this.viewer.model);
-            console.log("Colores restaurados a su estado original.");
+          //console.log("Colores restaurados a su estado original.");
         } else {
             console.error("El visor no está inicializado.");
         }
     };
     pintarIdFecha = async () => {
         await this.obtenerIdsConFecha();
-        console.log("previo a pintar", this.state.idsConFecha);
+      //console.log("previo a pintar", this.state.idsConFecha);
     
         this.state.idsConFecha.forEach(objeto => {
             let color;
@@ -432,10 +432,10 @@ class ViewerMobile extends React.Component {
     filtrar =  async (identificadores) => {
        this.viewer.isolate(identificadores);
       
-       console.log("Muestro ids filtrar",identificadores);
+     //console.log("Muestro ids filtrar",identificadores);
        const { fierros } = this.state;
 
-       console.log("Valor de fierros:", fierros);
+     //console.log("Valor de fierros:", fierros);
 
        let pesoTotal = 0;
        let largoTotal = 0;
@@ -470,9 +470,9 @@ class ViewerMobile extends React.Component {
            }
        });
    
-        console.log("Peso Total:", pesoTotal.toFixed(1));
-        console.log("Largo Total:", largoTotal.toFixed(1));
-        console.log("Total Barras:", totalBarras);
+      //console.log("Peso Total:", pesoTotal.toFixed(1));
+      //console.log("Largo Total:", largoTotal.toFixed(1));
+      //console.log("Total Barras:", totalBarras);
         this.context.updatePesoTotal(pesoTotal);
         this.context.updateLargoTotal(largoTotal);
         this.context.updateTotalBarras(totalBarras);
@@ -527,11 +527,11 @@ class ViewerMobile extends React.Component {
                         }
                     });
     
-                    console.log("Objetos con fecha y datos:", objetosConFecha);
-                    console.log("Objetos sin fecha:", objetosSinFecha);
+                  //console.log("Objetos con fecha y datos:", objetosConFecha);
+                  //console.log("Objetos sin fecha:", objetosSinFecha);
                     // Usa setState y resuelve la promesa en el callback de setState para asegurar que se espera la actualización
                     this.setState({ idsConFecha: objetosConFecha, idsSinFecha: objetosSinFecha }, () => {
-                        console.log("Actualización de estado completa");
+                      //console.log("Actualización de estado completa");
                         resolve(); // Resuelve la promesa una vez que el estado se haya actualizado
                     });
                 });
@@ -565,7 +565,7 @@ class ViewerMobile extends React.Component {
                     });
                 }
     
-                console.log("IDS SIN FECHA:", idsSinFecha);
+              //console.log("IDS SIN FECHA:", idsSinFecha);
                 resolve(idsSinFecha);
             }, (error) => {
                 reject(error);
@@ -613,15 +613,15 @@ class ViewerMobile extends React.Component {
         const dbId = event.dbIdArray[0]; // Obtiene el primer elemento seleccionado
         const seleccionActual = this.viewer.getSelection();
         this.context.actualizarSeleccionActual(seleccionActual);
-        console.log("SELECCIONO ELEMENTO");
-        console.log(event.dbIdArray);
-        console.log(seleccionActual);
+      //console.log("SELECCIONO ELEMENTO");
+      //console.log(event.dbIdArray);
+      //console.log(seleccionActual);
         if (this.state.procesandoSeleccion) {
             return;
           }
       
         if ( seleccionActual.length ==0) {
-            console.log("No hay selección");
+          //console.log("No hay selección");
             this.context.actualizarResultadoFierros([]);
             this.context.updateSelectedObjectProps([]);
             return; // Sale de la función si no hay nada seleccionado
@@ -632,7 +632,7 @@ class ViewerMobile extends React.Component {
             viewer.getProperties(dbId, (data) => {
           
                 this.context.updateSelectedObjectProps(data);
-               console.log("elemento seleccionado",data);
+             //console.log("elemento seleccionado",data);
             }, (error) => {
                 console.error("Error al obtener propiedades del elemento seleccionado:", error);
             });

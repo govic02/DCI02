@@ -25,7 +25,7 @@ const VisualizadorDev = () => {
       };
   
       const onLoadModelSuccess = (model) => {
-        console.log("Modelo cargado exitosamente:", model);
+      //console.log("Modelo cargado exitosamente:", model);
       };
   
       const onLoadModelError = (error) => {

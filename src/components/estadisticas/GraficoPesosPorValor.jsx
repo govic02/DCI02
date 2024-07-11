@@ -22,7 +22,7 @@ const GraficoPesosPorValor = ({ urn }) => {
         const urlBarras = `${API_BASE_URL}/api/pesosTotales/${encodeURIComponent(urn)}`;
         const respuestaBarras = await axios.get(urlBarras);
 
-        console.log("barras pesos totales respuesta", respuestaBarras.data);
+      //console.log("barras pesos totales respuesta", respuestaBarras.data);
 
         // Ordenar los datos por valor numérico ascendente
         const pesosOrdenados = respuestaBarras.data.pesosPorValor.sort((a, b) => parseFloat(a.valor) - parseFloat(b.valor));

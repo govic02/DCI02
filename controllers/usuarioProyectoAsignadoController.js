@@ -187,6 +187,23 @@ const transferirUsuarioProyectoPerfil = async (req, res) => {
       res.status(500).send('Error interno al intentar actualizar los usuarios de proyecto.');
   }
 };
+const eliminarAsignacionesPorUrn = async (req, res) => {
+  try {
+    
+    const { urn } = req.params; // Asume que la URN viene como parámetro en la URL
+    const resultado = await UsuarioProyectoAsignado.deleteMany({ urn });
+    console.log("intento eliminar registros asociados a una urn ");
+    console.log(""+resultado.deletedCount);
+    if (resultado.deletedCount === 0) {
+      return res.status(200).json({ mensaje: 'No se encontraron registros para eliminar' });
+    }
+
+    res.json({ mensaje: 'Registros eliminados con éxito', resultado });
+  } catch (error) {
+    console.error('Error al eliminar los registros:', error);
+    res.status(500).json({ mensaje: 'Error interno del servidor' });
+  }
+};
 
 
   export  {
@@ -195,5 +212,6 @@ const transferirUsuarioProyectoPerfil = async (req, res) => {
   obtenerUsuarioProyectoAsignadoPorIdUsuario,
   obtenerUsuariosProyectoAsignadoPorUrn,
   eliminarUsuarioProyectoAsignado,
-  transferirUsuarioProyectoPerfil 
+  transferirUsuarioProyectoPerfil,
+  eliminarAsignacionesPorUrn
 };

@@ -91,8 +91,8 @@ const Paleta =  ({ urnBuscada })  => {
         const tipoUsuario = localStorage.getItem('tipo'); 
         const esAdministradorEditor = tipoUsuario === 'Administrador' || tipoUsuario === 'administrador'|| tipoUsuario === 'Editor';
         setAdministradorEditor(esAdministradorEditor);
-        console.log("Fierros buscados desde paleta", resultadoFierros);
-        console.log("Seleccion actual desde Paleta", seleccionActual);
+      //console.log("Fierros buscados desde paleta", resultadoFierros);
+      //console.log("Seleccion actual desde Paleta", seleccionActual);
     }, [resultadoFierros,seleccionActual]); // Dependencia del efecto
     
     //
@@ -117,9 +117,9 @@ const Paleta =  ({ urnBuscada })  => {
                 const { fecha_plan, fecha_instalacion } = response.data;
                 const fechaPlanFormatted = fecha_plan ? fecha_plan.split('T')[0] : '';
                 const fechaInstalacionFormatted = fecha_instalacion ? fecha_instalacion.split('T')[0] : '';
-                console.log("fecha recibida ",response.data);
-                console.log("fecha recibida ",fechaPlanFormatted);
-                console.log("fecha recibida instalacion ",fechaInstalacionFormatted);
+              //console.log("fecha recibida ",response.data);
+              //console.log("fecha recibida ",fechaPlanFormatted);
+              //console.log("fecha recibida instalacion ",fechaInstalacionFormatted);
                 setFechaPlan(fechaPlanFormatted);
                 setFechaInstalacion(fechaInstalacionFormatted);
                 setShowEditDatesModal(true);
@@ -180,7 +180,7 @@ const Paleta =  ({ urnBuscada })  => {
        
     }
     const handleGuardarClick = async () => {
-        console.log("Guardando datos...");
+      //console.log("Guardando datos...");
         toast.success('Iniciado proceso de guardado. espere unos segundos.. será notificado al terminar');
         if (resultadoFierros && resultadoFierros.length > 0) {
             // Preparar el listado de objetos para el endpoint masivo
@@ -195,7 +195,7 @@ const Paleta =  ({ urnBuscada })  => {
     
             try {
                 const response = await axios.post(`${API_BASE_URL}/api/objetoProyectoPlanMasivo`, objetosParaGuardar);
-                console.log('Datos guardados exitosamente:', response.data);
+              //console.log('Datos guardados exitosamente:', response.data);
                 toast.success('Datos guardados exitosamente');
                 setShowEditDatesModal(false); // Cerrar el modal después de guardar
             } catch (error) {
@@ -214,7 +214,7 @@ const Paleta =  ({ urnBuscada })  => {
                     dateModificacion: new Date()
                 });
     
-                console.log('Datos guardados exitosamente:', response.data);
+              //console.log('Datos guardados exitosamente:', response.data);
                 toast.success('Datos guardados exitosamente');
                 setShowEditDatesModal(false); // Cerrar el modal después de guardar
             } catch (error) {

@@ -89,7 +89,7 @@ const ListadoProyectosAdministrador = ({ onProyectoSeleccionado,onProyectoKeySel
   const handleListItemClick = async (proyectoKey, urn) => {
     toast.info('Abriendo Proyecto...'); // Duración en milisegundos
     setProyectoSeleccionado(proyectoKey);
-    console.log("URN del proyecto:", urn);
+  //console.log("URN del proyecto:", urn);
     onProyectoSeleccionado(proyectoKey, urn); // Llamar a la función onProyectoSeleccionado
 
     // Llamar a translateObject para forzar la traducción del archivo
@@ -106,9 +106,9 @@ const ListadoProyectosAdministrador = ({ onProyectoSeleccionado,onProyectoKeySel
         
       });
       const data = await response.json();
-      console.log("Resultado usuario proyecto");
-      console.log(data);
-      console.log( urn);
+    //console.log("Resultado usuario proyecto");
+    //console.log(data);
+    //console.log( urn);
       // Puedes realizar acciones adicionales según sea necesario con la respuesta del servidor
     } catch (error) {
       console.error('Error al actualizar el usuario-proyecto asignado:', error);
@@ -121,7 +121,7 @@ const ListadoProyectosAdministrador = ({ onProyectoSeleccionado,onProyectoKeySel
      return ("No Hay proyectos Asignados");
   }
   if(tipo !== 'administrador' && tipo !== 'Administrador'){
-    console.log("estos son los proyectos", proyectos);
+  //console.log("estos son los proyectos", proyectos);
     return (
       <Card style={{ marginTop: '25px', marginLeft: '20px', marginRight: '25px', borderRadius: '20px' }}>
         <ToastContainer />

@@ -28,6 +28,7 @@ class ViewerProyectos extends React.Component {
             nombreParametroNivel:'',
             filtro1: '',
             filtro2: '',
+            popiedadesGenerales:'',
             idsBarraActual:[],
             cambioUrnCount: 0,
             cambioUrnTimes: [],
@@ -55,6 +56,7 @@ class ViewerProyectos extends React.Component {
                 this.context.registerAction('diametroPromedioGeneral', this.diametroPromedioGeneral);
                 this.context.registerAction('porcentajePedidoTotal', this.porcentajePedidoTotal);
                 this.context.registerAction("obtenerFiltrosOrden", this.obtenerFiltrosOrden);
+                this.context.registerAction('obtenerPropiedades',this.obtenerPropiedadesModelo);
             })
             .catch(err => console.log(err));
 
@@ -67,7 +69,7 @@ class ViewerProyectos extends React.Component {
         if (!urn) return; // Si no hay urn, no continuar
     
         try {
-            console.log("ingreso ");
+          //console.log("ingreso ");
             const url = `${API_BASE_URL}/api/barraurn/${encodeURIComponent(urn)}`;
             const response = await fetch(url);
     
@@ -77,13 +79,13 @@ class ViewerProyectos extends React.Component {
     
             if (!result.detalles || result.detalles.length === 0) {
                 // Si no hay detalles o están vacíos, ejecuta generarTotalPesoPisos
-                console.log('No se encontraron detalles, generando pesos totales de pisos...');
+              //console.log('No se encontraron detalles, generando pesos totales de pisos...');
                 this.generarTotalPesoPisos();
             } else {
-                console.log('Detalles recibidos:', result.detalles);
+              //console.log('Detalles recibidos:', result.detalles);
             }
         } catch (error) {
-            console.log('Error checking data:', error);
+          //console.log('Error checking data:', error);
             // Opcionalmente podrías intentar llamar a generarTotalPesoPisos incluso en caso de error
             this.generarTotalPesoPisos();
         }
@@ -116,7 +118,7 @@ class ViewerProyectos extends React.Component {
     
         this.viewer.loadExtension('HandleSelectionExtension');
         this.viewer.addEventListener(Autodesk.Viewing.GEOMETRY_LOADED_EVENT, () => {
-            console.log("Geometría cargada");
+          //console.log("Geometría cargada");
             this.onModelLoaded();
         });
         this.viewer.addEventListener(Autodesk.Viewing.CAMERA_CHANGE_EVENT, this.onViewerCameraChange);
@@ -136,8 +138,8 @@ class ViewerProyectos extends React.Component {
     
     componentDidUpdate(prevProps, prevState) {
        
-        console.log("nueva urn a cargar");
-        console.log(this.props.urn);
+      //console.log("nueva urn a cargar");
+      //console.log(this.props.urn);
        
         if (this.viewer && (this.props.urn !== prevProps.urn || this.props.idUsuario !== prevProps.idUsuario || this.props.proyectoKey !== prevProps.proyectoKey)) {
           
@@ -174,41 +176,41 @@ class ViewerProyectos extends React.Component {
                         try {
                             // Intenta cargar el documento
                             this.viewer.loadDocumentNode(doc, doc.getRoot().getDefaultGeometry()).then(() => {
-                                console.log("Documento cargado correctamente");
+                              //console.log("Documento cargado correctamente");
                                 this.onModelLoaded(); // Llama a onModelLoaded después de cargar el documento
                             });
                         } catch (error) {
                             // Captura errores durante la carga del documento
-                            console.log("Error al cargar el documento:", error);
+                          //console.log("Error al cargar el documento:", error);
                             toast.info('Error al cargar el documento. Intenta nuevamente más tarde.');
                         }
                     },
                     (code, message, errors) => { 
-                        console.log("no se pudo cargar debe traducir");
+                      //console.log("no se pudo cargar debe traducir");
                         toast.info('No se pudo abrir, proceso de traducción del archivo iniciado');
-                        console.log(code, message, errors);
+                      //console.log(code, message, errors);
                     }
                 );
             } catch (error) {
                 // Captura errores durante la carga de la URN
-                console.log("Error al cargar la URN:", error);
+              //console.log("Error al cargar la URN:", error);
                 toast.info('Error al cargar. Verifica la URN e intenta nuevamente.');
             }
         }
         if (prevState.idsBarras !== this.state.idsBarras) {
-            console.log("idsBarras ha cambiado, enviando a la base de datos...");
+          //console.log("idsBarras ha cambiado, enviando a la base de datos...");
             this.guardarIdsBarras();
         }
     }
     
     cargarConfiguracion = async () => {
-        console.log("busco configuración en viewer proyectos");
+      //console.log("busco configuración en viewer proyectos");
         const url = `${API_BASE_URL}/api/configuracionViewer?urn=${encodeURIComponent(this.props.urn)}`;
-        console.log("URN CONSULTADA",this.props.urn);
+      //console.log("URN CONSULTADA",this.props.urn);
         try {
             const respuesta = await fetch(url);
             const resultado = await respuesta.json();
-            console.log("respuesta config",resultado);
+          //console.log("respuesta config",resultado);
             if (respuesta.ok) {
                 
                 // Actualiza el estado con el nombre del parámetro de fecha obtenido
@@ -218,15 +220,15 @@ class ViewerProyectos extends React.Component {
                 this.setState({ nombreParametrolargo: resultado.variableLargo|| '' });
                 this.setState({ nombreParametroPesoLineal: resultado.variablePesoLineal|| '' });
                 this.setState({ nombreParametroDiametro: resultado.variableDiametro|| '' });
-                console.log("parametro fecha buscado");
-                console.log( resultado.variableBarra);
-                console.log(resultado.variableTiempo);
+              //console.log("parametro fecha buscado");
+              //console.log( resultado.variableBarra);
+              //console.log(resultado.variableTiempo);
                 
             } else {
-                console.log('Configuración no encontrada:', resultado.mensaje);
+              //console.log('Configuración no encontrada:', resultado.mensaje);
             }
         } catch (error) {
-            console.log('Error al cargar la configuración:', error);
+          //console.log('Error al cargar la configuración:', error);
         }
     };
    sumarPesosPorFiltro2 = (idsBarras) => {
@@ -234,7 +236,7 @@ class ViewerProyectos extends React.Component {
         const sumaPesos = idsBarras.reduce((acumulador, barraActual) => {
             // Usar el valor de filtro2 como clave
             const clave = barraActual.nombreFiltro2; // Asume que filtro2 es una variable o constante que contiene la cadena 'AEC Piso'
-          //  console.log("barra actual: ",barraActual.nombreFiltro2);
+          ////console.log("barra actual: ",barraActual.nombreFiltro2);
            // const pesoActual = barraActual.pesoLineal * barraActual.longitudTotal / 100; // Convertir longitud en metros y calcular peso
            const pesoActual = barraActual.pesoLineal * barraActual.longitudTotal; 
             if (!acumulador[clave]) {
@@ -244,13 +246,13 @@ class ViewerProyectos extends React.Component {
             acumulador[clave] += pesoActual; // Sumar el peso de la barra actual al total para este piso
             return acumulador;
         }, {});
-        console.log("Suma por pisos parametro 2", sumaPesos);
+      //console.log("Suma por pisos parametro 2", sumaPesos);
         return sumaPesos;
     };
   // Asumiendo que obtenerIdsBarras y sumarPesosPorFiltro2 están definidas en el mismo ámbito
   sumarPesosPorDiametroEnPiso = async(idsBarras) => {
     const resultadosPorPiso = {};
-    console.log("sumo pesos por diametro desde visualizador");
+  //console.log("sumo pesos por diametro desde visualizador");
     idsBarras.forEach(barra => {
         const piso = barra.nombreFiltro2;
         const diametro = barra.diametroBarra;
@@ -288,14 +290,14 @@ class ViewerProyectos extends React.Component {
 
 
    generarTotalPesoPisos = async () => {
-    console.log("llaman a generador de pisos");
+  //console.log("llaman a generador de pisos");
     try {
         const idsBarras = await this.obtenerIdsBarras();
         // Asumiendo que sumarPesosPorFiltro2 devuelve directamente el resultado,
         // sin necesidad de esperar una promesa.
         const resultado = await this.sumarPesosPorFiltro2(idsBarras);
         
-        console.log("PESOS POR PISO", resultado); // Esto imprimirá un objeto con los totales de peso por cada valor de 'AEC Piso'
+      //console.log("PESOS POR PISO", resultado); // Esto imprimirá un objeto con los totales de peso por cada valor de 'AEC Piso'
 
         
         // Preparar los datos para enviar
@@ -304,7 +306,7 @@ class ViewerProyectos extends React.Component {
             nombreFiltro2: this.state.filtro2, // Asegúrate de tener nombreFiltro2 en el ámbito
             pesosPorValor: Object.entries(resultado).map(([valor, sumaPeso]) => ({ valor, sumaPeso }))
         };
-        console.log("datos para enviar pesos pisos",datosParaEnviar);
+      //console.log("datos para enviar pesos pisos",datosParaEnviar);
 
        
         // Enviar los datos al servidor
@@ -322,9 +324,9 @@ class ViewerProyectos extends React.Component {
         }
 
         const datosRespuesta = await respuesta.json();
-        console.log('Datos guardados con éxito:', datosRespuesta);
+      //console.log('Datos guardados con éxito:', datosRespuesta);
         const diametroPiso = await this.sumarPesosPorDiametroEnPiso(idsBarras);
-        console.log("diametros por piso",diametroPiso);
+      //console.log("diametros por piso",diametroPiso);
         const datosParaEnviarDiametros = {
             urn: this.props.urn,
             nombreFiltro2: this.state.filtro2,
@@ -344,7 +346,7 @@ class ViewerProyectos extends React.Component {
            // console.log('Datos de pesos por diámetro en piso guardados con éxito:', await respuesta.json());
            // console.log("Datos desde server",respuestaDiametros);
         } catch (error) {
-            console.log("Error al enviar total de peso por diámetro en piso:", error);
+          //console.log("Error al enviar total de peso por diámetro en piso:", error);
         }
 
         try {
@@ -361,22 +363,22 @@ class ViewerProyectos extends React.Component {
                     pesoLineal: barra.pesoLineal,
                 }))
             };
-            console.log("pre barras insertadas",datosParaInsertar);
+          //console.log("pre barras insertadas",datosParaInsertar);
             const urlBarras = `${API_BASE_URL}/api/barraurn`; 
             const barrasInsertadas = await axios.post(urlBarras, datosParaInsertar);
-            console.log("PESOS POR diametro piso", diametroPiso);
-            console.log("Barras insertadas",barrasInsertadas);
+          //console.log("PESOS POR diametro piso", diametroPiso);
+          //console.log("Barras insertadas",barrasInsertadas);
             this.guardarIdsBarras();
         }
         catch(error){
-            console.log("error en envvío",error);
+          //console.log("error en envvío",error);
         }
 
 
       
        
     } catch (error) {
-        console.log("Error generando total de peso por pisos:", error);
+      //console.log("Error generando total de peso por pisos:", error);
     }
 };
 
@@ -387,7 +389,7 @@ diametroPromedioGeneral = async (urn) => {
         let totalDiametro = 0;
         let totalBarras = 0;
         const { idsBarras } = this.state;
-        console.log("barras previo diametro general");
+      //console.log("barras previo diametro general");
         if(idsBarras && idsBarras.length>0){
             idsBarras.forEach(barra => {
                 const { diametroBarra } = barra;
@@ -397,7 +399,7 @@ diametroPromedioGeneral = async (urn) => {
     
             if (totalBarras > 0) {
                 const diametroPromedio = totalDiametro / totalBarras;  // Calcula el diámetro promedio del proyecto
-                console.log(`Diámetro promedio del proyecto: ${diametroPromedio} unidades`);
+              //console.log(`Diámetro promedio del proyecto: ${diametroPromedio} unidades`);
     
                 // Realiza la llamada a la API para guardar el resultado
                 const response = await fetch(`${API_BASE_URL}/api/diametroPromedioGeneral`, {
@@ -409,21 +411,21 @@ diametroPromedioGeneral = async (urn) => {
                 });
     
                 if (!response.ok) {
-                    console.log("Error en la inserción", response.statusText);
+                  //console.log("Error en la inserción", response.statusText);
                     return;
                 }
     
                 const saveResult = await response.json();
-                console.log('Saved project average diameter:', saveResult);
+              //console.log('Saved project average diameter:', saveResult);
                 return { diametroPromedioProyecto: diametroPromedio };
             } else {
-                console.log("No hay barras para calcular el promedio");
+              //console.log("No hay barras para calcular el promedio");
                 return { diametroPromedioProyecto: 0 };
             }
         }
         
     } catch (error) {
-        console.log("Error al procesar los datos de las barras:", error);
+      //console.log("Error al procesar los datos de las barras:", error);
         throw error;  // Re-lanza el error para manejarlo en la función que llama
     }
 };
@@ -431,7 +433,7 @@ diametroPromedioGeneral = async (urn) => {
 PesoPromedioGeneral = async (urn) => {
     try {
         const { idsBarras } = this.state;
-        console.log("Datos de barras actuales", idsBarras);
+      //console.log("Datos de barras actuales", idsBarras);
         let totalPesoProyecto = 0;
         let totalBarras = 0;
 
@@ -447,7 +449,7 @@ PesoPromedioGeneral = async (urn) => {
 
             if (totalBarras > 0) {
                 const pesoPromedioGeneral = totalPesoProyecto / totalBarras; // Calcula el peso promedio del proyecto
-                console.log(`Peso promedio del proyecto: ${pesoPromedioGeneral} kg`);
+              //console.log(`Peso promedio del proyecto: ${pesoPromedioGeneral} kg`);
 
                 const response = await fetch(`${API_BASE_URL}/api/pesoPromedioGeneral`, {
                     method: 'POST',
@@ -458,20 +460,20 @@ PesoPromedioGeneral = async (urn) => {
                 });
 
                 if (!response.ok) {
-                    console.log("Error en la inserción", response.statusText);
+                  //console.log("Error en la inserción", response.statusText);
                     return;
                 }
 
                 const saveResult = await response.json();
-                console.log('Saved project average weight:', saveResult);
+              //console.log('Saved project average weight:', saveResult);
                 return { pesoPromedioProyecto: pesoPromedioGeneral };
             } else {
-                console.log("No hay barras para calcular el promedio");
+              //console.log("No hay barras para calcular el promedio");
                 return { pesoPromedioProyecto: 0 };
             }
         }
     } catch (error) {
-        console.log("Error al procesar los datos de las barras:", error);
+      //console.log("Error al procesar los datos de las barras:", error);
         throw error; // Re-lanza el error para manejarlo en la función que llama
     }
 };
@@ -482,8 +484,8 @@ PesoPromedio = async (urn) => {
         const { idsBarras } = this.state;
        // const detalles = await this.obtenerIdsBarras();
        // console.log("pesos promedio",detalles);
-        console.log("PesoPromedio",this.state);
-        console.log("supuestas barras",idsBarras);
+      //console.log("PesoPromedio",this.state);
+      //console.log("supuestas barras",idsBarras);
         const resultados = {};
         if(idsBarras != undefined){
             idsBarras.forEach(barra => {
@@ -507,7 +509,7 @@ PesoPromedio = async (urn) => {
                 promedios[key] = totalPeso / count;  // Calcula el promedio de peso
             });
     
-            console.log("Promedios de peso por nombreFiltro2:", promedios);
+          //console.log("Promedios de peso por nombreFiltro2:", promedios);
             const saveResponse = await fetch(`${API_BASE_URL}/api/crearPesoPromedio`, {
                 method: 'POST',
                 headers: {
@@ -517,18 +519,18 @@ PesoPromedio = async (urn) => {
             });
     
             if (!saveResponse.ok) {
-          console.log("respuesta desde inserción",saveResponse);
+        //console.log("respuesta desde inserción",saveResponse);
             }
     
             const saveResult = await saveResponse.json();
-            console.log('Saved weight averages:', saveResult);
+          //console.log('Saved weight averages:', saveResult);
             return promedios;
         }
         // Agrupar y calcular el peso total multiplicando peso lineal por longitud total
         
 
     } catch (error) {
-        console.log("Error fetching or processing bar data:", error);
+      //console.log("Error fetching or processing bar data:", error);
         throw error; // Re-throw to handle it in the calling function
     }
 };
@@ -542,7 +544,7 @@ porcentajePedidoTotal = async (urn) => {
         //if (!barResponse.ok) throw new Error('Failed to fetch bar data');
       
         //const barData = await barResponse.json();
-        console.log("datos de barros desde Admin pr2",idsBarras);
+      //console.log("datos de barros desde Admin pr2",idsBarras);
         
 
         //const detalles = idsBarras.detalles;
@@ -556,19 +558,19 @@ porcentajePedidoTotal = async (urn) => {
         // Fetch order data
         const orderResponse = await fetch(`${API_BASE_URL}/api/listPedidos?urn=${encodeURIComponent(urn)}`);
        // if (!orderResponse.ok) throw new Error('Failed to fetch order data');
-       console.log("respuesta desde servidor ordenes pedidos",orderResponse);
+     //console.log("respuesta desde servidor ordenes pedidos",orderResponse);
        const pedidos = await orderResponse.json();
-        console.log("pedidos asignados a proyecto",pedidos);
+      //console.log("pedidos asignados a proyecto",pedidos);
         let pesoTotalPedidos = 0;
         pedidos.forEach(pedido => {
             pesoTotalPedidos += parseFloat(pedido.pesos);
         });
 
         // Output results to the console
-        console.log("Peso total del proyecto:", pesoTotalProyecto);
-        console.log("Peso total de pedidos:", pesoTotalPedidos);
+      //console.log("Peso total del proyecto:", pesoTotalProyecto);
+      //console.log("Peso total de pedidos:", pesoTotalPedidos);
         const porcentaje = (pesoTotalPedidos / pesoTotalProyecto) * 100;
-        console.log(`Porcentaje del peso de los pedidos sobre el total del proyecto: ${porcentaje.toFixed(2)}%`);
+      //console.log(`Porcentaje del peso de los pedidos sobre el total del proyecto: ${porcentaje.toFixed(2)}%`);
 
         const saveResponse = await fetch(`${API_BASE_URL}/api/crearPesovsPedidos`, {
             method: 'POST',
@@ -584,10 +586,10 @@ porcentajePedidoTotal = async (urn) => {
 
         if (!saveResponse.ok) throw new Error('Failed to save weight data');
         const saveResult = await saveResponse.json();
-        console.log('Saved weight data:', saveResult);
+      //console.log('Saved weight data:', saveResult);
 
     } catch (error) {
-        console.log("Error in porcentajePedidoTotal:", error);
+      //console.log("Error in porcentajePedidoTotal:", error);
     }
 };
 
@@ -595,7 +597,7 @@ porcentajePedidoTotal = async (urn) => {
    guardarIdsBarras = async () => {
         const { idsBarras } = this.state;
         const { urn } = this.props;
-        console.log("objeto con barras",idsBarras);
+      //console.log("objeto con barras",idsBarras);
         const batchSize = 1000; 
         const numBatches = Math.ceil(idsBarras.length / batchSize);
         toast.success('Inicio proceso de carga de barras');
@@ -618,11 +620,11 @@ porcentajePedidoTotal = async (urn) => {
                 }
     
                 const responseData = await response.json();
-                console.log("Datos de barras guardados con éxito:", responseData);
+              //console.log("Datos de barras guardados con éxito:", responseData);
                 toast.success('Datos de barras guardados con éxito grupo '+i+'  de '+numBatches-1);
             }
         } catch (error) {
-            console.log("Error al guardar los datos de barras:", error);
+          //console.log("Error al guardar los datos de barras:", error);
             toast.error('Error al guardar los datos de barras: ' + error.message);
         }
     }
@@ -667,19 +669,21 @@ porcentajePedidoTotal = async (urn) => {
     }
     
     obtenerIdsBarras = async () => {
-        console.log("inicio busqueda de barras", this.state);
-        console.log();
+      //console.log("inicio busqueda de barras", this.state);
+      //console.log();
         await this.obtenerFiltros(this.props.urn);
+        const propiedades = await this.obtenerPropiedadesModelo();
+          //console.log("Propiedades obtenidas para completar forms:", propiedades);
         return new Promise(async (resolve, reject) => {
             if (!this.viewer || !this.viewer.model) {
-                console.log("El modelo del visualizador no está cargado.");
+              //console.log("El modelo del visualizador no está cargado.");
                 resolve({}); 
                 return;
             }
     
             try {
                 const { filtro1, filtro2, nombreParametroFecha, nombreParametroBarra, nombreParametrolargo, nombreParametroPesoLineal, nombreParametroDiametro, nombreParametroNivel } = this.state;
-                console.log("parametro nivel buscado ", nombreParametroNivel);
+              //console.log("parametro nivel buscado ", nombreParametroNivel);
             
                 this.viewer.model.getBulkProperties([], {
                     propFilter: [
@@ -785,11 +789,11 @@ porcentajePedidoTotal = async (urn) => {
             
                     // Guarda los resultados en el estado o maneja como prefieras
                     this.setState({ idsBarras });
-                    console.log("Barras generadas con datos ", idsBarras);
+                  //console.log("Barras generadas con datos ", idsBarras);
                     resolve(idsBarras);
                 });
             } catch (error) {
-                console.log("Error al procesar los datos de Autodesk Forge", error);
+              //console.log("Error al procesar los datos de Autodesk Forge", error);
                
                 resolve({}); 
                 return;
@@ -801,7 +805,7 @@ porcentajePedidoTotal = async (urn) => {
     consultaFiltro = (filtros) => {
         return new Promise((resolve, reject) => {
             if (!this.viewer || !this.viewer.model) {
-                console.log("El modelo del visualizador no está cargado.");
+              //console.log("El modelo del visualizador no está cargado.");
                 resolve({}); 
                 return;
             }
@@ -825,40 +829,66 @@ porcentajePedidoTotal = async (urn) => {
                     }
                     // Más lógica de procesamiento si es necesario
                 });
-                console.log("Resultado obtenido:");
-                console.log(data); // Muestra el resultado por consola
+              //console.log("Resultado obtenido:");
+              //console.log(data); // Muestra el resultado por consola
                 resolve(data);
                 resolve(data);
             }, (error) => {
-                console.log("error",error);
+              //console.log("error",error);
                 resolve({}); 
                 return;
             });
         });
     };
+
+    guardarPropiedadesModelo = async ( propiedades) => {
+        const url = `${API_BASE_URL}/api/guardarPropiedadesModelo`;
+        try {
+            const urn = this.props.urn;
+            const response = await axios.post(url, {
+                urn,
+                propiedades
+            });
+    
+            if (!response.ok) {
+                throw new Error('Error al guardar las propiedades del modelo');
+            }
+    
+          //console.log('Propiedades guardadas con éxito:', response.data);
+        } catch (error) {
+          //console.log('Error al guardar las propiedades del modelo:', error);
+        }
+    };
+    
     obtenerPropiedadesModelo = () => {
         return new Promise((resolve, reject) => {
             if (!this.viewer || !this.viewer.model) {
-                console.log("El modelo del visualizador no está cargado.");
+              //console.log("El modelo del visualizador no está cargado.");
                 resolve([]);
                 return;
             }
     
             this.viewer.model.getBulkProperties([], {}, (result) => {
                 let propiedades = new Set();
-    
+                let categorias = new Set();
                 result.forEach(element => {
                     element.properties.forEach(prop => {
-                        propiedades.add(prop.displayName);
+                        if (prop.displayName === 'Category') {
+
+                            propiedades.add(prop.displayValue);
+                        } else {
+                            propiedades.add(prop.displayName);
+                        }
                     });
                 });
     
-                console.log("Propiedades encontradas:");
-                console.log(Array.from(propiedades)); // Muestra las propiedades por consola
-    
+              //console.log("Propiedades encontradas:");
+              //console.log(Array.from(propiedades)); // Muestra las propiedades por consola
+                this.guardarPropiedadesModelo(Array.from(propiedades));
+                this.setState({ propiedadesGenerales: Array.from(propiedades) || [''] });
                 resolve(Array.from(propiedades));
             }, (error) => {
-                console.log("Error al obtener las propiedades:", error);
+              //console.log("Error al obtener las propiedades:", error);
                 resolve([]);
                 return;
             });
@@ -867,11 +897,11 @@ porcentajePedidoTotal = async (urn) => {
     obtenerFiltros = async (urnBuscada) => {
         return new Promise(async (resolve, reject) => {
             try {
-                console.log("URN ANTES DE AXIOS");
-                console.log(this.props);
+              //console.log("URN ANTES DE AXIOS");
+              //console.log(this.props);
     
                 const response = await axios.get(`${API_BASE_URL}/api/configuracionViewer?urn=${encodeURIComponent(this.props.urn)}`);
-                console.log("Respuesta Filtros:", response.data);
+              //console.log("Respuesta Filtros:", response.data);
     
                 let filtrado1 = response.data.filtro01;
                 let filtrado2 = response.data.filtro02;
@@ -887,28 +917,28 @@ porcentajePedidoTotal = async (urn) => {
                                 nombreParametroDiametro: response.data.variableDiametro,
                                 nombreParametroNivel : response.data.variableNivel
                             }, async () => {
-                    console.log("Filtros actualizados en el estado:", filtrado1, filtrado2,response.data.variableBarra,response.data.variableTiempo,response.data.variableLargo,response.data.variablePesoLineal ,response.data.variableDiametro, response.data.variableNivel );
+                  //console.log("Filtros actualizados en el estado:", filtrado1, filtrado2,response.data.variableBarra,response.data.variableTiempo,response.data.variableLargo,response.data.variablePesoLineal ,response.data.variableDiametro, response.data.variableNivel );
     
                     // Después de actualizar el estado, procede con la consulta de filtros.
                     try {
                         const datosFiltro1 = await this.consultaFiltro([filtrado1]);
                         //this.context.updateDatosFiltro1(datosFiltro1);
-                        console.log("filtro datos 1",datosFiltro1);
+                      //console.log("filtro datos 1",datosFiltro1);
                         const datosFiltro2 = await this.consultaFiltro([filtrado2]);
-                        console.log("filtro datos 2",datosFiltro2);
+                      //console.log("filtro datos 2",datosFiltro2);
                        // this.context.updateDatosFiltro2(datosFiltro2);
     
                         // Una vez completado todo, resuelve la promesa.
                         resolve();
                     } catch (error) {
-                        console.log("Error al consultar los filtros:", error);
+                      //console.log("Error al consultar los filtros:", error);
                        
                         resolve({}); 
                         return;
                     }
                 });
             } catch (error) {
-                console.log("Error al obtener los filtros:", error);
+              //console.log("Error al obtener los filtros:", error);
                
                 resolve({}); 
                 return;
@@ -919,11 +949,11 @@ porcentajePedidoTotal = async (urn) => {
     obtenerFiltrosOrden = async (urnBuscada) => {
         return new Promise(async (resolve, reject) => {
             try {
-                console.log("URN ANTES DE AXIOS");
-                console.log(this.props);
+              //console.log("URN ANTES DE AXIOS");
+              //console.log(this.props);
     
                 const response = await axios.get(`${API_BASE_URL}/api/configuracionViewer?urn=${encodeURIComponent(this.props.urn)}`);
-                console.log("Respuesta Filtros:", response.data);
+              //console.log("Respuesta Filtros:", response.data);
     
                 let filtrado1 = response.data.filtro01;
                 let filtrado2 = response.data.filtro02;
@@ -939,26 +969,26 @@ porcentajePedidoTotal = async (urn) => {
                                 nombreParametroDiametro: response.data.variableDiametro,
                                 nombreParametroNivel : response.data.variableNivel
                             }, async () => {
-                    console.log("Filtros actualizados en el estado:", filtrado1, filtrado2,response.data.variableBarra,response.data.variableTiempo,response.data.variableLargo,response.data.variablePesoLineal ,response.data.variableDiametro, response.data.variableNivel );
+                  //console.log("Filtros actualizados en el estado:", filtrado1, filtrado2,response.data.variableBarra,response.data.variableTiempo,response.data.variableLargo,response.data.variablePesoLineal ,response.data.variableDiametro, response.data.variableNivel );
     
                     // Después de actualizar el estado, procede con la consulta de filtros.
                     try {
                       
                         const datosFiltro2 = await this.consultaFiltro([filtrado2]);
-                        console.log("filtro datos 2 para orden",datosFiltro2);
+                      //console.log("filtro datos 2 para orden",datosFiltro2);
                        // this.context.updateDatosFiltro2(datosFiltro2);
     
                         // Una vez completado todo, resuelve la promesa.
                         resolve(datosFiltro2);
                     } catch (error) {
-                        console.log("Error al consultar los filtros:", error);
+                      //console.log("Error al consultar los filtros:", error);
                         
                         resolve({}); 
                         return;
                     }
                 });
             } catch (error) {
-                console.log("Error al obtener los filtros:", error);
+              //console.log("Error al obtener los filtros:", error);
                 
                 resolve({}); 
                 return;
@@ -968,13 +998,13 @@ porcentajePedidoTotal = async (urn) => {
     obtenerIdsConFecha = async () => {
         return new Promise((resolve, reject) => {
             if (!this.viewer || !this.viewer.model) {
-                console.log("El modelo del visualizador no está cargado.");
+              //console.log("El modelo del visualizador no está cargado.");
                 resolve({}); 
                 return;
             } else {
                 const { nombreParametroFecha, urn } = this.state;
-                console.log("NOMBRE DEL PARAMETRO FECHA");
-                console.log(nombreParametroFecha);
+              //console.log("NOMBRE DEL PARAMETRO FECHA");
+              //console.log(nombreParametroFecha);
                 this.viewer.model.getBulkProperties([], { propFilter: [nombreParametroFecha] }, async (result) => {
                     let idsConFechaYValor = result
                         .filter(element => element.properties.some(prop => prop.displayName === nombreParametroFecha))
@@ -996,10 +1026,10 @@ porcentajePedidoTotal = async (urn) => {
                         });
                     }
     
-                    console.log("IDs con fecha y su valor:", idsConFechaYValor);
+                  //console.log("IDs con fecha y su valor:", idsConFechaYValor);
                     resolve(idsConFechaYValor);
                 }, (error) => {
-                    console.log("error",error);
+                  //console.log("error",error);
                     resolve({}); 
                     return;
                 });
@@ -1007,14 +1037,14 @@ porcentajePedidoTotal = async (urn) => {
         });
     };
     getIdManageFecha = async () => {
-        console.log("Inicio búsqueda de ids fechas");
+      //console.log("Inicio búsqueda de ids fechas");
     
         try {
             const idsConFecha = await this.obtenerIdsConFecha();
             const idsSinFecha = await this.obtenerIdsSinFecha();
             this.setState({ idsConFecha, idsSinFecha });
         } catch (error) {
-            console.log("Error al obtener IDs:", error);
+          //console.log("Error al obtener IDs:", error);
             // A pesar del error, el flujo del programa continúa, evitando bloquear la pantalla.
         }
     }
@@ -1022,7 +1052,7 @@ porcentajePedidoTotal = async (urn) => {
     obtenerIdsSinFecha = async () => {
         return new Promise((resolve, reject) => {
             if (!this.viewer || !this.viewer.model) {
-                console.log("El modelo del visualizador no está cargado.");
+              //console.log("El modelo del visualizador no está cargado.");
                 resolve({}); 
                 return;
             }
@@ -1042,10 +1072,10 @@ porcentajePedidoTotal = async (urn) => {
                     });
                 }
     
-                console.log("IDS SIN FECHA:", idsSinFecha);
+              //console.log("IDS SIN FECHA:", idsSinFecha);
                 resolve(idsSinFecha);
             }, (error) => {
-                console.log("error", error);
+              //console.log("error", error);
                 resolve({}); 
                 return;
             });
@@ -1060,7 +1090,7 @@ porcentajePedidoTotal = async (urn) => {
                     this.viewer.start(); // Reinicia el visor
                     this.viewer.loadDocumentNode(doc, doc.getRoot().getDefaultGeometry(), {
                         onLoadFinished: () => {
-                            console.log("Modelo cargado correctamente");
+                          //console.log("Modelo cargado correctamente");
                             this.updateViewerState({});
                             this.cargarConfiguracion();
                             this.onModelLoaded(); // Llama a onModelLoaded después de cargar el modelo
@@ -1068,25 +1098,24 @@ porcentajePedidoTotal = async (urn) => {
 
 
                         onLoadError: (errorCode, errorMessage, statusCode, statusText) => {
-                            console.log("Error al cargar el modelo:", errorCode, errorMessage, statusCode, statusText);
+                          //console.log("Error al cargar el modelo:", errorCode, errorMessage, statusCode, statusText);
                         }
                     });
                 },
                 (code, message, errors) => {
-                    console.log("no se pudo cargar debe traducir");
+                  //console.log("no se pudo cargar debe traducir");
                     toast.info('No se pudo abrir, proceso de traducción del archivo iniciado');
-                    console.log(code, message, errors);
+                  //console.log(code, message, errors);
                 }
             );
         }
     };
 
     onModelLoaded = async () => {
-        console.log("modelo cargado, busco--2");
+      //console.log("modelo cargado, busco--2");
         try {
-            console.log("modelo cargado, busco--");
-            const propiedades = await this.obtenerPropiedadesModelo();
-            console.log("Propiedades obtenidas para completar forms:", propiedades);
+          //console.log("modelo cargado, busco--");
+            
             // Espera a que ambas funciones asincrónicas se completen.
             const [idsConFecha, idsSinFecha] = await Promise.all([
               //  this.obtenerIdsConFecha(),
@@ -1097,26 +1126,28 @@ porcentajePedidoTotal = async (urn) => {
             //this.setState({ idsConFecha, idsSinFecha });
             
             this.cargarConfiguracion();
+            const propiedades = await this.obtenerPropiedadesModelo();
+          //console.log("Propiedades obtenidas para completar forms:", propiedades);
             await this.obtenerFiltros(this.props.urn).then(async () => {
                 try {
-                    console.log("proceso Id Barras Proyecto");
+                  //console.log("proceso Id Barras Proyecto");
                     const idsBarras = await this.obtenerIdsBarras();
                     await  this.guardarIdsBarras();
                     if(!idsBarras.length ==0){
                         await this.generarTotalPesoPisos();
-                        console.log("IDs2 de barras obtenidos:", idsBarras);
+                      //console.log("IDs2 de barras obtenidos:", idsBarras);
                         this.setState.idsBarraActual = idsBarras
                    
                     }
                     
                 } catch (error) {
-                    console.log("Error al obtener IDs de barras:", error);
+                  //console.log("Error al obtener IDs de barras:", error);
                 }
             });
         
 
         } catch (error) {
-            console.log("Error al obtener IDs:", error);
+          //console.log("Error al obtener IDs:", error);
         }
     };
     

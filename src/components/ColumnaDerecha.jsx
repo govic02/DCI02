@@ -68,7 +68,7 @@ const ColumnaDerecha = ({ isCollapsed, token, urn, selectedIds, onCameraChange, 
       try {
           const userId = localStorage.getItem('userId');
           const response = await axios.get(`${API_BASE_URL}/api/usuarios/${userId}`);
-          console.log("Usuario verificado:", response.data);
+        //console.log("Usuario verificado:", response.data);
       } catch (error) {
           logout();
           window.location.reload();
@@ -80,13 +80,13 @@ const ColumnaDerecha = ({ isCollapsed, token, urn, selectedIds, onCameraChange, 
     useEffect(() => {
 
       const obtenerUsuarioProyecto = async () => {
-        console.log("token desde jwt",tokenContexto);
+      //console.log("token desde jwt",tokenContexto);
         const tipo = localStorage.getItem('tipo');
         
         const userId = localStorage.getItem('userId');
         const username = localStorage.getItem('username');
-        console.log("token desde jwt",userId);
-        console.log("token desde jwt",username);
+      //console.log("token desde jwt",userId);
+      //console.log("token desde jwt",username);
         try {
           const response = await fetch(API_BASE_URL+'/api/getUserProyectId', {
             method: 'POST',
@@ -99,22 +99,22 @@ const ColumnaDerecha = ({ isCollapsed, token, urn, selectedIds, onCameraChange, 
           });
           if (response.ok) {
             const data = await response.json();
-            console.log("listado de proyectos asignados al usuario", data);
+          //console.log("listado de proyectos asignados al usuario", data);
             
             if (data.length > 0) {  // Asegúrate de que data es un arreglo y tiene al menos un elemento
               setUrnSelected(data[0].urn); // Toma el URN del primer proyecto
               setProyectoKeySeleccionado(data[0].proyectoKey); // Toma el proyectoKey del primer proyecto
-              console.log("Urn seleccionada en useEffect:", data[0].urn);
-              console.log("Proyecto Key seleccionado en useEffect:", data[0].proyectoKey);
+            //console.log("Urn seleccionada en useEffect:", data[0].urn);
+            //console.log("Proyecto Key seleccionado en useEffect:", data[0].proyectoKey);
             } else {
-              console.log("No hay proyectos asignados al usuario");
+            //console.log("No hay proyectos asignados al usuario");
             }
           } else {
             const errorData = await response.text(); // O response.json() dependiendo de cómo el servidor envía errores
-            console.log("error carga usuario proyecto");
+          //console.log("error carga usuario proyecto");
           }
         } catch (error) {
-          console.log('Error al obtener el usuario-proyecto asignado:', error);
+        //console.log('Error al obtener el usuario-proyecto asignado:', error);
           toast.error('Error al obtener el usuario-proyecto asignado');
         }
     };

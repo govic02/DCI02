@@ -84,7 +84,7 @@ const TablaUsuarios = ({ usuarios,refrescarUsuarios }) => {
     
             // Procesar la respuesta del servidor
             const usuarioActualizado = await response.json();
-            console.log('Usuario actualizado con éxito:', usuarioActualizado);
+          //console.log('Usuario actualizado con éxito:', usuarioActualizado);
     
             // Actualizar la UI según sea necesario, por ejemplo, cerrando el modal y recargando la lista de usuarios
             cerrarModalEditar();
@@ -132,7 +132,7 @@ const TablaUsuarios = ({ usuarios,refrescarUsuarios }) => {
     };
 
     const editarUsuario = (usuario) => {
-        console.log('Editar usuario:', usuario);
+      //console.log('Editar usuario:', usuario);
         setUsuarioAEditar(usuario);
         setEsModalEditarAbierto(true);
     };

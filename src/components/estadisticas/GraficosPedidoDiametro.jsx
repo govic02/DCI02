@@ -49,8 +49,8 @@ const GraficosPedidoDiametro = ({ urn }) => {
                 const urlBarras = `${API_BASE_URL}/api/barraurn/${encodeURIComponent(urn)}`;
                 const respuestaBarras = await axios.get(urlBarras);
                 const barras = respuestaBarras.data.detalles;
-                console.log("Barras desde servidor ",barras);
-                console.log("total barras",respuestaBarras);
+              //console.log("Barras desde servidor ",barras);
+              //console.log("total barras",respuestaBarras);
                 const urlPedidos = `${API_BASE_URL}/api/listPedidos?urn=${urn}`;
                 const respuestaPedidos = await axios.get(urlPedidos);
                 const pedidos = respuestaPedidos.data;
@@ -62,7 +62,7 @@ const GraficosPedidoDiametro = ({ urn }) => {
                 let totalIdsEncontradas = 0;
 
                 pedidos.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
-                console.log("pedidos desde grafico pedidos", pedidos);
+              //console.log("pedidos desde grafico pedidos", pedidos);
                 pedidos.forEach(pedido => {
                     if (!pesosPorPedidoYDiametro[pedido.nombre_pedido]) {
                         pesosPorPedidoYDiametro[pedido.nombre_pedido] = {};
@@ -80,17 +80,17 @@ const GraficosPedidoDiametro = ({ urn }) => {
                             totalIdsEncontradas++;
                         }
                         else {
-                          //  console.log(`Barra con id ${id} no encontrada en la lista de barras.`);
+                          ////console.log(`Barra con id ${id} no encontrada en la lista de barras.`);
                         }
                     });
                 });
-                console.log("pesos obtenidos",pesosPorPedidoYDiametro);
+              //console.log("pesos obtenidos",pesosPorPedidoYDiametro);
                 setDiametrosEncontrados([...diametrosSet]);
-                console.log("D ENCONTRADOS :",diametrosSet);
-                console.log("Total IDs en pedidos:", totalIdsPedidos);
-                console.log("Total IDs encontradas en barras:", totalIdsEncontradas);
-                console.log("Barras ",barras);
-                console.log("original", respuestaBarras);
+              //console.log("D ENCONTRADOS :",diametrosSet);
+              //console.log("Total IDs en pedidos:", totalIdsPedidos);
+              //console.log("Total IDs encontradas en barras:", totalIdsEncontradas);
+              //console.log("Barras ",barras);
+              //console.log("original", respuestaBarras);
                 // Convertir los datos para el gráfico
                 let labels = Object.keys(pesosPorPedidoYDiametro); // Nombres de pedidos como labels del eje X
                 let datasets = [];
@@ -116,7 +116,7 @@ const GraficosPedidoDiametro = ({ urn }) => {
                         datasets[datasetIndex].data[idx] = peso;
                     });
                 });
-                console.log("Diámetros encontrados:", Object.keys(diametrosVistos));
+              //console.log("Diámetros encontrados:", Object.keys(diametrosVistos));
                 setDatosGrafico({
                     labels,
                     datasets,
@@ -133,8 +133,23 @@ const GraficosPedidoDiametro = ({ urn }) => {
     const colores = ['#E04C41', '#737373', '#EE736A', '#41E0E0', '#E0E041'];
     const options = {
         scales: {
+            responsive: false,
+           
             x: {
                 stacked: true,
+                barThickness: 20,
+                categoryPercentage: 1.0,
+                offset: true,
+                ticks: {
+                    autoSkip: false,
+                    maxRotation: 50,
+                    minRotation: 50
+                },
+                grid: {
+                    offset: false,
+                    display: false
+                }
+        
             },
             y: {
                 stacked: true,
@@ -151,6 +166,11 @@ const GraficosPedidoDiametro = ({ urn }) => {
                 position: 'top',
             },
         },
+        layout: {
+            padding: {
+                right: datosGrafico.labels.length > 20 ? 0 : Math.max(1120 - (datosGrafico.labels.length - 3) * 50, 0),
+            }
+            }
     };
     const cardStyle = {
         marginLeft: '40px',

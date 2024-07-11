@@ -16,7 +16,7 @@ const HeaderApp = ({ proyectoKey,urn }) => {
     const [anchorEl, setAnchorEl] = useState(null);
     const { logout } = useAuth();
     const [bandejaVisible, setBandejaVisible] = useState(false);
-    console.log("Proyecto seleccionado Header:", proyectoKey);
+  //console.log("Proyecto seleccionado Header:", proyectoKey);
 
     const handleOpenBandeja = () => {
         setBandejaVisible(true);
@@ -37,7 +37,7 @@ const HeaderApp = ({ proyectoKey,urn }) => {
         handleClose(); // Cierra el menú
         logout();
         window.location.reload();
-        console.log("cerrando sesión");
+      //console.log("cerrando sesión");
     };
 
     return (

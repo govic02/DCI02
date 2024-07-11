@@ -43,10 +43,10 @@ const ListadoProyectos = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) 
                 }
             });
             const data = await response.json();
-            console.log(data);
+          //console.log(data);
             if (data.length > 0) {
               var data1 = data.sort((a, b) => a.objectKey.localeCompare(b.objectKey));
-                console.log("Datos ordenados:", data1);
+              //console.log("Datos ordenados:", data1);
                 setBucketKey(data[0]?.bucketKey); // Establece el bucketKey del primer proyecto
                 setProyectos( data1);
           }
@@ -65,7 +65,7 @@ const ListadoProyectos = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) 
         const response = await fetch(`${API_BASE_URL}/api/gettoken`);
         const data = await response.json();
         setToken(data.token);
-        console.log("Ok token");
+      //console.log("Ok token");
       } catch (error) {
         console.error('Error al obtener el token:', error);
       }
@@ -77,8 +77,8 @@ const ListadoProyectos = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) 
   const handleListItemClick = async (proyectoKey, urn) => {
     toast.info('Abriendo Proyecto...'); // Duración en milisegundos
     setProyectoSeleccionado(proyectoKey);
-    console.log("URN del proyecto:", urn);
-    console.log("Nombre de  proyecto:", proyectoKey);
+  //console.log("URN del proyecto:", urn);
+  //console.log("Nombre de  proyecto:", proyectoKey);
     setUrnSelected(urn);
     onProyectoSeleccionado(proyectoKey, urn); // Llamar a la función onProyectoSeleccionado
 
@@ -96,9 +96,9 @@ const ListadoProyectos = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) 
         
       });
       const data = await response.json();
-      console.log("Resultado usuario proyecto");
-      console.log(data);
-      console.log( urn);
+    //console.log("Resultado usuario proyecto");
+    //console.log(data);
+    //console.log( urn);
       // Puedes realizar acciones adicionales según sea necesario con la respuesta del servidor
     } catch (error) {
       console.error('Error al actualizar el usuario-proyecto asignado:', error);
@@ -107,15 +107,15 @@ const ListadoProyectos = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) 
 
 
   };
-
+  
   const handleDeleteButtonClick = () => {
     if (proyectoSeleccionado) {
-      console.log('Proyecto seleccionado:', proyectoSeleccionado);
+    //console.log('Proyecto seleccionado:', proyectoSeleccionado);
       
         const objectKey = proyectoSeleccionado;
-        console.log("datos borrado");
-        console.log(bucketKey);
-        console.log(objectKey);
+      //console.log("datos borrado");
+      //console.log(bucketKey);
+      //console.log(objectKey);
        
           fetch(`${API_BASE_URL}/api/deleteObject`, {
               method: 'POST',
@@ -132,7 +132,7 @@ const ListadoProyectos = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) 
               }
           })
           .then(data => {
-            console.log('Éxito en Borrado inicial :', data);
+          //console.log('Éxito en Borrado inicial :', data);
             //  urnSelected
             toast.success(`${objectKey} ha sido borrado exitosamente`);
 
@@ -143,40 +143,58 @@ const ListadoProyectos = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) 
         })
         
         .then(data => {
-          console.log('Pedidos eliminados exitosamente:', data);
+        //console.log('Pedidos eliminados exitosamente:', data);
           toast.success('Pedidos asociados eliminados exitosamente');
-          console.log("eliminacion de filtros asociados a URN");
+        //console.log("eliminacion de filtros asociados a URN");
           // Procede a eliminar los filtros asociados a la URN
           return fetch(`${API_BASE_URL}/api/filtrosOpcionesProyectoEliminar/${urnSelected}`, {
             method: 'DELETE'
           });
         })
         .then(data => {
-          console.log('Filtros eliminados exitosamente:', data);
+        //console.log('Filtros eliminados exitosamente:', data);
           toast.success('Datos asociados eliminados exitosamente');
-          console.log('Inicio borrado configuración');
+        //console.log('Inicio borrado configuración');
           // Procede a eliminar la configuración del visor asociada a la URN
           return fetch(`${API_BASE_URL}/api/configuracionViewerEliminar/${urnSelected}`, {
             method: 'DELETE'
           });
         })
         .then(data => {
-            console.log('Pedidos eliminados exitosamente:', data);
+          //console.log('Pedidos eliminados exitosamente:', data);
             toast.success('Pedidos asociados eliminados exitosamente');
             
             // Actualiza los filtros u otras listas que dependan de estos datos
-            fetchFilters(() => {
+           /* fetchFilters(() => {
                 if (proyectos.length > 0) {
                     setProyectoSeleccionado(proyectos[0].proyectoKey);
-                    console.log("URN del proyecto:", urn);
-                    console.log("Nombre de proyecto:", proyectos[0].proyectoKey);
+                  //console.log("URN del proyecto:", urn);
+                  //console.log("Nombre de proyecto:", proyectos[0].proyectoKey);
                     setUrnSelected(urn);
                     onProyectoSeleccionado(proyectos[0].proyectoKey, urn); // Llamar a la función onProyectoSeleccionado
                 }
-            });
-            handleListItemClick(proyectos[0].objectKey, proyectos[0].urn);
+            });*/
+          //  handleListItemClick(proyectos[0].objectKey, proyectos[0].urn);
+            return fetch(`${API_BASE_URL}/api/eliminarPorUrn/${urnSelected}`, {
+              method: 'DELETE'
+          });
         })
+        .then(data => {
+        //console.log('Asignaciones de usuarios eliminadas exitosamente:', data);
+          toast.success('Asignaciones de usuarios asociadas eliminadas exitosamente');
           
+          // Actualiza los filtros u otras listas que dependan de estos datos
+          fetchFilters(() => {
+              if (proyectos.length > 0) {
+                  setProyectoSeleccionado(proyectos[0].proyectoKey);
+                //console.log("URN del proyecto:", urn);
+                //console.log("Nombre de proyecto:", proyectos[0].proyectoKey);
+                  setUrnSelected(urn);
+                  onProyectoSeleccionado(proyectos[0].proyectoKey, urn); // Llamar a la función onProyectoSeleccionado
+              }
+          });
+          handleListItemClick(proyectos[0].objectKey, proyectos[0].urn);
+      })
           .catch(error => {
               console.error('Error:', error);
               toast.error(`Error al intentar borrar ${objectKey}`);
@@ -215,10 +233,10 @@ const ListadoProyectos = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) 
             }
           });
           const data = await response.json();
-          console.log(data);
+        //console.log(data);
           if (data.length > 0) {
            var data1 = data.sort((a, b) => a.objectKey.localeCompare(b.objectKey));
-                console.log("Datos ordenados:", data1);
+              //console.log("Datos ordenados:", data1);
                 setBucketKey(data[0]?.bucketKey); // Establece el bucketKey del primer proyecto
                 setProyectos( data1);
           }
@@ -249,17 +267,17 @@ const ListadoProyectos = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) 
           setIdUsuarioSelected(data[0].idUsuario);
           setProyectoKeySelected(data[0].proyectoKey);
           seleccionarProyectoPorNombre(data[0].proyectoKey); // Toma el proyectoKey del primer proyecto
-          console.log("Urn seleccionada en useEffect:", data[0].urn);
-          console.log("Proyecto Key seleccionado en useEffect:", data[0].proyectoKey);
+        //console.log("Urn seleccionada en useEffect:", data[0].urn);
+        //console.log("Proyecto Key seleccionado en useEffect:", data[0].proyectoKey);
         } else {
-          console.log("No hay proyectos asignados al usuario");
+        //console.log("No hay proyectos asignados al usuario");
         }
         
       } catch (error) {
         console.error('Error al obtener el usuario-proyecto asignado:', error);
         toast.error('Error al obtener el usuario-proyecto asignado');
       }
-      console.log("");
+    //console.log("");
   };
   //
 
@@ -279,8 +297,8 @@ const ListadoProyectos = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) 
   
       const fileName = file.name;
       const fileExtension = fileName.slice(((fileName.lastIndexOf(".") - 1) >>> 0) + 2);
-      console.log("File name:", fileName);
-      console.log("File extension:", fileExtension);
+    //console.log("File name:", fileName);
+    //console.log("File extension:", fileExtension);
   
       if (!['rvt', 'ifc'].includes(fileExtension.toLowerCase())) {
         toast.error('solamente puede subir .rvt y .ifc .');
@@ -310,14 +328,14 @@ const ListadoProyectos = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) 
         formData.append('bucketKey', bucketKey);
         formData.append('username', localStorage.getItem('username'));
   
-        console.log(`Uploading chunk ${currentChunk + 1} of ${totalChunks}`);
+      //console.log(`Uploading chunk ${currentChunk + 1} of ${totalChunks}`);
         let ck = currentChunk+1
         
         toast.update(toastId, {
           render: `Parte ${currentChunk+1} de ${totalChunks} subida con éxito.`
         });
         if( ck ==totalChunks){
-          console.log("INICIO PROCESO ");
+        //console.log("INICIO PROCESO ");
           toast.info( `El proceso de carga en el repositorio ha iniciado. La operación puede tardar varios segundos..`, { autoClose: false });
         }
         try {
@@ -330,7 +348,7 @@ const ListadoProyectos = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) 
           });
           if (!response.ok) throw new Error('Failed to upload chunk.');
           
-          console.log(`Chunk ${currentChunk + 1} uploaded successfully.`);
+        //console.log(`Chunk ${currentChunk + 1} uploaded successfully.`);
           
           currentChunk++;
         } catch (error) {
@@ -340,7 +358,7 @@ const ListadoProyectos = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) 
         }
       }
   
-      console.log('proceso terminado de subida.');
+    //console.log('proceso terminado de subida.');
       toast.success('Archivo subido completamente.');
       fetchFilters(); 
     };
@@ -351,7 +369,7 @@ const ListadoProyectos = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) 
   
   
   const handleFileTranslate = async ()=>{
-    console.log("busco traducir"+bucketKey ,urnSelected);
+  //console.log("busco traducir"+bucketKey ,urnSelected);
     translateObject({ id: urnSelected, parents: [bucketKey] });
   }
   const translateObject = async (node) => {
@@ -359,8 +377,8 @@ const ListadoProyectos = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) 
    
     var bucketKey = node.parents[0];
     var objectKey = node.id;
-    console.log(bucketKey);
-    console.log(objectKey);
+  //console.log(bucketKey);
+  //console.log(objectKey);
     const username = localStorage.getItem('username');
     try {
       toast.success(` Proceso de traducción  iniciado , el proceso tomará algunos minutos, recibirá un correo electrónico que notificará cuando esté disponible`);
@@ -371,10 +389,10 @@ const ListadoProyectos = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) 
         },
         body: JSON.stringify({ 'bucketKey': bucketKey, 'objectName': objectKey ,'username':username})
       });
-      console.log(response);
+    //console.log(response);
       if (response.ok) {
       
-       console.log('Traducción Iniciada, espere unos instantes..');
+     //console.log('Traducción Iniciada, espere unos instantes..');
       } else {
         toast.success(` Error al intentar traducir , intente nuevamente`);
         console.error('Error al intentar traducir:', response.statusText);

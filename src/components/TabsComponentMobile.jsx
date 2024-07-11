@@ -57,7 +57,7 @@ const TabComponentMobile = ({ urnBuscada }) => {
     const handleOpenModalWithInfo = async (pedido) => {
         setPedidoActual(pedido);
         setModalInfo({ show: true, data: pedido });
-        console.log("pedido a mostrar", pedido);
+      //console.log("pedido a mostrar", pedido);
         await cargarAdicionales(pedido._id); // Llama a cargarAdicionales aquí
     };
 
@@ -77,14 +77,14 @@ const TabComponentMobile = ({ urnBuscada }) => {
             }
         }
     
-        console.log("Estado actual:", estadoActualIndex);
+      //console.log("Estado actual:", estadoActualIndex);
     
         // Determina el próximo estado si no es el último
         let nuevoEstado = 'paquetizado'; // Estado inicial por defecto si no hay ningún estado actual
         if (estadoActualIndex !== -1 && estadoActualIndex < estados.length - 1) {
             nuevoEstado = estados[estadoActualIndex + 1];
         } else if (estadoActualIndex === estados.length - 1) {
-            console.log("Ya está en el último estado posible.");
+          //console.log("Ya está en el último estado posible.");
             return; // Retorna aquí si ya está en el último estado
         }
     
@@ -149,8 +149,8 @@ const TabComponentMobile = ({ urnBuscada }) => {
             });
 
             // Mostrar por consola los idsFiltrados separados por categoría
-            console.log("dbIds filtrados por ParticionHA:", idsFiltradosParticionHA);
-            console.log("dbIds filtrados por Piso:", idsFiltradosPiso);
+          //console.log("dbIds filtrados por ParticionHA:", idsFiltradosParticionHA);
+          //console.log("dbIds filtrados por Piso:", idsFiltradosPiso);
             if( idsFiltradosPiso.length ==0 && idsFiltradosParticionHA.length>0){
                 filtrar(idsFiltradosParticionHA);
                 setSelectedIds(idsFiltradosParticionHA);
@@ -166,7 +166,7 @@ const TabComponentMobile = ({ urnBuscada }) => {
                 let idsRepetidos = idsFiltradosParticionHA.filter(id => idsFiltradosPiso.includes(id));
 
                 // Mostrar por consola los ids que se repiten en ambos
-                console.log("dbIds repetidos en ambos:", idsRepetidos);
+              //console.log("dbIds repetidos en ambos:", idsRepetidos);
 
                 // Si necesitas utilizar la función filtrar para aplicar estos filtros visualmente, hazlo aquí:
                 // Por ejemplo, podrías querer filtrar visualmente solo los ids que se repiten
@@ -204,10 +204,10 @@ const TabComponentMobile = ({ urnBuscada }) => {
         }
       
         try {
-            console.log("Datos que se deben enviar");
-            console.log(adicional);
-            console.log(modalInfo.data._id);
-            console.log(modalInfo);
+          //console.log("Datos que se deben enviar");
+          //console.log(adicional);
+          //console.log(modalInfo.data._id);
+          //console.log(modalInfo);
           // Envía el adicional al servidor, asumiendo que modalInfo.data._id es el ID del pedido actual
           await axios.post(API_BASE_URL+`/api/adicionalesPedido`, { ...adicional, pedidoId: modalInfo.data._id , urn:urnBuscada});
       
@@ -232,10 +232,10 @@ const TabComponentMobile = ({ urnBuscada }) => {
                 const url = API_BASE_URL+`/api/listPedidos?urn=${urn}`;
               
                 const response = await axios.get(url);
-                console.log("lista pedidos",response);
+              //console.log("lista pedidos",response);
                 if (response.status === 200) {
-                    console.log("PEDIDOS SERVER");
-                    console.log(response.data);
+                  //console.log("PEDIDOS SERVER");
+                  //console.log(response.data);
                     setPedidos(response.data);
                 }
             } catch (error) {
@@ -246,14 +246,14 @@ const TabComponentMobile = ({ urnBuscada }) => {
         fetchPedidos();
     }, [urnBuscada]); // Agrega urnBuscada a las dependencias de useEffect si es una prop o un estado
     const handleDeleteConfirmation = async (pedido) => {
-        console.log("pedido borrar antes");
-        console.log(pedido);
+      //console.log("pedido borrar antes");
+      //console.log(pedido);
         const isConfirmed = window.confirm("En verdad desea borrar "+pedido.nombre_pedido);
         if (isConfirmed) {
             try {
                 // Reemplaza 'tu-api-url' con la URL base de tu API
                 const response = await axios.delete(API_BASE_URL+'/api/eliminarPedido', { data: { id: pedido._id } });
-                console.log(response.data.mensaje);
+              //console.log(response.data.mensaje);
                 setModalInfo({ show: false, data: pedido });
                 fetchPedidosAct();
                 // Actualiza tu vista o estado aquí para reflejar que el pedido fue eliminado
@@ -266,7 +266,7 @@ const TabComponentMobile = ({ urnBuscada }) => {
         // Si el usuario selecciona "No", simplemente se cierra la alerta y no se hace nada más.
     };
     useEffect(() => {
-        console.log(`Peso Total Desde Tab: ${pesoTotal}, Largo Total: ${largoTotal}, Total Barras: ${totalBarras}`);
+      //console.log(`Peso Total Desde Tab: ${pesoTotal}, Largo Total: ${largoTotal}, Total Barras: ${totalBarras}`);
     }, [pesoTotal, largoTotal, totalBarras]); // Dependencias para reaccionar a sus cambios
     const handCleanClick = () => {
         cleanModel();
@@ -284,8 +284,8 @@ const TabComponentMobile = ({ urnBuscada }) => {
             
             const response = await axios.get(url);
             if (response.status === 200) {
-                console.log("PEDIDOS SERVER");
-                console.log(response.data);
+              //console.log("PEDIDOS SERVER");
+              //console.log(response.data);
                 setPedidos(response.data);
             }else{ setPedidos([]);}
         } catch (error) {
@@ -294,14 +294,14 @@ const TabComponentMobile = ({ urnBuscada }) => {
     };
     const viewPedido = (ids) => {
         const idsInt = ids.map(id => parseInt(id, 10)); // Convierte cada elemento a entero
-        console.log("IDs del pedido:", idsInt);
+      //console.log("IDs del pedido:", idsInt);
         filtrar(idsInt);
         setSelectedIds(idsInt);
       };
       
     useEffect(() => {
         if (datosFiltro1) {
-               console.log("Datos Filtro1 desde Tabs:", datosFiltro1);
+             //console.log("Datos Filtro1 desde Tabs:", datosFiltro1);
              const opciones1 = Object.keys(datosFiltro1).map(key => ({
                 value: key,
                 label: key,
@@ -312,7 +312,7 @@ const TabComponentMobile = ({ urnBuscada }) => {
         
 
         if (datosFiltro2) {
-            console.log("Datos Filtro2 desde Tabs:", datosFiltro2);
+          //console.log("Datos Filtro2 desde Tabs:", datosFiltro2);
           const opciones2 = Object.keys(datosFiltro2).map(key => ({
              value: key,
              label: key,
@@ -326,13 +326,13 @@ const TabComponentMobile = ({ urnBuscada }) => {
     useEffect(() => {
         const fetchFiltros = async () => {
             try {
-                console.log("URN BUSCADA 12");
-                console.log(urnBuscada);
+              //console.log("URN BUSCADA 12");
+              //console.log(urnBuscada);
                 
                 if (urnBuscada) {
                     const response = await axios.get(API_BASE_URL+`/api/filtrosPorUrn/${urnBuscada}`);
-                    console.log("Respuesta Filtros");
-                    console.log(response.data);
+                  //console.log("Respuesta Filtros");
+                  //console.log(response.data);
                   
                     const filtros = response.data;
                     if (filtros.length >= 2) {
@@ -382,7 +382,7 @@ const TabComponentMobile = ({ urnBuscada }) => {
         });
     
         if (idsRepetidos.length > 0) {
-            console.log("IDs repetidos encontrados:", idsRepetidos);
+          //console.log("IDs repetidos encontrados:", idsRepetidos);
             const nombresPedidos = Array.from(pedidosConRepetidos).join(", "); // Convertimos el Set a Array y lo unimos en una cadena
             toast.error(`Hay elementos repetidos en los siguientes pedidos: ${nombresPedidos}`);
             viewPedido(idsRepetidos); // Visualiza los IDs repetidos
@@ -396,17 +396,17 @@ const TabComponentMobile = ({ urnBuscada }) => {
     const handleCloseModal = () => setShowModal(false);
     const handleExecuteOrderClick = async () => {
         if (!pedidoNombre.trim()) {
-            console.log("sin nombre");
+          //console.log("sin nombre");
             toast.error("Debe agregar un nombre al pedido");
             return;
         }
     
-        console.log("Nombre del pedido:", pedidoNombre);
+      //console.log("Nombre del pedido:", pedidoNombre);
         // Suponiendo que tienes un estado o una forma de obtener los IDs seleccionados, 
         // aquí es donde mostrarías esos IDs. 
         // A modo de ejemplo, usaré un estado ficticio llamado selectedIds para esta demostración:
        
-        console.log("Lista de IDs seleccionados:", selectedIds);
+      //console.log("Lista de IDs seleccionados:", selectedIds);
         const datosPedido = {
             ids: selectedIds,
             fecha: new Date().toISOString().slice(0, 10), // Fecha actual en formato YYYY-MM-DD
@@ -421,7 +421,7 @@ const TabComponentMobile = ({ urnBuscada }) => {
             const respuesta = await axios.post(API_BASE_URL+'/api/pedido', datosPedido);
 
             if (respuesta.status === 201) {
-                console.log("Pedido creado exitosamente", respuesta.data);
+              //console.log("Pedido creado exitosamente", respuesta.data);
                 toast.success("Pedido creado exitosamente");
                 // Cerrar el modal y limpiar el formulario
                 handleCloseModal();

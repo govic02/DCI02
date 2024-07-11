@@ -25,7 +25,7 @@ const ConfiguracionVisualizador = () => {
                 });
                 const data = await response.json();
                 setUrnSelected(data.urn);
-            //    console.log("URN BUSCADA DESDE ESTADITICAS GENERAL",data.urn);
+            //  //console.log("URN BUSCADA DESDE ESTADITICAS GENERAL",data.urn);
                 setProyectoKeySeleccionado(data.proyectoKey);
             } catch (error) {
                // console.error('Error al obtener el usuario-proyecto asignado:', error);

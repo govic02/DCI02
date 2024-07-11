@@ -28,7 +28,7 @@ const BandejaDeEntrada = ({ open, onClose,urn }) => {
         try {
             const adminUsersResponse = await axios.get(`${API_BASE_URL}/api/usuariosAdministradores`);
             const projectUsersResponse = await axios.get(`${API_BASE_URL}/api/usuariosProyectoAsignado/${urn}`);
-            console.log("usuarios admin",adminUsersResponse);
+          //console.log("usuarios admin",adminUsersResponse);
             const adminUsers = adminUsersResponse.data;
             const projectUserIds = projectUsersResponse.data.map(user => user.idUsuario);
             const projectUsers = await Promise.all(projectUserIds.map(async idUsuario => {
@@ -37,10 +37,10 @@ const BandejaDeEntrada = ({ open, onClose,urn }) => {
             }));
     
             const combinedUsers = [...new Set([...adminUsers, ...projectUsers])];
-            console.log("USUARIOS ACTUALES PARA REMITIR",combinedUsers);
+          //console.log("USUARIOS ACTUALES PARA REMITIR",combinedUsers);
             setUsuariosProyecto(combinedUsers);
         } catch (error) {
-            console.log('Error al cargar usuarios', error);
+          //console.log('Error al cargar usuarios', error);
             setError('cargando usuarios');
         }
     
@@ -56,7 +56,7 @@ const BandejaDeEntrada = ({ open, onClose,urn }) => {
     
             try {
                 const response = await axios.get(`${API_BASE_URL}/api/conversaciones/participante/${userId}`);
-                console.log("mensajes recibidos", response.data);
+              //console.log("mensajes recibidos", response.data);
     
                 const conversationsWithUsernames = await Promise.all(response.data.map(async conversation => {
                     // Mapear cada participant a su username, usando el API
@@ -91,7 +91,7 @@ const BandejaDeEntrada = ({ open, onClose,urn }) => {
     
 
     const handleMessageSelect = (mensaje) => {
-        console.log("datos de mensaje seleccionado",mensaje);
+      //console.log("datos de mensaje seleccionado",mensaje);
         setSelectedMessage(mensaje);
         setIsNewMessage(false);
     };
@@ -146,7 +146,7 @@ const BandejaDeEntrada = ({ open, onClose,urn }) => {
         try {
             mensajes = [];
             const response = await axios.get(`${API_BASE_URL}/api/conversaciones/participante/${userId}`);
-            console.log("mensajes recibidos", response.data);
+          //console.log("mensajes recibidos", response.data);
     
             const conversationsWithUsernames = await Promise.all(response.data.map(async conversation => {
                 const participantsWithUsernames = await Promise.all(conversation.participants.map(async participantId => {
@@ -166,7 +166,7 @@ const BandejaDeEntrada = ({ open, onClose,urn }) => {
     
             setMensajes(conversationsWithUsernames.length > 0 ? conversationsWithUsernames : [{ id: 'dummy', asunto: 'Sin Mensajes', usuario: 'N/A' }]);
         } catch (error) {
-            console.log('Error al cargar conversaciones', error);
+          //console.log('Error al cargar conversaciones', error);
             setError('Error al cargar conversaciones');
             setMensajes([{ }]);
         }
@@ -178,10 +178,10 @@ const BandejaDeEntrada = ({ open, onClose,urn }) => {
     }, [userId]);
     const handleAddMessageSend = async () => {
         if (!selectedMessage || !messageText.trim()) {
-            console.log("No se seleccionó mensaje o el campo de mensaje está vacío.");
+          //console.log("No se seleccionó mensaje o el campo de mensaje está vacío.");
             return;  // Evita enviar si no hay mensaje seleccionado o el texto del mensaje está vacío
         }
-        console.log("mensaje que se enviará", selectedMessage);
+      //console.log("mensaje que se enviará", selectedMessage);
         const messageData = {
             conversationId: selectedMessage.conversationId, // Asegúrate de que cada conversación tiene un ID único
             senderId: userId, // ID del usuario que envía el mensaje
@@ -191,7 +191,7 @@ const BandejaDeEntrada = ({ open, onClose,urn }) => {
         try {
             const response = await axios.post(`${API_BASE_URL}/api/conversaciones/mensajes`, messageData);
             if (response.status === 200) {
-                console.log("Mensaje enviado con éxito:", response.data);
+              //console.log("Mensaje enviado con éxito:", response.data);
                 // Solo actualiza los mensajes de la conversación seleccionada
                 const updatedMessages = [...selectedMessage.messages, {
                     senderId: userId,
@@ -209,10 +209,10 @@ const BandejaDeEntrada = ({ open, onClose,urn }) => {
                 setEnvio(true);
                 //fetchConversations(); 
             } else {
-                console.log("Error al enviar mensaje:", response.data);
+              //console.log("Error al enviar mensaje:", response.data);
             }
         } catch (error) {
-            console.log("Error al enviar mensaje:", error);
+          //console.log("Error al enviar mensaje:", error);
         }
     };
     

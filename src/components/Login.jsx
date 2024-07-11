@@ -23,9 +23,9 @@ const Login = ({ onLoginSuccess }) => {
               text: '<p>Estimado Usuario</p><p> Se ha registrado un ingreso a su cuenta en la platadorma ICD.</p>', // Agrega el mensaje que quieras
             }),
           });
-          console.log("respuesta login email ok",response);
+        //console.log("respuesta login email ok",response);
           if (response.ok) {
-            console.log("email enviado correctamente");
+          //console.log("email enviado correctamente");
           
           } else {
             setError('Failed to send email'); // Si la respuesta del backend no es OK, muestra un error

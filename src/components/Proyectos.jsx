@@ -6,6 +6,8 @@ import AdministracionProyectos from './proyectos/AdministracionProyecto';
 import API_BASE_URL from '../config';
 import { ProyectoProvider } from '../context/ProyectoContext'; // Asegúrate de que la ruta es correcta
 import ErrorBoundary from '../ErrorBoundary';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 const Proyectos = ({ token, selectedIds, onCameraChange, onSelectionChange, refViewer }) => {
     const [proyectoSeleccionado, setProyectoSeleccionado] = useState(null);
     const [proyectoKeySeleccionado, setProyectoKeySeleccionado] = useState(null);
@@ -37,7 +39,7 @@ const Proyectos = ({ token, selectedIds, onCameraChange, onSelectionChange, refV
         const tipoUsuario = localStorage.getItem('tipo'); 
         const esAdministrador = tipoUsuario === 'Administrador' || tipoUsuario === 'administrador';
         setAdministrador(esAdministrador);
-        console.log("tipo usuario",tipoUsuario);
+      //console.log("tipo usuario",tipoUsuario);
     }, []);
     
     useEffect(() => {
@@ -53,12 +55,12 @@ const Proyectos = ({ token, selectedIds, onCameraChange, onSelectionChange, refV
               body: JSON.stringify({ idUsuario: userId }) // Envía el ID del usuario en el cuerpo de la solicitud
             });
             const data = await response.json();
-            console.log("DATOS ASOCIADOS A USUARIO",data);
-            console.log(data[0]);
+          //console.log("DATOS ASOCIADOS A USUARIO",data);
+          //console.log(data[0]);
             setUrnSelected(data[0].urn); // Establecer el estado de urnSelected con la urn obtenida
             setProyectoKeySeleccionado(data[0].proyectoKey);
           } catch (error) {
-            console.log('Error al obtener el usuario-proyecto asignado:', error);
+          //console.log('Error al obtener el usuario-proyecto asignado:', error);
             toast.error('Error al obtener el usuario-proyecto asignado');
           }
          
@@ -69,7 +71,7 @@ const Proyectos = ({ token, selectedIds, onCameraChange, onSelectionChange, refV
       }, );
 
 
-    console.log(proyectoKeySelected);
+  //console.log(proyectoKeySelected);
     
     const handleProyectoSeleccionado = (proyectoKey, urn) => {
         setProyectoSeleccionado({ proyectoKey, urn });

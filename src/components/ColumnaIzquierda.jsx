@@ -26,9 +26,9 @@ const ColumnaIzquierda = ({ isCollapsed, handleCollapse }) => {
         
         const userId = localStorage.getItem('userId');
         const username = localStorage.getItem('username');
-        console.log("Token cargado:", tipo);
-        console.log("Token cargado:", userId);
-        console.log("Token cargado:", username);
+      //console.log("Token cargado:", tipo);
+      //console.log("Token cargado:", userId);
+      //console.log("Token cargado:", username);
         setTipoUsuario(tipo);
         const handleResize = () => {
             setIsMobile(window.innerWidth < 980);  // Actualiza el estado basado en el ancho de la ventana
@@ -44,7 +44,7 @@ const ColumnaIzquierda = ({ isCollapsed, handleCollapse }) => {
         try {
             const userId = localStorage.getItem('userId');
             const response = await axios.get(`${API_BASE_URL}/api/usuarios/${userId}`);
-            console.log("Usuario verificado:", response.data);
+          //console.log("Usuario verificado:", response.data);
         } catch (error) {
             logout();
             window.location.reload();

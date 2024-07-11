@@ -83,10 +83,10 @@ class Viewer extends React.Component {
                 this.calcularPesoYActualizarContexto(resultado_fierros.map(barra => barra.id));
                 this.context.actualizarResultadoFierros(resultado_fierros); // Actualiza con los objetos completos de las barras
                 this.context.actualizarSeleccionActual(seleccionActual);
-                console.log("Barras que intersectan con la selección:", resultado_fierros);
+              //console.log("Barras que intersectan con la selección:", resultado_fierros);
             } else {
                 toast.warn('No se encontraron barras que intersectan con la selección.');
-                console.log("No se encontraron barras que intersectan con la selección.");
+              //console.log("No se encontraron barras que intersectan con la selección.");
                 this.context.actualizarResultadoFierros([]);
                 this.context.actualizarSeleccionActual(seleccionActual);
                 this.viewer.isolate([]); // Limpia el aislamiento si no hay coincidencias
@@ -121,10 +121,10 @@ class Viewer extends React.Component {
                 if (prop.attributeName === nombreParametroPesoLineal && parseFloat(prop.displayValue) > 0) {
                      if (prop.units) {
                          if (prop.units.includes("kilograms") || prop.units.includes("kilos") || prop.units.includes("kilogramos")) {
-                           console.log("peso actual Kilos",prop.displayValue);
+                         //console.log("peso actual Kilos",prop.displayValue);
                             pesoActual = parseFloat(prop.displayValue); // No se necesita conversión
                          } else if (prop.units.includes("pounds") || prop.units.includes("libras")) {
-                            console.log("peso actual libras",prop.displayValue);
+                          //console.log("peso actual libras",prop.displayValue);
                              pesoActual = parseFloat(prop.displayValue) * 1.48816394; // libras x pie ==> kg por mtr
                          }
                      } else {
@@ -136,52 +136,52 @@ class Viewer extends React.Component {
                   
                     if (prop.units) {
                         if (prop.units.includes("autodesk.unit.unit:meters")) {
-                            console.log("tipo de unidad metros");
+                          //console.log("tipo de unidad metros");
                             largoActual = parseFloat(prop.displayValue) ; // *100 Convertir de metros a centímetros
                         } else if (prop.units.includes("feet-")) {
-                            console.log("encuentro pies");
-                            console.log("tipo de unidad pies");
+                          //console.log("encuentro pies");
+                          //console.log("tipo de unidad pies");
                             largoActual = parseFloat(prop.displayValue) * 30.48 *(0.01); // 
                         } else if (prop.units.includes("centimeters")) {
-                            console.log("tipo de unidad centimetros");
+                          //console.log("tipo de unidad centimetros");
                             largoActual = parseFloat(prop.displayValue) / 100; //
                         }
                         else if (prop.units.includes("millimeters")) {
-                            console.log("tipo de unidad milimetros");
+                          //console.log("tipo de unidad milimetros");
                             largoActual = parseFloat(prop.displayValue) /1000; //  milimetros a cm
                         }
                         else if (prop.units.includes("inches")) {
-                            console.log("tipo de unidad pulgadas");
-                            console.log("inches");
+                          //console.log("tipo de unidad pulgadas");
+                          //console.log("inches");
                             largoActual = parseFloat(prop.displayValue) *2.54 * (0.01); // 
                         }
                         else if (prop.units.includes("feetFractionalInches")) {
-                            console.log("tipo de unidad pies fraccionados pulgadas");
+                          //console.log("tipo de unidad pies fraccionados pulgadas");
                           
                             largoActual = parseFloat(prop.displayValue) *30.48 * (0.01); //
-                            console.log("feetFractionalInches",prop.displayValue);
-                            console.log("feetFractionalInches",largoActual);
+                          //console.log("feetFractionalInches",prop.displayValue);
+                          //console.log("feetFractionalInches",largoActual);
                         }
                         else if (prop.units.includes("fractionalInches")) {
-                            console.log("tipo de unidad  pulgadas fraccionadas");
+                          //console.log("tipo de unidad  pulgadas fraccionadas");
                            
                             largoActual = parseFloat(prop.displayValue) *2.54 * (0.01); //
-                            console.log(largoActual+"  "+prop.displayValue);
-                            console.log("fractionalInches actual",largoActual);
+                          //console.log(largoActual+"  "+prop.displayValue);
+                          //console.log("fractionalInches actual",largoActual);
                         }
                         else if (prop.units.includes("decimeters")) {
-                            console.log("tipo de unidad decimetros");
-                            console.log("decimeters");
+                          //console.log("tipo de unidad decimetros");
+                          //console.log("decimeters");
                             largoActual = parseFloat(prop.displayValue) *0.1 ; //
                         }
                         else if (prop.units.includes("metersCentimeters")) {
-                            console.log("tipo de unidad metros centimetros");
-                            console.log("metersCentimeters");
+                          //console.log("tipo de unidad metros centimetros");
+                          //console.log("metersCentimeters");
                             largoActual = (parseFloat(prop.displayValue)) /100 ; //
                         }
                         else if (prop.units.includes("usSurveyFeet")) {
-                            console.log("tipo de unidad US Survey pie");
-                            console.log("usSurveyFeet");
+                          //console.log("tipo de unidad US Survey pie");
+                          //console.log("usSurveyFeet");
                             largoActual = (parseFloat(prop.displayValue)) *30.48 *(0.01); //
                         }//
                     } else {
@@ -200,9 +200,9 @@ class Viewer extends React.Component {
             }
         });
     
-        console.log("Peso Total:", pesoTotal.toFixed(1));
-        console.log("Largo Total:", largoTotal.toFixed(1));
-        console.log("Total Barras:", totalBarras);
+      //console.log("Peso Total:", pesoTotal.toFixed(1));
+      //console.log("Largo Total:", largoTotal.toFixed(1));
+      //console.log("Total Barras:", totalBarras);
     
         // Actualizar el contexto con los nuevos valores
         this.context.updatePesoTotal(pesoTotal);
@@ -214,27 +214,27 @@ class Viewer extends React.Component {
  
     cargarConfiguracion = async () => {
          const url = `${API_BASE_URL}/api/configuracionViewer?urn=${encodeURIComponent(this.props.urn)}`;
-         console.log("URN CONSULTADA",this.props.urn);
+       //console.log("URN CONSULTADA",this.props.urn);
         try {
             const respuesta = await fetch(url);
            
             const resultado = await respuesta.json();
-            console.log("respuesta config",resultado);
+          //console.log("respuesta config",resultado);
             if (resultado.urn !== "") {
                // const { configuracion } = resultado;
-              //  console.log("RESULTADO CONFIG",configuracion);
+              ////console.log("RESULTADO CONFIG",configuracion);
                 // Actualiza el estado con el nombre del parámetro de fecha obtenido
                 this.setState({ nombreParametroFecha: resultado.variableTiempo || '' });
                 this.setState({ nombreParametroBarra: resultado.variableBarra|| '' });
                 this.setState({ nombreParametrolargo: resultado.variableLargo|| '' });
                 this.setState({ nombreParametroPesoLineal: resultado.variablePesoLineal|| '' });
                 this.setState({ nombreParametroDiametro: resultado.variableDiametro|| '' });
-                console.log("parametro fecha buscado");
-                console.log( resultado.variableBarra);
-                console.log(resultado.variableTiempo);
-                console.log( resultado.variablePesoLineal);
-                console.log(resultado.variableDiametro);
-                console.log(resultado.variableLargo);
+              //console.log("parametro fecha buscado");
+              //console.log( resultado.variableBarra);
+              //console.log(resultado.variableTiempo);
+              //console.log( resultado.variablePesoLineal);
+              //console.log(resultado.variableDiametro);
+              //console.log(resultado.variableLargo);
 
             } else {
                 console.error('Configuración no encontrada:', resultado.mensaje);
@@ -247,7 +247,7 @@ class Viewer extends React.Component {
     consultaFiltro = (filtros) => {
         return new Promise((resolve, reject) => {
             if (!this.viewer || !this.viewer.model) {
-                console.log("Error El modelo del visualizador no está cargado.");
+              //console.log("Error El modelo del visualizador no está cargado.");
                 resolve({});
             }
             this.viewer.model.getBulkProperties([], filtros, (result) => {
@@ -270,12 +270,12 @@ class Viewer extends React.Component {
                     }
                     // Más lógica de procesamiento si es necesario
                 });
-                console.log("Resultado obtenido:");
-                console.log(data); // Muestra el resultado por consola
+              //console.log("Resultado obtenido:");
+              //console.log(data); // Muestra el resultado por consola
                 resolve(data);
                 resolve(data);
             }, (error) => {
-                console.log(error);
+              //console.log(error);
               
                 resolve({}); 
                 return;
@@ -285,7 +285,7 @@ class Viewer extends React.Component {
     obtenerIdsBarras = async () => {
         return new Promise(async (resolve, reject) => {
             if (!this.viewer || !this.viewer.model) {
-                console.log("El modelo del visualizador no está cargado.");
+              //console.log("El modelo del visualizador no está cargado.");
                 resolve({}); 
                 return;;
             }
@@ -313,9 +313,9 @@ class Viewer extends React.Component {
                             pesoLineal = parseFloat(propPeso.displayValue || '0');
                             if (propPeso.units) {
                                 if (propPeso.units.includes("kilograms") || propPeso.units.includes("kilos") || propPeso.units.includes("kilogramos")) {
-                                    console.log("Peso actual Kilos", propPeso.displayValue);
+                                  //console.log("Peso actual Kilos", propPeso.displayValue);
                                 } else if (propPeso.units.includes("pounds") || propPeso.units.includes("libras")) {
-                                    console.log("Peso actual libras", propPeso.displayValue);
+                                  //console.log("Peso actual libras", propPeso.displayValue);
                                     pesoLineal = pesoLineal * 0.453592; // Convertir de libras a kilogramos
                                 }
                             }
@@ -352,7 +352,7 @@ class Viewer extends React.Component {
     
                     // Guarda los resultados en el estado o maneja como prefieras
                     this.setState({ idsBarras });
-                    console.log("estas son las barras",idsBarras);
+                  //console.log("estas son las barras",idsBarras);
                     // Resolver la promesa con los IDs de barras encontrados
                     resolve(idsBarras);
                 });
@@ -369,11 +369,11 @@ class Viewer extends React.Component {
 
     obtenerFiltros = async (urnBuscada) => {
         try {
-            console.log("URN antes de AXIOS:", urnBuscada);
+          //console.log("URN antes de AXIOS:", urnBuscada);
            // const response = await axios.get(`${API_BASE_URL}/api/filtros`);
            //api/configuracionViewer  const url = `${API_BASE_URL}/api/configuracionViewer?urn=${encodeURIComponent(this.props.urn)}`;
            const response = await axios.get(`${API_BASE_URL}/api/configuracionViewer?urn=${encodeURIComponent(this.props.urn)}`);
-           console.log("Respuesta Filtros:", response.data);
+         //console.log("Respuesta Filtros:", response.data);
     
             const filtrado1 = response.data.filtro01;
             const filtrado2 = response.data.filtro02;
@@ -381,7 +381,7 @@ class Viewer extends React.Component {
             // Actualiza el estado con los nuevos filtros y fierros.
             await this.setStateAsync({ filtro1: filtrado1, filtro2: filtrado2, fierros: response.data.variableBarra });
     
-            console.log("Filtros actualizados en el estado:", filtrado1, filtrado2);
+          //console.log("Filtros actualizados en el estado:", filtrado1, filtrado2);
     
             // Consulta de filtros después de actualizar el estado
             const datosFiltro1 = await this.consultaFiltro([filtrado1]);
@@ -390,8 +390,8 @@ class Viewer extends React.Component {
             this.context.updateDatosFiltro1(datosFiltro1);
             this.context.updateDatosFiltro2(datosFiltro2);
     
-            console.log("filtro datos 1", datosFiltro1);
-            console.log("filtro datos 2", datosFiltro2);
+          //console.log("filtro datos 1", datosFiltro1);
+          //console.log("filtro datos 2", datosFiltro2);
         } catch (error) {
             console.error("Error en obtenerFiltros:", error);
            // throw error;  
@@ -447,7 +447,7 @@ class Viewer extends React.Component {
     setupViewer = () => {
         this.viewer = new Autodesk.Viewing.GuiViewer3D(this.container.current, { extensions: ['Autodesk.DocumentBrowser', 'HandleSelectionExtension'] });
         this.viewer.start();
-        console.log("iniciar!!!");
+      //console.log("iniciar!!!");
         this.viewer.loadExtension('FiltrosVisuales');
         this.viewer.loadExtension('HandleSelectionExtension');
         this.viewer.addEventListener(Autodesk.Viewing.GEOMETRY_LOADED_EVENT, this.onModelLoaded);
@@ -464,7 +464,7 @@ class Viewer extends React.Component {
         await this.obtenerFiltros(this.props.urn).then(async () => {
             try {
                 const idsBarras = await this.obtenerIdsBarras();
-                console.log("IDs de barras obtenidos:", idsBarras);
+              //console.log("IDs de barras obtenidos:", idsBarras);
             } catch (error) {
                 console.error("Error al obtener IDs de barras:", error);
             }
@@ -494,14 +494,14 @@ class Viewer extends React.Component {
         if (this.viewer) {
             // Elimina todos los colores temáticos aplicados en el visor
             this.viewer.clearThemingColors(this.viewer.model);
-            console.log("Colores restaurados a su estado original.");
+          //console.log("Colores restaurados a su estado original.");
         } else {
             console.error("El visor no está inicializado.");
         }
     };
     pintarIdFecha = async () => {
         await this.obtenerIdsConFecha();
-        console.log("previo a pintar", this.state.idsConFecha);
+      //console.log("previo a pintar", this.state.idsConFecha);
     
         this.state.idsConFecha.forEach(objeto => {
             let color;
@@ -550,7 +550,7 @@ class Viewer extends React.Component {
 
     cleanModel =() =>{
         if (this.viewer) {
-            console.log("limpio visor");
+          //console.log("limpio visor");
             this.viewer.isolate([]);
             this.props.guardarIdentificadores([]);
             this.viewer.fitToView(this.viewer.model);
@@ -563,10 +563,10 @@ class Viewer extends React.Component {
     filtrar =  async (identificadores) => {
        this.viewer.isolate(identificadores);
        const {  nombreParametroPesoLineal, nombreParametrolargo} = this.state;
-       console.log("Muestro ids filtrar",identificadores);
+     //console.log("Muestro ids filtrar",identificadores);
        const { fierros } = this.state;
 
-       console.log("Valor de fierros:", fierros);
+     //console.log("Valor de fierros:", fierros);
 
        let pesoTotal = 0;
        let largoTotal = 0;
@@ -587,10 +587,10 @@ class Viewer extends React.Component {
                if (prop.attributeName === nombreParametroPesoLineal && parseFloat(prop.displayValue) > 0) {
                     if (prop.units) {
                         if (prop.units.includes("kilograms") || prop.units.includes("kilos") || prop.units.includes("kilogramos")) {
-                            console.log("peso actual Kilos",prop.displayValue);
+                          //console.log("peso actual Kilos",prop.displayValue);
                             pesoActual = parseFloat(prop.displayValue); // No se necesita conversión
                         } else if (prop.units.includes("pounds") || prop.units.includes("libras")) {
-                            console.log("peso actual libras",prop.displayValue);
+                          //console.log("peso actual libras",prop.displayValue);
                             pesoActual = parseFloat(prop.displayValue) * 1.48816394; // libras x pie ==> kg por mtr
                         }
                     } else {
@@ -602,52 +602,52 @@ class Viewer extends React.Component {
                  
                     if (prop.units) {
                         if (prop.units.includes("autodesk.unit.unit:meters")) {
-                            console.log("tipo de unidad metros");
+                          //console.log("tipo de unidad metros");
                             largoActual = parseFloat(prop.displayValue) ; // *100 Convertir de metros a centímetros
                         } else if (prop.units.includes("feet-")) {
-                            console.log("encuentro pies");
-                            console.log("tipo de unidad pies");
+                          //console.log("encuentro pies");
+                          //console.log("tipo de unidad pies");
                             largoActual = parseFloat(prop.displayValue) * 30.48 *(0.01); // 
                         } else if (prop.units.includes("centimeters")) {
-                            console.log("tipo de unidad centimetros");
+                          //console.log("tipo de unidad centimetros");
                             largoActual = parseFloat(prop.displayValue) / 100; //
                         }
                         else if (prop.units.includes("millimeters")) {
-                            console.log("tipo de unidad milimetros");
+                          //console.log("tipo de unidad milimetros");
                             largoActual = parseFloat(prop.displayValue) /1000; //  milimetros a cm
                         }
                         else if (prop.units.includes("inches")) {
-                            console.log("tipo de unidad pulgadas");
-                            console.log("inches");
+                          //console.log("tipo de unidad pulgadas");
+                          //console.log("inches");
                             largoActual = parseFloat(prop.displayValue) *2.54 * (0.01); // 
                         }
                         else if (prop.units.includes("feetFractionalInches")) {
-                            console.log("tipo de unidad pies fraccionados pulgadas");
+                          //console.log("tipo de unidad pies fraccionados pulgadas");
                           
                             largoActual = parseFloat(prop.displayValue) *30.48 * (0.01); //
-                            console.log("feetFractionalInches",prop.displayValue);
-                            console.log("feetFractionalInches",largoActual);
+                          //console.log("feetFractionalInches",prop.displayValue);
+                          //console.log("feetFractionalInches",largoActual);
                         }
                         else if (prop.units.includes("fractionalInches")) {
-                            console.log("tipo de unidad  pulgadas fraccionadas");
+                          //console.log("tipo de unidad  pulgadas fraccionadas");
                            
                             largoActual = parseFloat(prop.displayValue) *2.54 * (0.01); //
-                            console.log(largoActual+"  "+prop.displayValue);
-                            console.log("fractionalInches actual",largoActual);
+                          //console.log(largoActual+"  "+prop.displayValue);
+                          //console.log("fractionalInches actual",largoActual);
                         }
                         else if (prop.units.includes("decimeters")) {
-                            console.log("tipo de unidad decimetros");
-                            console.log("decimeters");
+                          //console.log("tipo de unidad decimetros");
+                          //console.log("decimeters");
                             largoActual = parseFloat(prop.displayValue) *0.1 ; //
                         }
                         else if (prop.units.includes("metersCentimeters")) {
-                            console.log("tipo de unidad metros centimetros");
-                            console.log("metersCentimeters");
+                          //console.log("tipo de unidad metros centimetros");
+                          //console.log("metersCentimeters");
                             largoActual = (parseFloat(prop.displayValue)) /100 ; //
                         }
                         else if (prop.units.includes("usSurveyFeet")) {
-                            console.log("tipo de unidad US Survey pie");
-                            console.log("usSurveyFeet");
+                          //console.log("tipo de unidad US Survey pie");
+                          //console.log("usSurveyFeet");
                             largoActual = (parseFloat(prop.displayValue)) *30.48006096 *(0.01); //
                         }//
                     } else {
@@ -670,9 +670,9 @@ class Viewer extends React.Component {
            }
        });
    
-        console.log("Peso Total:", pesoTotal.toFixed(1));
-        console.log("Largo Total:", largoTotal.toFixed(1));
-        console.log("Total Barras:", totalBarras);
+      //console.log("Peso Total:", pesoTotal.toFixed(1));
+      //console.log("Largo Total:", largoTotal.toFixed(1));
+      //console.log("Total Barras:", totalBarras);
         this.context.updatePesoTotal(pesoTotal);
         this.context.updateLargoTotal(largoTotal);
         this.context.updateTotalBarras(totalBarras);
@@ -729,11 +729,11 @@ class Viewer extends React.Component {
                         }
                     });
     
-                    console.log("Objetos con fecha y datos:", objetosConFecha);
-                    console.log("Objetos sin fecha:", objetosSinFecha);
+                  //console.log("Objetos con fecha y datos:", objetosConFecha);
+                  //console.log("Objetos sin fecha:", objetosSinFecha);
                     // Usa setState y resuelve la promesa en el callback de setState para asegurar que se espera la actualización
                     this.setState({ idsConFecha: objetosConFecha, idsSinFecha: objetosSinFecha }, () => {
-                        console.log("Actualización de estado completa");
+                      //console.log("Actualización de estado completa");
                         resolve(); // Resuelve la promesa una vez que el estado se haya actualizado
                     });
                 });
@@ -751,7 +751,7 @@ class Viewer extends React.Component {
     obtenerIdsSinFecha = async () => {
         return new Promise((resolve, reject) => {
             if (!this.viewer || !this.viewer.model) {
-                console.log("El modelo del visualizador no está cargado.");
+              //console.log("El modelo del visualizador no está cargado.");
                 resolve({}); 
                 return;
             }
@@ -771,10 +771,10 @@ class Viewer extends React.Component {
                     });
                 }
     
-                console.log("IDS SIN FECHA:", idsSinFecha);
+              //console.log("IDS SIN FECHA:", idsSinFecha);
                 resolve(idsSinFecha);
             }, (error) => {
-                console.log("error",error);
+              //console.log("error",error);
                 resolve({}); 
                 return;
             });
@@ -822,16 +822,16 @@ class Viewer extends React.Component {
         const dbId = event.dbIdArray[0]; // Obtiene el primer elemento seleccionado
         const seleccionActual = this.viewer.getSelection();
         this.context.actualizarSeleccionActual(seleccionActual);
-        console.log("SELECCIONO ELEMENTO");
-        console.log(nombreParametroPesoLineal,  nombreParametrolargo);
-        console.log(event.dbIdArray);
-        console.log(seleccionActual);
+      //console.log("SELECCIONO ELEMENTO");
+      //console.log(nombreParametroPesoLineal,  nombreParametrolargo);
+      //console.log(event.dbIdArray);
+      //console.log(seleccionActual);
         if (this.state.procesandoSeleccion) {
             return;
           }
       
         if ( seleccionActual.length ==0) {
-            console.log("No hay selección");
+          //console.log("No hay selección");
             this.context.actualizarResultadoFierros([]);
             this.context.updateSelectedObjectProps([]);
             return; // Sale de la función si no hay nada seleccionado
@@ -840,7 +840,7 @@ class Viewer extends React.Component {
           
       
             viewer.getProperties(dbId, (data) => {
-               console.log("data seleccion", data);
+             //console.log("data seleccion", data);
                const convertirYRedondear = (valor, factor) => {
                 return parseFloat((valor * factor).toFixed(2));
               };
@@ -868,7 +868,7 @@ class Viewer extends React.Component {
                         } else if (prop.units.includes("millimeters")) {
                             conversionFactor = 0.1;
                         } else if (prop.units.includes("inches")) {
-                            console.log("ENCUENTRO EN VISUALIZADOR INCHES FRACC");
+                          //console.log("ENCUENTRO EN VISUALIZADOR INCHES FRACC");
                             conversionFactor = 2.54
                         } else if (prop.units.includes("decimeters")) {
                             conversionFactor = 10;
@@ -887,7 +887,7 @@ class Viewer extends React.Component {
                     }
                 });
                 this.context.updateSelectedObjectProps(data);
-               console.log("elemento seleccionado",data);
+             //console.log("elemento seleccionado",data);
             }, (error) => {
                 console.error("Error al obtener propiedades del elemento seleccionado:", error);
             });

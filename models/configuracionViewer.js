@@ -10,7 +10,8 @@ const configuracionViewerSchema = new mongoose.Schema({
   variableLargo:String,
   variablePesoLineal:String,
   variableDiametro:String,
-  variableNivel:String
+  variableNivel:String,
+  propiedades: [String] 
 });
 
 // Crear el modelo a partir del esquema definido

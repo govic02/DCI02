@@ -40,8 +40,8 @@ const Perfil = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) => {
             });
             const data = await response.json();
             setUrnSelected(data.urn);
-            console.log("URN BUSCADA DESDE ESTADITICAS GENERAL",data.urn);
-            console.log("URN BUSCADA DESDE ESTADITICAS GENERAL",data.proyectoKey);
+          //console.log("URN BUSCADA DESDE ESTADITICAS GENERAL",data.urn);
+          //console.log("URN BUSCADA DESDE ESTADITICAS GENERAL",data.proyectoKey);
             setProyectoKeySeleccionado(data.proyectoKey);
         } catch (error) {
            // console.error('Error al obtener el usuario-proyecto asignado:', error);

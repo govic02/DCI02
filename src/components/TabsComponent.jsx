@@ -57,10 +57,11 @@ const TabComponent = ({ urnBuscada }) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const userId = localStorage.getItem('userId');
     const { logout } = useAuth();
+    const [tokenVar, setToken] = useState(null);
     const handleOpenModalWithInfo = async (pedido) => {
         setPedidoActual(pedido);
         setModalInfo({ show: true, data: pedido });
-        console.log("pedido a mostrar", pedido);
+      //console.log("pedido a mostrar", pedido);
         await cargarAdicionales(pedido._id); // Llama a cargarAdicionales aquí
     };
     const permisos = {
@@ -71,7 +72,7 @@ const TabComponent = ({ urnBuscada }) => {
         Invitado: []
     };
     const handleNextStateClick = () => {
-        console.log("AQUIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII");
+      //console.log("AQUIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII");
         revisionPermisos ();
        
     };
@@ -79,7 +80,7 @@ const TabComponent = ({ urnBuscada }) => {
         try {
             const userId = localStorage.getItem('userId');
             const response = await axios.get(`${API_BASE_URL}/api/usuarios/${userId}`);
-            console.log("Usuario verificado:", response.data);
+          //console.log("Usuario verificado:", response.data);
         } catch (error) {
             logout();
             window.location.reload();
@@ -94,7 +95,7 @@ const TabComponent = ({ urnBuscada }) => {
         try {
             verificarUsuario();
             const respuesta = await fetch(`${API_BASE_URL}/api/usuariosProyectoAsignado/${encodeURIComponent(urnBuscada)}`);
-            console.log("inicio revisión");
+          //console.log("inicio revisión");
             if (!respuesta.ok) {
                 throw new Error('Error al obtener usuarios asignados');
             }
@@ -110,7 +111,7 @@ const TabComponent = ({ urnBuscada }) => {
             }
     
             // Mostrar por consola el tipo de usuario
-            console.log("Tipo de usuario asignado:", usuarioAsignado.tipoUsuario);
+          //console.log("Tipo de usuario asignado:", usuarioAsignado.tipoUsuario);
             if(usuarioAsignado.tipoUsuario != "" && usuarioAsignado.tipoUsuario != undefined){
                 // aqui debe buscar  segun el tipo de usuario  si es posible hacer el cambio o no
                 const tipoUsuario = usuarioAsignado.tipoUsuario;
@@ -126,23 +127,23 @@ const TabComponent = ({ urnBuscada }) => {
                     }
                 }
             
-                console.log("Estado actual:", estadoActualIndex);
+              //console.log("Estado actual:", estadoActualIndex);
             
                 // Determina el próximo estado si no es el último
                 let nuevoEstado = 'paquetizado'; // Estado inicial por defecto si no hay ningún estado actual
                 if (estadoActualIndex !== -1 && estadoActualIndex < estados.length - 1) {
                     nuevoEstado = estados[estadoActualIndex + 1];
-                    console.log("estado nuevo",nuevoEstado);
+                  //console.log("estado nuevo",nuevoEstado);
                     setShowConfirmChange(true); // Muestra la confirmación
                 } else if (estadoActualIndex === estados.length - 1) {
-                    console.log("Ya está en el último estado posible.");
+                  //console.log("Ya está en el último estado posible.");
                     toast.info("Ya está en el último estado posible.");
                     return; // Retorna aquí si ya está en el último estado
                 }
                 
 
                 if (nuevoEstado && permisosUsuario.includes(nuevoEstado)) {
-                    console.log(` El usuario puede cambiar al estado '${nuevoEstado}'.`);
+                  //console.log(` El usuario puede cambiar al estado '${nuevoEstado}'.`);
                     setShowConfirmChange(true); // Muestra la confirmación
                 } else {
                     toast.error(` No tiene permisos para cambiar al estado '${nuevoEstado}'.`);
@@ -172,14 +173,14 @@ const TabComponent = ({ urnBuscada }) => {
             }
         }
     
-        console.log("Estado actual:", estadoActualIndex);
+      //console.log("Estado actual:", estadoActualIndex);
     
         // Determina el próximo estado si no es el último
         let nuevoEstado = 'paquetizado'; // Estado inicial por defecto si no hay ningún estado actual
         if (estadoActualIndex !== -1 && estadoActualIndex < estados.length - 1) {
             nuevoEstado = estados[estadoActualIndex + 1];
         } else if (estadoActualIndex === estados.length - 1) {
-            console.log("Ya está en el último estado posible.");
+          //console.log("Ya está en el último estado posible.");
             return; // Retorna aquí si ya está en el último estado
         }
     
@@ -223,6 +224,7 @@ const TabComponent = ({ urnBuscada }) => {
     
     
     const handleApplyFilterClick = () => {
+         fetchFilters();
         verificarUsuario();
         if (filtrar) {
 
@@ -245,8 +247,8 @@ const TabComponent = ({ urnBuscada }) => {
             });
 
             // Mostrar por consola los idsFiltrados separados por categoría
-            console.log("dbIds filtrados por ParticionHA:", idsFiltradosParticionHA);
-            console.log("dbIds filtrados por Piso:", idsFiltradosPiso);
+          //console.log("dbIds filtrados por ParticionHA:", idsFiltradosParticionHA);
+          //console.log("dbIds filtrados por Piso:", idsFiltradosPiso);
             if( idsFiltradosPiso.length ==0 && idsFiltradosParticionHA.length>0){
                 filtrar(idsFiltradosParticionHA);
                 setSelectedIds(idsFiltradosParticionHA);
@@ -262,7 +264,7 @@ const TabComponent = ({ urnBuscada }) => {
                 let idsRepetidos = idsFiltradosParticionHA.filter(id => idsFiltradosPiso.includes(id));
 
                 // Mostrar por consola los ids que se repiten en ambos
-                console.log("dbIds repetidos en ambos:", idsRepetidos);
+              //console.log("dbIds repetidos en ambos:", idsRepetidos);
 
                 // Si necesitas utilizar la función filtrar para aplicar estos filtros visualmente, hazlo aquí:
                 // Por ejemplo, podrías querer filtrar visualmente solo los ids que se repiten
@@ -301,10 +303,10 @@ const TabComponent = ({ urnBuscada }) => {
         }
       
         try {
-            console.log("Datos que se deben enviar");
-            console.log(adicional);
-            console.log(modalInfo.data._id);
-            console.log(modalInfo);
+          //console.log("Datos que se deben enviar");
+          //console.log(adicional);
+          //console.log(modalInfo.data._id);
+          //console.log(modalInfo);
           // Envía el adicional al servidor, asumiendo que modalInfo.data._id es el ID del pedido actual
           await axios.post(API_BASE_URL+`/api/adicionalesPedido`, { ...adicional, pedidoId: modalInfo.data._id , urn:urnBuscada});
       
@@ -330,10 +332,10 @@ const TabComponent = ({ urnBuscada }) => {
                 const url = API_BASE_URL+`/api/listPedidos?urn=${urn}`;
               
                 const response = await axios.get(url);
-                console.log("lista pedidos",response);
+              //console.log("lista pedidos",response);
                 if (response.status === 200) {
-                    console.log("PEDIDOS SERVER");
-                    console.log(response.data);
+                  //console.log("PEDIDOS SERVER");
+                  //console.log(response.data);
                     setPedidos(response.data);
                 }
             } catch (error) {
@@ -345,14 +347,14 @@ const TabComponent = ({ urnBuscada }) => {
     }, [urnBuscada]); // Agrega urnBuscada a las dependencias de useEffect si es una prop o un estado
     const handleDeleteConfirmation = async (pedido) => {
         verificarUsuario();
-        console.log("pedido borrar antes");
-        console.log(pedido);
+      //console.log("pedido borrar antes");
+      //console.log(pedido);
         const isConfirmed = window.confirm("En verdad desea borrar "+pedido.nombre_pedido);
         if (isConfirmed) {
             try {
                 // Reemplaza 'tu-api-url' con la URL base de tu API
                 const response = await axios.delete(API_BASE_URL+'/api/eliminarPedido', { data: { id: pedido._id } });
-                console.log(response.data.mensaje);
+              //console.log(response.data.mensaje);
                 setModalInfo({ show: false, data: pedido });
                 fetchPedidosAct();
                 // Actualiza tu vista o estado aquí para reflejar que el pedido fue eliminado
@@ -365,7 +367,7 @@ const TabComponent = ({ urnBuscada }) => {
         // Si el usuario selecciona "No", simplemente se cierra la alerta y no se hace nada más.
     };
     useEffect(() => {
-        console.log(`Peso Total Desde Tab: ${pesoTotal}, Largo Total: ${largoTotal}, Total Barras: ${totalBarras}`);
+      //console.log(`Peso Total Desde Tab: ${pesoTotal}, Largo Total: ${largoTotal}, Total Barras: ${totalBarras}`);
     }, [pesoTotal, largoTotal, totalBarras]); // Dependencias para reaccionar a sus cambios
     const handCleanClick = () => {
         cleanModel();
@@ -384,8 +386,8 @@ const TabComponent = ({ urnBuscada }) => {
             
             const response = await axios.get(url);
             if (response.status === 200) {
-                console.log("PEDIDOS SERVER");
-                console.log(response.data);
+              //console.log("PEDIDOS SERVER");
+              //console.log(response.data);
                 setPedidos(response.data);
             }else{ setPedidos([]);}
         } catch (error) {
@@ -394,14 +396,14 @@ const TabComponent = ({ urnBuscada }) => {
     };
     const viewPedido = (ids) => {
         const idsInt = ids.map(id => parseInt(id, 10)); // Convierte cada elemento a entero
-        console.log("IDs del pedido:", idsInt);
+      //console.log("IDs del pedido:", idsInt);
         filtrar(idsInt);
         setSelectedIds(idsInt);
       };
       
     useEffect(() => {
         if (datosFiltro1) {
-               console.log("Datos Filtro1 desde Tabs:", datosFiltro1);
+             //console.log("Datos Filtro1 desde Tabs:", datosFiltro1);
              const opciones1 = Object.keys(datosFiltro1).map(key => ({
                 value: key,
                 label: key,
@@ -412,7 +414,7 @@ const TabComponent = ({ urnBuscada }) => {
         
 
         if (datosFiltro2) {
-            console.log("Datos Filtro2 desde Tabs:", datosFiltro2);
+          //console.log("Datos Filtro2 desde Tabs:", datosFiltro2);
           const opciones2 = Object.keys(datosFiltro2).map(key => ({
              value: key,
              label: key,
@@ -427,12 +429,12 @@ const TabComponent = ({ urnBuscada }) => {
         const fetchFiltros = async () => {
             try {
                 verificarUsuario();
-                console.log(urnBuscada);
+              //console.log(urnBuscada);
                 
                 if (urnBuscada) {
                     const response = await axios.get(API_BASE_URL+`/api/filtrosPorUrn/${urnBuscada}`);
-                    console.log("Respuesta Filtros");
-                    console.log(response.data);
+                  //console.log("Respuesta Filtros");
+                  //console.log(response.data);
                   
                     const filtros = response.data;
                     if (filtros.length >= 2) {
@@ -485,7 +487,7 @@ const TabComponent = ({ urnBuscada }) => {
         });
     
         if (idsRepetidos.length > 0) {
-            console.log("IDs repetidos encontrados:", idsRepetidos);
+          //console.log("IDs repetidos encontrados:", idsRepetidos);
             const nombresPedidos = Array.from(pedidosConRepetidos).join(", "); // Convertimos el Set a Array y lo unimos en una cadena
             toast.error(`Hay elementos repetidos en los siguientes pedidos: ${nombresPedidos}`);
             viewPedido(idsRepetidos); // Visualiza los IDs repetidos
@@ -501,11 +503,11 @@ const TabComponent = ({ urnBuscada }) => {
     const fetchBarDetails = async (pedido) => {
         try {
             verificarUsuario();
-            console.log("datos para consulta ",urnBuscada );
-            console.log("datos para consulta ",pedido );
+          //console.log("datos para consulta ",urnBuscada );
+          //console.log("datos para consulta ",pedido );
             const url = `${API_BASE_URL}/api/barrasPorUrneIds/${urnBuscada}`;
             const response = await axios.post(url, { ids: pedido.ids });
-            console.log("respuesta datos  barra detalles",response.data)
+          //console.log("respuesta datos  barra detalles",response.data)
             if (response.status === 200) {
                 return response.data;
             } else {
@@ -542,7 +544,7 @@ const TabComponent = ({ urnBuscada }) => {
 
         
         if (!pedidoNombre.trim()) {
-            console.log("sin nombre");
+          //console.log("sin nombre");
             toast.error("Debe agregar un nombre al pedido");
             return;
         }
@@ -550,12 +552,12 @@ const TabComponent = ({ urnBuscada }) => {
             return;
         }
         setIsSubmitting(true); 
-        console.log("Nombre del pedido:", pedidoNombre);
+      //console.log("Nombre del pedido:", pedidoNombre);
         // Suponiendo que tienes un estado o una forma de obtener los IDs seleccionados, 
         // aquí es donde mostrarías esos IDs. 
         // A modo de ejemplo, usaré un estado ficticio llamado selectedIds para esta demostración:
        
-        console.log("Lista de IDs seleccionados:", selectedIds);
+      //console.log("Lista de IDs seleccionados:", selectedIds);
         const datosPedido = {
             ids: selectedIds,
             fecha: new Date().toISOString().slice(0, 10), // Fecha actual en formato YYYY-MM-DD
@@ -572,7 +574,7 @@ const TabComponent = ({ urnBuscada }) => {
             const respuesta = await axios.post(API_BASE_URL+'/api/pedido', datosPedido);
 
             if (respuesta.status === 201) {
-                console.log("Pedido creado exitosamente", respuesta.data);
+              //console.log("Pedido creado exitosamente", respuesta.data);
                 toast.success("Pedido creado exitosamente");
                 // Cerrar el modal y limpiar el formulario
                 handleCloseModal();
@@ -581,7 +583,7 @@ const TabComponent = ({ urnBuscada }) => {
                 fetchPedidosAct();
                 let email = localStorage.getItem('username');
                 const detalles = await fetchBarDetails(respuesta.data.pedido); // Obtiene los detalles de las barras del pedido
-                console.log("Barras de pedido con detalles", detalles);
+              //console.log("Barras de pedido con detalles", detalles);
         
                 // Agrega detalles adicionales para la generación del archivo CSV
                 const pedidoInfo = {
@@ -698,6 +700,53 @@ const TabComponent = ({ urnBuscada }) => {
 
         verificarUsuarioYAsignaciones();
     }, [modalInfo.data._id]);
+
+
+     useEffect(() => {
+        const fetchToken = async () => {
+          try {
+            
+            const response = await fetch(`${API_BASE_URL}/api/gettoken`);
+            const data = await response.json();
+            setToken(data.token);
+          //console.log("Ok token");
+          } catch (error) {
+            console.error('Error al obtener el token:', error);
+          }
+        };
+    
+        fetchToken();
+      }, []);
+
+      useEffect(() => {
+        fetchFilters();
+    }, [urnBuscada]);
+      const fetchFilters = async () => {
+        if (tokenVar) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/bucketsProyectos`, {
+                    headers: {
+                        Authorization: `${tokenVar}`
+                    }
+                });
+                const data = await response.json();
+              //console.log(data);
+                if (data.length > 0) {
+                  var data1 = data.sort((a, b) => a.objectKey.localeCompare(b.objectKey));
+                  //console.log("listado de proyectos:", data1);
+                    const proyectoEncontrado = data1.find(proyecto => proyecto.urn === urnBuscada);
+                    if(!proyectoEncontrado){
+                        alert("El proyecto fue borrado, cualquier cambio que realice no será guardado permanentemente");
+                    }
+                   
+              }
+    
+            //  setProyectos(data); // Establece los proyectos ordenados en el estado
+            } catch (error) {
+                console.error('Error al buscar los filtros:', error);
+            }
+        }
+    };
     const buttonStyle = {
         marginRight: '5px', 
         fontSize: '8pt', // ajustado a 8pt según tu requerimiento

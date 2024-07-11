@@ -25,7 +25,7 @@ const AdministracionProyecto = (proyectoKey,urn) => {
 
 
       const handleReorder = (newOrder) => {
-        console.log('Nuevo orden de proyectos:', newOrder);
+      //console.log('Nuevo orden de proyectos:', newOrder);
         setNiveles(newOrder);
       };
     const onSelect = (k) => {
@@ -119,7 +119,7 @@ const AdministracionProyecto = (proyectoKey,urn) => {
       
     
         try {
-            console.log('Iniciando la transferencia de datos del modelo...');
+          //console.log('Iniciando la transferencia de datos del modelo...');
             toast.info("Iniciando la transferencia de datos...");
             // Llamada a la API para transferir pedidos
             const responsePedidos = await fetch(`${API_BASE_URL}/api/transfierePedido`, {
@@ -134,7 +134,7 @@ const AdministracionProyecto = (proyectoKey,urn) => {
             });
     
             const dataPedidos = await responsePedidos.json();
-            console.log('Respuesta de transferencia de pedidos:', dataPedidos);
+          //console.log('Respuesta de transferencia de pedidos:', dataPedidos);
             toast.success("Pedidos  Transferidos.");
             // Llamada a la API para transferir adicionales de pedidos
             const responseAdicionales = await fetch(`${API_BASE_URL}/api/transfiereAdicionalesPedidos`, {
@@ -149,7 +149,7 @@ const AdministracionProyecto = (proyectoKey,urn) => {
             });
     
             const dataAdicionales = await responseAdicionales.json();
-            console.log('Respuesta de transferencia de adicionales de pedidos:', dataAdicionales);
+          //console.log('Respuesta de transferencia de adicionales de pedidos:', dataAdicionales);
             toast.success("Pedidos Adicionales Transferidos.");
             // Notificar al usuario que la transferencia fue exitosa
 
@@ -166,7 +166,7 @@ const AdministracionProyecto = (proyectoKey,urn) => {
             });
     
             const dataVistas = await responseVistas.json();
-            console.log('Respuesta de transferencia de vistas guardadas:', dataVistas);
+          //console.log('Respuesta de transferencia de vistas guardadas:', dataVistas);
             toast.success("Vistas Guardadas Transferidas.");
             const responseObjectProyectoPlan = await fetch(`${API_BASE_URL}/api/transfiereObjetoProyectoPlan`, {
                 method: 'POST',
@@ -180,7 +180,7 @@ const AdministracionProyecto = (proyectoKey,urn) => {
             });
     
             const dataObjetoProyectoPlan = await responseObjectProyectoPlan.json();
-            console.log('Respuesta de transferencia de objeto proyecto plan:', dataObjetoProyectoPlan);
+          //console.log('Respuesta de transferencia de objeto proyecto plan:', dataObjetoProyectoPlan);
             toast.success("Objetos de Proyecto Plan Transferidos.");
 
             const responseUsuarioProyectoPerfil = await fetch(`${API_BASE_URL}/api/transferirUsuarioProyectoPerfil`, {
@@ -193,7 +193,7 @@ const AdministracionProyecto = (proyectoKey,urn) => {
             });
     
             const dataUsuarioProyectoPerfil = await responseUsuarioProyectoPerfil.json();
-            console.log('Respuesta de transferencia de usuario proyecto perfil:', dataUsuarioProyectoPerfil);
+          //console.log('Respuesta de transferencia de usuario proyecto perfil:', dataUsuarioProyectoPerfil);
             if(dataUsuarioProyectoPerfil.message) {
                 toast.success(dataUsuarioProyectoPerfil.message);
             }
@@ -212,7 +212,7 @@ const AdministracionProyecto = (proyectoKey,urn) => {
             const usuarios = await respuesta.json();
             
             const usuariosNoAdmin = usuarios //.filter(usuario => usuario.tipoUsuario.toLowerCase() !== "administrador");
-            console.log("listado de usuarios",usuariosNoAdmin);
+          //console.log("listado de usuarios",usuariosNoAdmin);
             setUsuariosNoAdmin(usuariosNoAdmin);
     
             // Establece el usuario seleccionado inicialmente al primer usuario no administrador
@@ -230,27 +230,27 @@ const AdministracionProyecto = (proyectoKey,urn) => {
     const obtenerUsuariosAsignados = async () => {
         try {
             const respuesta = await fetch(`${API_BASE_URL}/api/usuariosProyectoAsignado/${encodeURIComponent(proyectoKey.urn)}`);
-            console.log("Respuesta usuarios urn" + proyectoKey.urn, respuesta);
+          //console.log("Respuesta usuarios urn" + proyectoKey.urn, respuesta);
             if (!respuesta.ok) {
                 throw new Error('Error al obtener usuarios asignados');
             }
     
             const usuariosAsignadosRespuesta = await respuesta.json();
-            console.log("Respuesta usuarios urn asignados", usuariosAsignadosRespuesta);
+          //console.log("Respuesta usuarios urn asignados", usuariosAsignadosRespuesta);
     
             const usuariosDetallados = await Promise.all(
                 usuariosAsignadosRespuesta.map(async (usuario) => {
                     try {
                         const resp = await fetch(`${API_BASE_URL}/api/usuarios/${usuario.idUsuario}`);
-                        console.log("Respuesta consulta Id usuario", resp);
+                      //console.log("Respuesta consulta Id usuario", resp);
     
                         if (!resp.ok) {
-                            console.log('Error al obtener detalles del usuario con ID:', usuario.idUsuario);
+                          //console.log('Error al obtener detalles del usuario con ID:', usuario.idUsuario);
                             return null; // Retornar null o un objeto especial para indicar el fallo
                         }
     
                         const userData = await resp.json();
-                        console.log("Datos de usuario con asignación", userData);
+                      //console.log("Datos de usuario con asignación", userData);
                         return {
                             idUsu: usuario.idUsuario,
                             fullname: userData.fullname,
@@ -266,7 +266,7 @@ const AdministracionProyecto = (proyectoKey,urn) => {
     
             // Filtrar resultados nulos y errores
             const usuariosFiltrados = usuariosDetallados.filter(usuario => usuario !== null);
-            console.log("Usuarios para asignación", usuariosFiltrados);
+          //console.log("Usuarios para asignación", usuariosFiltrados);
             setUsuariosAsignadosProyecto(usuariosFiltrados);
         } catch (error) {
             console.error('Error al obtener usuarios asignados:', error);
@@ -277,6 +277,7 @@ const AdministracionProyecto = (proyectoKey,urn) => {
     
     useEffect(() => {
         obtenerUsuariosAsignados();
+       
         setNiveles(['']);
     }, [proyectoKey.urn]); // Se ejecuta al montar y cuando cambia el urn del proyecto seleccionado
     
@@ -296,13 +297,13 @@ const AdministracionProyecto = (proyectoKey,urn) => {
                 },
                 body: JSON.stringify({ urn, listaNiveles })  // Enviar la URN y los niveles formateados
             });
-            console.log("respuesta intento consulta",response);
+          //console.log("respuesta intento consulta",response);
             if (!response.ok) {
                 throw new Error('Error al guardar los niveles');
             }
     
             const responseData = await response.json();
-            console.log('Orden de niveles guardado:', responseData);
+          //console.log('Orden de niveles guardado:', responseData);
             alert('Orden de niveles actualizado correctamente.');
         } catch (error) {
             console.error('Error al guardar orden de niveles:', error);
@@ -311,16 +312,16 @@ const AdministracionProyecto = (proyectoKey,urn) => {
     };
     
     const buscarOrdenNiveles = async() =>{
-        console.log("intento  guardar orden actual");
+      //console.log("intento  guardar orden actual");
         try {
             const ordenNivelesResponse = await fetch(`${API_BASE_URL}/api/ordenNiveles/${encodeURIComponent(proyectoKey.urn)}`);
-            console.log("respuesta ordenes niveles",ordenNivelesResponse);
+          //console.log("respuesta ordenes niveles",ordenNivelesResponse);
             const ordenNivelesData = await ordenNivelesResponse.json();
-            console.log("datos respuessta server orden niveles",ordenNivelesData);
+          //console.log("datos respuessta server orden niveles",ordenNivelesData);
           
             if(ordenNivelesData.mensaje == "sin registros"){
                 let filtrosOrdenes = await actions.obtenerFiltrosOrden(proyectoKey.urn);
-                 console.log("filtros para ordenar", filtrosOrdenes);
+               //console.log("filtros para ordenar", filtrosOrdenes);
 
                  const orderedKeys = Object.keys(filtrosOrdenes).sort((a, b) => {
                     // Verificar si ambas claves son numéricas
@@ -344,12 +345,12 @@ const AdministracionProyecto = (proyectoKey,urn) => {
                     content: ` ${key}` // Usa el valor de key original para el content
                 }));
 
-                console.log("Nuevos niveles:", nivelesActualizados);
+              //console.log("Nuevos niveles:", nivelesActualizados);
                 setNiveles(nivelesActualizados);
             }
             else{
                 
-                console.log("filtros para ordenar", ordenNivelesData);
+              //console.log("filtros para ordenar", ordenNivelesData);
     
                 // Cargar los filtros directamente sin ordenar
                 const nivelesActualizados = ordenNivelesData.listaNiveles.map((filtro, index) => ({
@@ -357,7 +358,7 @@ const AdministracionProyecto = (proyectoKey,urn) => {
                     content: filtro.nombre // Asumiendo que los filtros vienen como un array de objetos
                 }));
     
-                console.log("Nuevos niveles después de obtener filtros:", nivelesActualizados);
+              //console.log("Nuevos niveles después de obtener filtros:", nivelesActualizados);
                 setNiveles(nivelesActualizados);
                 
             
@@ -374,7 +375,7 @@ const AdministracionProyecto = (proyectoKey,urn) => {
             if (!response.ok) throw new Error('Error al obtener datos de barras');
             
             const barras = await response.json();
-            console.log("barras recibidas", barras);
+          //console.log("barras recibidas", barras);
             const resultado = {};
             if (!barras.detalles || !Array.isArray(barras.detalles)) {
                 throw new Error('Datos de barras no están en el formato esperado o están vacíos');
@@ -410,7 +411,7 @@ const AdministracionProyecto = (proyectoKey,urn) => {
                 });
             });
     
-            console.log("Resultado final de Diametro Equivalente:", resultado);
+          //console.log("Resultado final de Diametro Equivalente:", resultado);
             await fetch(`${API_BASE_URL}/api/diametroequivalente`, {
                 method: 'POST',
                 headers: {
@@ -419,7 +420,7 @@ const AdministracionProyecto = (proyectoKey,urn) => {
                 body: JSON.stringify({ urn, filtros2: resultado })
             });
     
-            console.log("Resultado final de Diametro Equivalente:", resultado);
+          //console.log("Resultado final de Diametro Equivalente:", resultado);
             return resultado;
            
         } catch (error) {
@@ -437,7 +438,7 @@ const AdministracionProyecto = (proyectoKey,urn) => {
     
             const data = await response.json();
             if (!data || !data.detalles || data.detalles.length === 0) {
-                console.log("No hay detalles disponibles para calcular el promedio.");
+              //console.log("No hay detalles disponibles para calcular el promedio.");
                 return {}; // Retornar un objeto vacío si no hay datos
             }
            
@@ -461,7 +462,7 @@ const AdministracionProyecto = (proyectoKey,urn) => {
                 promedios[key] = totalLongitud / count;
             });
     
-            console.log("Promedios de longitud por nombreFiltro2:", promedios);
+          //console.log("Promedios de longitud por nombreFiltro2:", promedios);
             const saveResponse = await fetch(`${API_BASE_URL}/api/crearLongitudPromedio`, {
                 method: 'POST',
                 headers: {
@@ -475,7 +476,7 @@ const AdministracionProyecto = (proyectoKey,urn) => {
             }
     
             const saveResult = await saveResponse.json();
-            console.log('Saved length averages:', saveResult);
+          //console.log('Saved length averages:', saveResult);
             return promedios;
     
         } catch (error) {
@@ -491,10 +492,10 @@ const AdministracionProyecto = (proyectoKey,urn) => {
     
   
     const guardarDatosModelo = async () => {
-        console.log('El nombre del proyecto es:');
+      //console.log('El nombre del proyecto es:');
 
         const val = await actions.generarTotalPesoPisos(proyectoKey.urn);
-        console.log("resultado generar TotalPisos", val);
+      //console.log("resultado generar TotalPisos", val);
         setTickets(prev => ({ ...prev, "Peso por Piso": "Completado" }));
         
         await actions.porcentajePedidoTotal(proyectoKey.urn);
@@ -511,12 +512,12 @@ const AdministracionProyecto = (proyectoKey,urn) => {
         setTickets(prev => ({ ...prev, "diametro Promedio barras General": "Completado" }));
         //
         const promediosLongitud = await LongitudPromedio(proyectoKey.urn);
-        console.log("Promedios de longitud por nombreFiltro2:", promediosLongitud);
+      //console.log("Promedios de longitud por nombreFiltro2:", promediosLongitud);
 
         setTickets(prev => ({ ...prev, "Longitud Promedio": "Completado" }));
         
         const resultadoDiametro = await DiametroEquivalenteLargosIguales(proyectoKey.urn);
-        console.log("Resultados de Diametro Equivalente por Largos Iguales:", resultadoDiametro);
+      //console.log("Resultados de Diametro Equivalente por Largos Iguales:", resultadoDiametro);
         setTickets(prev => ({ ...prev, "Diametro Equivalente": "Completado" }));
     };
 
@@ -553,13 +554,13 @@ const AdministracionProyecto = (proyectoKey,urn) => {
     };
     
     const agregarUsuario = async () => {
-        console.log("tipo usuario seleccionado",tipoUsuario);
+      //console.log("tipo usuario seleccionado",tipoUsuario);
         if (!usuarioSeleccionado||tipoUsuario === "") {
             toast.error("Seleccione un usuario y tipo de usuario antes de agregar.");
             return;
         }
         const usuarioSeleccionadoId = Number(usuarioSeleccionado);
-        console.log("el usuario seleccionado (convertido a número si necesario)", usuarioSeleccionadoId);
+      //console.log("el usuario seleccionado (convertido a número si necesario)", usuarioSeleccionadoId);
     
         const usuarioEncontrado = usuariosNoAdmin.find(usuario => Number(usuario.idUsu) === usuarioSeleccionadoId);
         if (!usuarioEncontrado) {
@@ -568,9 +569,9 @@ const AdministracionProyecto = (proyectoKey,urn) => {
         }
     
     
-        console.log("Usuario seleccionado para agregar al proyecto:", usuarioEncontrado);
+      //console.log("Usuario seleccionado para agregar al proyecto:", usuarioEncontrado);
         // Asegúrate de tener acceso a proyectoKey de alguna manera, aquí asumo que es un estado o prop
-        console.log("urn", proyectoKey.urn);
+      //console.log("urn", proyectoKey.urn);
     
         try {
             const payload = {
@@ -579,7 +580,7 @@ const AdministracionProyecto = (proyectoKey,urn) => {
                 proyectoKey: proyectoKey.proyectoKey ,
                 tipoUsuario: tipoUsuario// 
             };
-            console.log("datos enviados",payload);
+          //console.log("datos enviados",payload);
             // Llamada a la API para asignar el usuario al proyecto
             const respuesta = await fetch(`${API_BASE_URL}/api/asignarUsuarioProyecto`, {
                 method: 'POST',
@@ -595,7 +596,7 @@ const AdministracionProyecto = (proyectoKey,urn) => {
             }
     
             const usuarioProyectoAsignado = await respuesta.json();
-            console.log('Usuario asignado con éxito:', usuarioProyectoAsignado);
+          //console.log('Usuario asignado con éxito:', usuarioProyectoAsignado);
             toast.success('Usuario asignado con éxito');
             obtenerUsuariosAsignados();
             // Aquí puedes realizar cualquier actualización en la UI necesaria,
@@ -630,9 +631,9 @@ const AdministracionProyecto = (proyectoKey,urn) => {
                         <div className="col-4">
                            
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' , marginLeft:'50px'}}>
-                            <Form.Label>Cálculo de Estadísticas</Form.Label>
+                            <Form.Label>Extracción de Información / Cálculo Estadísticas</Form.Label>
                             
-                                  <Button onClick={guardarDatosModelo} style={{...botonEstilo, marginTop: '10px'}}>Calcular Estadísticas</Button>
+                                  <Button onClick={guardarDatosModelo} style={{...botonEstilo, marginTop: '10px'}}>Extraer Información</Button>
                             </div>
                              
                         </div> 

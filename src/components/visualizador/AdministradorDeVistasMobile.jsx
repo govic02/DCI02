@@ -31,10 +31,10 @@ const AdministradorDeVistasMobile = ({ tabsRef,identificadoresActual,refViewer2 
     const guardarVista = async () => {
         try {
             // Crear el objeto de datos de la vista
-            console.log('Nombre de la vista:', nombreVista);
-            console.log(identificadoresActuales);
-            console.log(urn);
-            console.log("selc actual",seleccionActual);
+          //console.log('Nombre de la vista:', nombreVista);
+          //console.log(identificadoresActuales);
+          //console.log(urn);
+          //console.log("selc actual",seleccionActual);
             if(identificadoresActuales.length >0 && identificadoresActuales){
                 const nuevaVista = {
                     nombre: nombreVista,
@@ -45,7 +45,7 @@ const AdministradorDeVistasMobile = ({ tabsRef,identificadoresActual,refViewer2 
                 // Realizar la solicitud HTTP para guardar la vista
                 const response = await axios.post(API_BASE_URL+'/api/vistasGuardadas', nuevaVista);
                 if (response.status === 201) {
-                    console.log('Vista guardada exitosamente:', response.data);
+                  //console.log('Vista guardada exitosamente:', response.data);
                     cargarVistasGuardadas();
                     // Aquí puedes realizar cualquier acción adicional después de guardar la vista, como cerrar el modal
                     cerrarModal(); // Cerrar el modal después de guardar
@@ -65,7 +65,7 @@ const AdministradorDeVistasMobile = ({ tabsRef,identificadoresActual,refViewer2 
                     // Realizar la solicitud HTTP para guardar la vista
                     const response = await axios.post(API_BASE_URL+'/api/vistasGuardadas', nuevaVista);
                     if (response.status === 201) {
-                        console.log('Vista guardada exitosamente:', response.data);
+                      //console.log('Vista guardada exitosamente:', response.data);
                         cargarVistasGuardadas();
                         // Aquí puedes realizar cualquier acción adicional después de guardar la vista, como cerrar el modal
                         cerrarModal(); // Cerrar el modal después de guardar
@@ -74,7 +74,7 @@ const AdministradorDeVistasMobile = ({ tabsRef,identificadoresActual,refViewer2 
                         // Aquí puedes manejar el caso de que ocurra un error al guardar la vista
                     }
                 }else{
-                    console.log("sin identificadores");
+                  //console.log("sin identificadores");
                     toast.error(` No hay elementos seleccionados, debe seleccionar elementos usando los filtros, click izquierdo del mouse o shift+click izquierdo de mouse`);
                 }
               
@@ -108,8 +108,8 @@ const AdministradorDeVistasMobile = ({ tabsRef,identificadoresActual,refViewer2 
         };
     }, []);
     async function handleDeleteClick(idVS) {
-        console.log("ID A BORRAR");
-        console.log(idVS);
+      //console.log("ID A BORRAR");
+      //console.log(idVS);
         const confirmDelete = window.confirm("¿Estás seguro de que deseas eliminar esta vista?");
         if (!confirmDelete) {
             return; // Detiene la función si el usuario cancela la acción
@@ -125,7 +125,7 @@ const AdministradorDeVistasMobile = ({ tabsRef,identificadoresActual,refViewer2 
             }
     
             const result = await response.text(); // O `response.json()` si tu API devuelve un JSON
-            console.log(result); // "Vista guardada eliminada"
+          //console.log(result); // "Vista guardada eliminada"
             alert('Vista guardada eliminada correctamente');
             cargarVistasGuardadas();
             // Aquí podrías también actualizar el estado de tu componente para reflejar que la vista fue eliminada,

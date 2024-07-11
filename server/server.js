@@ -14,6 +14,7 @@ const { DerivativesApi, JobPayload, JobPayloadInput, JobPayloadOutput, JobSvfOut
 
 const { BucketsApi, ObjectsApi, PostBucketsPayload } = forgeSDK;
 import { crearActualizarOrdenNiveles, obtenerOrdenNivelesPorUrn } from '../controllers/OrdenNivelesController.js';
+import { guardarPropiedadesModelo, obtenerPropiedadesModelo, eliminarPropiedadesModeloPorUrn } from '../controllers/propiedadesModeloController.js';
 
 import { obtenerFiltros,actualizarFiltro } from '../controllers/filtrosController.js';
 import {crearPedido,crearArchivoPedido,eliminarPedido,obtenerPedidos,actualizarEstadoPedido,transfierePedido,eliminarPedidosPorUrn } from '../controllers/pedidoController.js'; // PEDIDOS
@@ -23,7 +24,7 @@ import { buscarCrearActualizarObjetoProyectoPlan, obtenerObjetosPorUrn ,CrearObj
 import {guardarSumaPisosGeneral,obtenerRegistroPorUrn} from '../controllers/RespuestaSumaPesosController.js';
 import{ obtenerUsuario, obtenerUsuarios, obtenerUsuarioPorUsername,crearUsuario,actualizarUsuario,eliminarUsuario,obtenerUsuariosAdministradores} from '../controllers/usersController.js'
 import { insertarObjetoConDetalles, obtenerRegistroPorUrnBarras,obtenerBarrasPorUrneIds } from '../controllers/BarraUrnControlller.js';
-import {crearUsuarioProyectoAsignado, obtenerUsuariosProyectoAsignadoPorUrn,eliminarUsuarioProyectoAsignado,transferirUsuarioProyectoPerfil } from '../controllers/usuarioProyectoAsignadoController.js'
+import {crearUsuarioProyectoAsignado, obtenerUsuariosProyectoAsignadoPorUrn,eliminarUsuarioProyectoAsignado,transferirUsuarioProyectoPerfil, eliminarAsignacionesPorUrn } from '../controllers/usuarioProyectoAsignadoController.js'
 import {guardarActualizarRespuesta,obtenerRespuestaPorUrn} from '../controllers/SumaPesosPorDiametroController.js';
 import { crearActualizarDiametroPromedioGeneral, obtenerDiametroPromedioGeneralPorUrn } from '../controllers/DiametroPromedioBarraGeneralController.js';
 
@@ -468,7 +469,13 @@ app.post('/api/objetoProyectoPlanMasivo', procesarObjetosProyectoPlanMasivamente
 app.post('/api/crearobjetoProyectoPlan', CrearObjetoProyectoPlan);
 app.get('/api/objetoProyectoPlan/:urn', obtenerObjetosPorUrn);//
 app.get('/api/objetos/:dbId/:urn', obtenerPorDbIdYUrn);
+//
+// Propiedades Proyecto
+app.post('/api/guardarPropiedadesModelo', guardarPropiedadesModelo);
+app.get('/api/obtenerPropiedadesModelo', obtenerPropiedadesModelo);
+app.delete('/api/eliminarPropiedadesModelo/:urn', eliminarPropiedadesModeloPorUrn);
 
+//
 // Insertar barras URN
 // 
 app.post('/api/barraurn', insertarObjetoConDetalles);
@@ -556,7 +563,8 @@ app.post('/api/transfiereObjetoProyectoPlan', transfiereObjetoProyectoPlan);
 // transfiere usuarios de un proyecto a otro
 app.post('/api/transferirUsuarioProyectoPerfil', transferirUsuarioProyectoPerfil);
 
-
+// Elimina asignaciones asociadas a una URN  eliminarAsignacionesPorUrn
+app.delete('/api/eliminarPorUrn/:urn', eliminarAsignacionesPorUrn);
 //  Orden de niveles
 // Ruta para crear o actualizar un registro de OrdenNiveles
 app.post('/api/ordenNiveles', crearActualizarOrdenNiveles);
