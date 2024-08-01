@@ -49,7 +49,7 @@ const IndicadorTotalPeso = ({ urn }) => {
                 const urlPesos = `${API_BASE_URL}/api/getPesovsPedidos/${urn}`;
                 const responsePesos = await axios.get(urlPesos);
                 const pesosTotales = responsePesos.data;
-    
+                console.log("peso total desde estadistica,",pesosTotales);
                 const urlPedidos = `${API_BASE_URL}/api/listPedidos?urn=${urn}`;
                 const respuestaPedidos = await axios.get(urlPedidos);
                 const pedidos = respuestaPedidos.data;

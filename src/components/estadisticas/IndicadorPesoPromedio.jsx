@@ -39,6 +39,7 @@ const IndicadorPesoPromedio = ({ urn }) => {
                 const url = `${API_BASE_URL}/api/getPesovsPedidos/${urn}`;
                 const respuesta = await axios.get(url);
                 const data = respuesta.data;
+                console.log("Peso Totl Proyecto",data);
                 setPesoTotalProyecto(data.pesoTotalProyecto);
             } catch (error) {
                 console.error("Error al obtener el peso total del proyecto:", error);
@@ -63,7 +64,7 @@ const IndicadorPesoPromedio = ({ urn }) => {
                     Peso Total del Proyecto
                 </Typography>
                 <Typography variant="body2" style={{ fontSize: 16, textAlign: 'center' , marginBottom:'20px'}}>
-                    <b>{pesoTotalProyecto.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits:0 })} kg</b>
+                    <b>{pesoTotalProyecto.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits:1 })} kg</b>
                 </Typography>
                 <Typography variant="h5" component="h2" style={{ fontSize: 14, textAlign: 'center' ,marginBottom: '10px'}}>
                     Peso Promedio General del Proyecto

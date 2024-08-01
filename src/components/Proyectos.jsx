@@ -56,7 +56,7 @@ const Proyectos = ({ token, selectedIds, onCameraChange, onSelectionChange, refV
             });
             const data = await response.json();
           //console.log("DATOS ASOCIADOS A USUARIO",data);
-          //console.log(data[0]);
+         console.log(data[0]);
             setUrnSelected(data[0].urn); // Establecer el estado de urnSelected con la urn obtenida
             setProyectoKeySeleccionado(data[0].proyectoKey);
           } catch (error) {

@@ -142,7 +142,7 @@ class ViewerProyectos extends React.Component {
       //console.log(this.props.urn);
        
         if (this.viewer && (this.props.urn !== prevProps.urn || this.props.idUsuario !== prevProps.idUsuario || this.props.proyectoKey !== prevProps.proyectoKey)) {
-          
+          this.setState({ idsBarras: [] });
             const now = Date.now();
             const newTimes = [...this.state.cambioUrnTimes, now].filter(time => now - time <= 6000);
             const cambioUrnCount = newTimes.length;
@@ -178,6 +178,7 @@ class ViewerProyectos extends React.Component {
                             this.viewer.loadDocumentNode(doc, doc.getRoot().getDefaultGeometry()).then(() => {
                               //console.log("Documento cargado correctamente");
                                 this.onModelLoaded(); // Llama a onModelLoaded después de cargar el documento
+                                this.setState({ idsBarras: [] });
                             });
                         } catch (error) {
                             // Captura errores durante la carga del documento
@@ -232,6 +233,7 @@ class ViewerProyectos extends React.Component {
         }
     };
    sumarPesosPorFiltro2 = (idsBarras) => {
+    console.log("barras para suma",idsBarras);
         // Agrupar y sumar los pesos por el valor de filtro2 (ejemplo: AEC Piso)
         const sumaPesos = idsBarras.reduce((acumulador, barraActual) => {
             // Usar el valor de filtro2 como clave
@@ -297,7 +299,7 @@ class ViewerProyectos extends React.Component {
         // sin necesidad de esperar una promesa.
         const resultado = await this.sumarPesosPorFiltro2(idsBarras);
         
-      //console.log("PESOS POR PISO", resultado); // Esto imprimirá un objeto con los totales de peso por cada valor de 'AEC Piso'
+      console.log("PESOS POR PISO", resultado); // Esto imprimirá un objeto con los totales de peso por cada valor de 'AEC Piso'
 
         
         // Preparar los datos para enviar
@@ -306,7 +308,7 @@ class ViewerProyectos extends React.Component {
             nombreFiltro2: this.state.filtro2, // Asegúrate de tener nombreFiltro2 en el ámbito
             pesosPorValor: Object.entries(resultado).map(([valor, sumaPeso]) => ({ valor, sumaPeso }))
         };
-      //console.log("datos para enviar pesos pisos",datosParaEnviar);
+      console.log("datos para enviar pesos pisos",datosParaEnviar);
 
        
         // Enviar los datos al servidor
@@ -432,24 +434,29 @@ diametroPromedioGeneral = async (urn) => {
 
 PesoPromedioGeneral = async (urn) => {
     try {
+      console.log("inicio peso promedio general");
         const { idsBarras } = this.state;
       //console.log("Datos de barras actuales", idsBarras);
         let totalPesoProyecto = 0;
         let totalBarras = 0;
 
         if (idsBarras !== undefined) {
+
             idsBarras.forEach(barra => {
-                const { pesoLineal, longitudTotal } = barra;
+             // console.log("Barra actual",bar);
+                const { pesoLineal, longitudTotal,cantidad } = barra;
+                console.log("cantidad de barra",cantidad);
                 const longitudEnMetros = longitudTotal ;
                 const pesoTotal = pesoLineal * longitudEnMetros; // Calcula el peso total para la barra actual
 
                 totalPesoProyecto += pesoTotal; // Suma acumulativa de todos los pesos
-                totalBarras++; // Contador de barras
+                totalBarras= totalBarras+cantidad; // Contador de barras
             });
-
+            console.log("Pesos Total promedio general"+totalBarras);
+            console.log("Pesos Total promedio general "+totalPesoProyecto);
             if (totalBarras > 0) {
                 const pesoPromedioGeneral = totalPesoProyecto / totalBarras; // Calcula el peso promedio del proyecto
-              //console.log(`Peso promedio del proyecto: ${pesoPromedioGeneral} kg`);
+              console.log(`Peso promedio del proyecto: ${pesoPromedioGeneral} kg`);
 
                 const response = await fetch(`${API_BASE_URL}/api/pesoPromedioGeneral`, {
                     method: 'POST',
@@ -482,14 +489,14 @@ PesoPromedio = async (urn) => {
     try {
       
         const { idsBarras } = this.state;
-       // const detalles = await this.obtenerIdsBarras();
-       // console.log("pesos promedio",detalles);
-      //console.log("PesoPromedio",this.state);
-      //console.log("supuestas barras",idsBarras);
+        const detalles = await this.obtenerIdsBarras();
+        console.log("pesos promedio",detalles);
+        console.log("PesoPromedio",this.state);
+       console.log("supuestas barras",idsBarras);
         const resultados = {};
         if(idsBarras != undefined){
             idsBarras.forEach(barra => {
-                const { nombreFiltro2, pesoLineal, longitudTotal } = barra;
+                const { nombreFiltro2, pesoLineal, longitudTotal,cantidad } = barra;
                 // Convertir longitud de milímetros a metros si es necesario
                 //const longitudEnMetros = longitudTotal / 100;
                 const longitudEnMetros = longitudTotal ;
@@ -669,11 +676,12 @@ porcentajePedidoTotal = async (urn) => {
     }
     
     obtenerIdsBarras = async () => {
-      //console.log("inicio busqueda de barras", this.state);
+       console.log("inicio busqueda de barras", this.state);
       //console.log();
+        this.setState({ idsBarras: [] });
         await this.obtenerFiltros(this.props.urn);
         const propiedades = await this.obtenerPropiedadesModelo();
-          //console.log("Propiedades obtenidas para completar forms:", propiedades);
+        console.log("Propiedades obtenidas para completar forms:", propiedades);
         return new Promise(async (resolve, reject) => {
             if (!this.viewer || !this.viewer.model) {
               //console.log("El modelo del visualizador no está cargado.");
@@ -683,17 +691,18 @@ porcentajePedidoTotal = async (urn) => {
     
             try {
                 const { filtro1, filtro2, nombreParametroFecha, nombreParametroBarra, nombreParametrolargo, nombreParametroPesoLineal, nombreParametroDiametro, nombreParametroNivel } = this.state;
-              //console.log("parametro nivel buscado ", nombreParametroNivel);
-            
+              console.log("parametro nivel buscado ", nombreParametroNivel);
+             console.log("Nombre Parámetro barra buscado",nombreParametroBarra);
                 this.viewer.model.getBulkProperties([], {
                     propFilter: [
                         'Category', filtro1, filtro2, nombreParametroPesoLineal, nombreParametrolargo, nombreParametroDiametro, nombreParametroFecha, nombreParametroNivel,
                         'Partición', 'Número de armadura', 'Imagen', 'Marca de tabla de planificación', 'Comentarios', 'Marca', 'AEC Grupo', 'AEC Forma', 'AEC Código Interno', 'AEC Bloquear barras','AEC Piso','AEC Secuencia Hormigonado', 'AEC Uso Barra', 'AEC Uso Barra (Bloquear)', 'AEC Cantidad', 'AEC Id', 'AEC Ubicación', 'AEC Sub Uso Barra', 'Fase de creación', 'Fase de derribo', 'Estados de visibilidad en vista', 'Geometría', 'Estilo', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J','I', 'K', 'O', 'R', 'Volumen de refuerzo', 'Regla de diseño', 'Cantidad','Quantity', 'Espaciado', 'Forma', 'Imagen de forma', 'Gancho al inicio', 'Rotación del gancho al inicio', 'Tratamiento de extremo al inicio', 'Gancho al final', 'Rotación del gancho al final', 'Tratamiento de extremo al final', 'Modificar longitudes de gancho', 'Categoría de anfitrión', 'Marca de anfitrión', 'Modificaciones de redondeo', 'Nombre de tipo', 'Material', 'Subcategoría', 'Diámetro de curvatura estándar', 'Diámetro de curvatura de gancho estándar', 'Diámetro de curvatura de estribo/tirante', 'Longitudes de gancho', 'Radio máximo de curvatura', 'Deformación', 'Imagen de tipo', 'Nota clave', 'Modelo', 'Fabricante', 'Comentarios de tipo', 'URL', 'Descripción', 'Descripción de montaje', 'Código de montaje', 'Marca de tipo', 'Costo'
                     ]
                 }, (result) => {
-                    let idsBarras = result.filter(element => 
+                    console.log("respuesta bulk properties",result);
+                     let idsBarras = result.filter(element => 
                         element.properties.some(prop => 
-                            prop.displayName === 'Category' && prop.displayValue === nombreParametroBarra
+                            (prop.displayName === 'Category' && prop.displayValue === nombreParametroBarra)||prop.ttributeName === nombreParametroBarra
                         )
                     ).map(element => {
                         const valores = element.properties.reduce((acc, prop) => {
@@ -702,7 +711,7 @@ porcentajePedidoTotal = async (urn) => {
                             return acc;
                         }, {});
                         const longitudTotal = this.convertirLongitud(valores[nombreParametrolargo], valores[nombreParametrolargo + 'Units']);
-                       // console.log("Longitud Modificada",longitudTotal);
+                        console.log("Longitud Modificada",longitudTotal);
                         return {
                             id: element.dbId,
                             nombreFiltro1: valores[filtro1],
@@ -789,7 +798,7 @@ porcentajePedidoTotal = async (urn) => {
             
                     // Guarda los resultados en el estado o maneja como prefieras
                     this.setState({ idsBarras });
-                  //console.log("Barras generadas con datos ", idsBarras);
+                  console.log("Barras generadas con datos ", idsBarras);
                     resolve(idsBarras);
                 });
             } catch (error) {
@@ -1115,7 +1124,7 @@ porcentajePedidoTotal = async (urn) => {
       //console.log("modelo cargado, busco--2");
         try {
           //console.log("modelo cargado, busco--");
-            
+          this.setState({ idsBarras: [] });
             // Espera a que ambas funciones asincrónicas se completen.
             const [idsConFecha, idsSinFecha] = await Promise.all([
               //  this.obtenerIdsConFecha(),
@@ -1131,7 +1140,8 @@ porcentajePedidoTotal = async (urn) => {
             await this.obtenerFiltros(this.props.urn).then(async () => {
                 try {
                   //console.log("proceso Id Barras Proyecto");
-                    const idsBarras = await this.obtenerIdsBarras();
+                  const idsBarras = [];
+                   idsBarras = await this.obtenerIdsBarras();
                     await  this.guardarIdsBarras();
                     if(!idsBarras.length ==0){
                         await this.generarTotalPesoPisos();

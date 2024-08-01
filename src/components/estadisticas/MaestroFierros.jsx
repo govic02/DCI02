@@ -15,6 +15,8 @@ const MaestroFierros = ({ urn,proyecto }) => {
     useEffect(() => {
         const fetchPedidos = async () => {
             try {
+                console.log("Nombre del pedido buscado "+proyecto);
+                console.log("Nombre del pedido buscado "+urn);
                 const url = `${API_BASE_URL}/api/listPedidos?urn=${encodeURIComponent(urn)}`;
                 const response = await axios.get(url);
                 if (response.status === 200) {
@@ -23,24 +25,24 @@ const MaestroFierros = ({ urn,proyecto }) => {
                     // Carga los detalles para todos los pedidos
                         const pedidosConDetalles = await Promise.all(pedidosInicial.map(async pedido => {
                         const detalles = await fetchBarDetails(pedido);
-                      //console.log("Detalle Pedidos",detalles);
+                       console.log("Detalle Pedidos",detalles);
                         return { ...pedido, detalles: detalles || [] };
                     }));
                    
                     const urlBarras = `${API_BASE_URL}/api/barraurn/${urn}`;
                     const responseBarras = await axios.get(urlBarras);
                     const allBars = await responseBarras.data; // Assuming the response data structure matches your needs
-                  //console.log("todas las barras",allBars);
+                    console.log("todas las barras",allBars);
                    
                    //const requestedIds = pedidos.flatMap(pedido => pedido.ids);
                     const requestedIds = pedidosConDetalles.flatMap(pedido => 
                         pedido.detalles.map(detalle => detalle.id.toString())
                     );
-                  //console.log("pedidos barras",requestedIds);
+                  console.log("pedidos barras",requestedIds);
 
                     
                     const availableBars = allBars.detalles.filter(bar => !requestedIds.includes(bar.id.toString()));
-                  //console.log("todas las barras no pedidas",availableBars);
+                  console.log("todas las barras no pedidas",availableBars);
 
                     const pedidoNoPedidos = {
                         nombre_pedido: "No Pedidos",
@@ -71,7 +73,7 @@ const fetchBarDetails = async (pedido) => {
     try {
         const url = `${API_BASE_URL}/api/barrasPorUrneIds/${urn}`;
         const response = await axios.post(url, { ids: pedido.ids });
-      //console.log("respuesta datos  barra detalles",response.data)
+     console.log("respuesta datos  barra detalles",response.data)
         if (response.status === 200) {
             return response.data;
         } else {
@@ -364,7 +366,7 @@ const handleExpand = async (index) => {
                                     <TableCell>Cantidad</TableCell>
                                     <TableCell>Ø mm</TableCell>
                                     <TableCell>Figura</TableCell>
-                                    <TableCell>L/m</TableCell>
+                                    <TableCell>Long Total</TableCell>
                                     <TableCell>Uso</TableCell>
                                     <TableCell>A/cm</TableCell>
                                     <TableCell>B/cm</TableCell>
@@ -444,7 +446,7 @@ const handleExpand = async (index) => {
                                                     <TableCell>Cantidad</TableCell>
                                                     <TableCell>Ø mm</TableCell>
                                                     <TableCell>Figura</TableCell>
-                                                    <TableCell>L/m</TableCell>
+                                                    <TableCell>Long Total</TableCell>
                                                     <TableCell>Uso</TableCell>
                                                     <TableCell>A/cm</TableCell>
                                                     <TableCell>B/cm</TableCell>
