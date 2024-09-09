@@ -117,16 +117,16 @@ const handleExpand = async (index) => {
                 'Figura': bar.aecForma,
                 'L/m': bar.longitudTotal,
                 'Uso': bar.aecUsoBarra,
-                'A/cm': bar.a,
-                'B/cm': bar.b,
-                'C/cm': bar.c,
-                'D/cm': bar.d,
-                'E/cm': bar.e,
-                'F/cm': bar.f,
-                'G/cm': bar.g,
-                'H/cm': bar.h,
-                'I/cm': bar.i,
-                'J/cm': bar.j,
+                'A/cm': bar.a*100,
+                'B/cm': bar.b*100,
+                'C/cm': bar.c*100,
+                'D/cm': bar.d*100,
+                'E/cm': bar.e*100,
+                'F/cm': bar.f*100,
+                'G/cm': bar.g*100,
+                'H/cm': bar.h*100,
+                'I/cm': bar.i*100,
+                'J/cm': bar.j*100,
                 'AngV': '',
                 'AngV2': '',
                 'AngV3': '',
@@ -166,15 +166,15 @@ const handleExpand = async (index) => {
             'Figura': barra.aecForma,
             'L/m': barra.longitudTotal,
             'Uso': barra.aecUsoBarra,
-            'A/cm': barra.a,
-            'B/cm': barra.b,
-            'C/cm': barra.c,
-            'D/cm': barra.d,
-            'E/cm': barra.e,
-            'F/cm': barra.f,
-            'G/cm': barra.g,
-            'H/cm': barra.h,
-            'I/cm': barra.i, // Si no existe el campo 'i', se deja vacío
+            'A/cm': barra.a*100,
+            'B/cm': barra.b*100,
+            'C/cm': barra.c*100,
+            'D/cm': barra.d*100,
+            'E/cm': barra.e*100,
+            'F/cm': barra.f*100,
+            'G/cm': barra.g*100,
+            'H/cm': barra.h*100,
+            'I/cm': barra.i*100, // Si no existe el campo 'i', se deja vacío
             'AngV': '',
             'AngV2': '',
             'AngV3': '',
@@ -227,16 +227,16 @@ const handleExpand = async (index) => {
                     'Figura': barra.aecForma,
                     'L/m': barra.longitudTotal,
                     'Uso': barra.aecUsoBarra,
-                    'A/cm': barra.a,
-                    'B/cm': barra.b,
-                    'C/cm': barra.c,
-                    'D/cm': barra.d,
-                    'E/cm': barra.e,
-                    'F/cm': barra.f,
-                    'G/cm': barra.g,
-                    'H/cm': barra.h,
-                    'I/cm': barra.i, // Si no existe el campo 'i', se deja vacío
-                    'J/cm': barra.j,
+                    'A/cm': barra.a*100,
+                    'B/cm': barra.b*100,
+                    'C/cm': barra.c*100,
+                    'D/cm': barra.d*100,
+                    'E/cm': barra.e*100,
+                    'F/cm': barra.f*100,
+                    'G/cm': barra.g*100,
+                    'H/cm': barra.h*100,
+                    'I/cm': barra.i*100, // Si no existe el campo 'i', se deja vacío
+                    'J/cm': barra.j*100,
                     'AngV': '',
                     'AngV2': '',
                     'AngV3': '',
@@ -396,18 +396,27 @@ const handleExpand = async (index) => {
                                             <TableCell>{barra.cantidad !== undefined ? barra.cantidad : barra.Quantity}</TableCell>
                                             <TableCell>{typeof barra.diametroBarra === 'number' ? barra.diametroBarra.toFixed(2) : "0.00"}</TableCell>
                                             <TableCell>{barra.aecForma}</TableCell>
-                                            <TableCell>{typeof barra.longitudTotal === 'number' ? barra.longitudTotal.toFixed(2) : "0.00"}</TableCell>
+                                            <TableCell>
+                                                        {(() => {
+                                                            const cantidad = barra.cantidad !== undefined ? barra.cantidad : barra.Quantity;
+                                                            const longitudTotal = barra.longitudTotal;
+                                                            if (typeof longitudTotal === 'number' && cantidad && cantidad !== 0) {
+                                                                return (longitudTotal / cantidad).toFixed(2);
+                                                            }
+                                                            return "0.00";
+                                                        })()}
+                                           </TableCell>
                                             <TableCell>{barra.aecUsoBarra}</TableCell>
-                                            <TableCell>{formatNumber(barra.a !== undefined ? barra.a : barra.A)}</TableCell>
-                                            <TableCell>{formatNumber(barra.b !== undefined ? barra.b : barra.B)}</TableCell>
-                                            <TableCell>{formatNumber(barra.c !== undefined ? barra.c : barra.C)}</TableCell>
-                                            <TableCell>{formatNumber(barra.d !== undefined ? barra.d : barra.D)}</TableCell>
-                                            <TableCell>{formatNumber(barra.e !== undefined ? barra.e : barra.E)}</TableCell>
-                                            <TableCell>{formatNumber(barra.f !== undefined ? barra.f : barra.F)}</TableCell>
-                                            <TableCell>{formatNumber(barra.g !== undefined ? barra.g : barra.G)}</TableCell>
-                                            <TableCell>{formatNumber(barra.h !== undefined ? barra.h : barra.H)}</TableCell>
-                                            <TableCell>{formatNumber(barra.i !== undefined ? barra.i : barra.I)}</TableCell>
-                                            <TableCell>{formatNumber(barra.j !== undefined ? barra.j : barra.J)}</TableCell>
+                                            <TableCell>{formatNumber(barra.a !== undefined ? barra.a*100 : barra.A*100)}</TableCell>
+                                            <TableCell>{formatNumber(barra.b !== undefined ? barra.b*100 : barra.B*100)}</TableCell>
+                                            <TableCell>{formatNumber(barra.c !== undefined ? barra.c*100 : barra.C*100)}</TableCell>
+                                            <TableCell>{formatNumber(barra.d !== undefined ? barra.d*100 : barra.D*100)}</TableCell>
+                                            <TableCell>{formatNumber(barra.e !== undefined ? barra.e*100 : barra.E*100)}</TableCell>
+                                            <TableCell>{formatNumber(barra.f !== undefined ? barra.f*100 : barra.F*100)}</TableCell>
+                                            <TableCell>{formatNumber(barra.g !== undefined ? barra.g*100 : barra.G*100)}</TableCell>
+                                            <TableCell>{formatNumber(barra.h !== undefined ? barra.h*100 : barra.H*100)}</TableCell>
+                                            <TableCell>{formatNumber(barra.i !== undefined ? barra.i*100 : barra.I*100)}</TableCell>
+                                            <TableCell>{formatNumber(barra.j !== undefined ? barra.j*100 : barra.J*100)}</TableCell>
       
                                             <TableCell>''</TableCell>
                                             <TableCell>''</TableCell>
@@ -476,18 +485,27 @@ const handleExpand = async (index) => {
                                             <TableCell>{barra.cantidad}</TableCell>
                                             <TableCell>{typeof barra.diametroBarra === 'number' ? barra.diametroBarra.toFixed(2) : "0.00"}</TableCell>
                                             <TableCell>{barra.aecForma}</TableCell>
-                                            <TableCell>{typeof barra.longitudTotal === 'number' ? barra.longitudTotal.toFixed(2) : "0.00"}</TableCell>
+                                            <TableCell>
+                                                {(() => {
+                                                    const cantidad = barra.cantidad !== undefined ? barra.cantidad : barra.Quantity;
+                                                    const longitudTotal = barra.longitudTotal;
+                                                    if (typeof longitudTotal === 'number' && cantidad && cantidad !== 0) {
+                                                        return (longitudTotal / cantidad).toFixed(2);
+                                                    }
+                                                    return "0.00";
+                                                })()}
+                                            </TableCell>
                                             <TableCell>{barra.aecUsoBarra}</TableCell>
-                                            <TableCell>{formatNumber(barra.a)}</TableCell>
-                                            <TableCell>{formatNumber(barra.b)}</TableCell>
-                                            <TableCell>{formatNumber(barra.c)}</TableCell>
-                                            <TableCell>{formatNumber(barra.d)}</TableCell>
-                                            <TableCell>{formatNumber(barra.e)}</TableCell>
-                                            <TableCell>{formatNumber(barra.f)}</TableCell>
-                                            <TableCell>{formatNumber(barra.g)}</TableCell>
-                                            <TableCell>{formatNumber(barra.h)}</TableCell>
-                                            <TableCell>{formatNumber(barra.i)}</TableCell>
-                                            <TableCell>{formatNumber(barra.j)}</TableCell>
+                                            <TableCell>{formatNumber(barra.a*100)}</TableCell>
+                                            <TableCell>{formatNumber(barra.b*100)}</TableCell>
+                                            <TableCell>{formatNumber(barra.c*100)}</TableCell>
+                                            <TableCell>{formatNumber(barra.d*100)}</TableCell>
+                                            <TableCell>{formatNumber(barra.e*100)}</TableCell>
+                                            <TableCell>{formatNumber(barra.f*100)}</TableCell>
+                                            <TableCell>{formatNumber(barra.g*100)}</TableCell>
+                                            <TableCell>{formatNumber(barra.h*100)}</TableCell>
+                                            <TableCell>{formatNumber(barra.i*100)}</TableCell>
+                                            <TableCell>{formatNumber(barra.j*100)}</TableCell>
                                             <TableCell>''</TableCell>
                                             <TableCell>''</TableCell>
                                             <TableCell>''</TableCell>

@@ -22,7 +22,7 @@ const AdministracionProyecto = (proyectoKey,urn) => {
     const [proyectoSeleccionado, setProyectoSeleccionado] = useState({});
     const [niveles, setNiveles] = useState([ ]);
     const [tipoUsuario, setTipoUsuario] = useState('');
-
+    const [isAddingUser, setIsAddingUser] = useState(false);
 
       const handleReorder = (newOrder) => {
       //console.log('Nuevo orden de proyectos:', newOrder);
@@ -437,6 +437,7 @@ const AdministracionProyecto = (proyectoKey,urn) => {
             }
     
             const data = await response.json();
+            console.log("datos para longitudes", data);
             if (!data || !data.detalles || data.detalles.length === 0) {
               //console.log("No hay detalles disponibles para calcular el promedio.");
                 return {}; // Retornar un objeto vacío si no hay datos
@@ -447,19 +448,21 @@ const AdministracionProyecto = (proyectoKey,urn) => {
     
             // Agrupar y calcular longitud promedio por nombreFiltro2
             detalles.forEach(barra => {
-                const { nombreFiltro2, longitudTotal } = barra;
+                const { nombreFiltro2, longitudTotal,cantidad } = barra;
                 if (!resultados[nombreFiltro2]) {
                     resultados[nombreFiltro2] = { totalLongitud: 0, count: 0 };
                 }
                 resultados[nombreFiltro2].totalLongitud += longitudTotal;
-                resultados[nombreFiltro2].count++;
+                resultados[nombreFiltro2].count+= cantidad;
             });
     
             // Calcular el promedio y guardar en un nuevo objeto
             const promedios = {};
             Object.keys(resultados).forEach(key => {
                 const { totalLongitud, count } = resultados[key];
+                console.log("valor calculo longitud promedio"+ totalLongitud+"   "+count);
                 promedios[key] = totalLongitud / count;
+                console.log("promedios key"+promedios[key]);
             });
     
           //console.log("Promedios de longitud por nombreFiltro2:", promedios);
@@ -554,7 +557,7 @@ const AdministracionProyecto = (proyectoKey,urn) => {
     };
     
     const agregarUsuario = async () => {
-      //console.log("tipo usuario seleccionado",tipoUsuario);
+        if (isAddingUser) return;
         if (!usuarioSeleccionado||tipoUsuario === "") {
             toast.error("Seleccione un usuario y tipo de usuario antes de agregar.");
             return;
@@ -569,10 +572,8 @@ const AdministracionProyecto = (proyectoKey,urn) => {
         }
     
     
-      //console.log("Usuario seleccionado para agregar al proyecto:", usuarioEncontrado);
-        // Asegúrate de tener acceso a proyectoKey de alguna manera, aquí asumo que es un estado o prop
-      //console.log("urn", proyectoKey.urn);
-    
+   
+        setIsAddingUser(true)
         try {
             const payload = {
                 idUsuario: usuarioEncontrado.idUsu, 
@@ -618,7 +619,7 @@ const AdministracionProyecto = (proyectoKey,urn) => {
                     <div className="row">
                         <div className="col-4">
                             <Form.Label>Proyecto al cual se transferirán los datos</Form.Label>
-                            <Form.Control as="select" value={proyectoSeleccionado.urn || ''} onChange={handleSelectProject}>
+                            <Form.Control as="select" value={proyectoSeleccionado.urn || ''} onChange={handleSelectProject}  >
                                 <option value="">Seleccione un proyecto...</option>
                                 {proyectos.map((proyecto) => (
                                     <option key={proyecto.urn} value={proyecto.urn}>
@@ -667,14 +668,14 @@ const AdministracionProyecto = (proyectoKey,urn) => {
                     <div style={tabContentStyle}>
                         <Form.Group className="mb-3">
                             <Form.Label>Asignación de Usuarios a Proyecto</Form.Label>
-                            <Form.Control as="select" value={usuarioSeleccionado} onChange={asignarUsuarioAProyecto}>
+                            <Form.Control as="select" value={usuarioSeleccionado} onChange={asignarUsuarioAProyecto} disabled={isAddingUser}>
                                 {usuariosNoAdmin.map(usuario => (
                                     <option key={usuario.idUsu} value={usuario.idUsu}>
                                         {usuario.fullname} / {usuario.username}
                                     </option>
                                 ))}
                             </Form.Control>
-                            <Form.Control as="select" value={tipoUsuario} onChange={e => setTipoUsuario(e.target.value)}>
+                            <Form.Control as="select" value={tipoUsuario} onChange={e => setTipoUsuario(e.target.value)} disabled={isAddingUser}>
                                 <option value="-1">Seleccione un tipo...</option>
                                 <option value="Constructor">Constructor</option>
                                 <option value="Fabricante">Fabricante</option>
@@ -682,7 +683,7 @@ const AdministracionProyecto = (proyectoKey,urn) => {
                                 <option value="Cliente">Cliente</option>
                                 <option value="Invitado">Invitado</option>
                             </Form.Control>
-                            <Button style={{...botonEstilo, marginTop: '10px'}} onClick={agregarUsuario}>Agregar Usuario </Button>
+                            <Button style={{...botonEstilo, marginTop: '10px'}} onClick={agregarUsuario} disabled={isAddingUser}>{isAddingUser ? 'Agregando...' : 'Agregar Usuario'}</Button>
                         </Form.Group>
                         <Table striped bordered hover>
                             <thead>

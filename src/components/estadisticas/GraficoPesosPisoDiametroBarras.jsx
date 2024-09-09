@@ -80,12 +80,25 @@ const GraficoPesosPisoDiametroBarras = ({ urn }) => {
     const options = {
         scales: {
             y: {
-                stacked: true, // Habilitar el apilado en el eje Y
+              stacked: true,
+              ticks: {
+                callback: function(value) {
+                  return value + ' kg';
+                }
+              },
+              title: {
+                display: true,
+                text: 'Peso (kg)'
+              }
             },
             x: {
-                stacked: true, // Habilitar el apilado en el eje X
+              stacked: true,
+              title: {
+                display: true,
+                text: 'Piso'
+              }
             }
-        },
+          },
         plugins: {
             title: {
                 display: true,

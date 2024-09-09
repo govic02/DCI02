@@ -34,9 +34,11 @@ const GraficoLongitudPromedio = ({ urn }) => {
 
         // Obtén los datos principales para el gráfico
         const respuesta = await fetch(`${API_BASE_URL}/api/getLongitudPromedio/${urn}`);
+      
         if (!respuesta.ok) throw new Error('Respuesta no satisfactoria del servidor');
         const { longitudes } = await respuesta.json();
-        
+        console.log("respuesta servidor "+longitudes);
+        console.log(longitudes);
         if (usePredefinedOrder) {
           longitudes.sort((a, b) => predefinedOrderMap[a.nombreFiltro2.trim()] - predefinedOrderMap[b.nombreFiltro2.trim()]);
         } else {
@@ -45,7 +47,7 @@ const GraficoLongitudPromedio = ({ urn }) => {
 
         // Preparar los datos para el gráfico
         const labels = longitudes.map(item => item.nombreFiltro2);
-        const data = longitudes.map(item => item.promedioLongitud / 1000);
+        const data = longitudes.map(item => item.promedioLongitud );
 
         setDatosGrafico({
           labels,
@@ -69,7 +71,16 @@ const GraficoLongitudPromedio = ({ urn }) => {
   const options = {
     scales: {
       y: {
-        beginAtZero: true
+        beginAtZero: true,
+        ticks: {
+          callback: function(value) {
+            return value + ' cm';
+          }
+        },
+        title: {
+          display: true,
+          text: 'Longitud (cm)'
+        }
       }
     },
   };

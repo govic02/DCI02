@@ -68,7 +68,16 @@ const GraficoPesosPromedio = ({ urn }) => {
   const options = {
     scales: {
       y: {
-        beginAtZero: true
+        beginAtZero: true,
+        ticks: {
+          callback: function(value) {
+            return value + ' kg';
+          }
+        },
+        title: {
+          display: true,
+          text: 'Peso (kg)'
+        }
       }
     },
   };

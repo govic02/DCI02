@@ -17,6 +17,7 @@ const BarraNuevaCuenta = () => {
     const [esFormularioValido, setEsFormularioValido] = useState(false);
     const [modalOpen, setModalOpen] = useState(false);
     const [mensajeError, setMensajeError] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
 const modalStyle = {
   position: 'absolute',
   top: '50%',
@@ -83,6 +84,9 @@ const handleInputChange = (event, setter) => {
   }
 };
 const crearCuenta = async () => {
+  if (isSubmitting) return;
+  setIsSubmitting(true);
+
   if (await verificarUsuarioExistente()) {
     return;
   }
@@ -166,8 +170,8 @@ const crearCuenta = async () => {
         )}
         <div className="row justify-content-center">
           <div className="col-auto">
-            <Button variant="contained" style={buttonStyle} disabled={!esFormularioValido} onClick={crearCuenta}>
-              Crear Cuenta
+            <Button variant="contained" style={buttonStyle}  disabled={!esFormularioValido || isSubmitting}  onClick={crearCuenta}>
+            {isSubmitting ? 'Creando...' : 'Crear Cuenta'}
             </Button>
           </div>
         </div>

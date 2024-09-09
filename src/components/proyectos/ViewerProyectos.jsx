@@ -486,60 +486,57 @@ PesoPromedioGeneral = async (urn) => {
 };
 
 PesoPromedio = async (urn) => {
-    try {
-      
-        const { idsBarras } = this.state;
-        const detalles = await this.obtenerIdsBarras();
-        console.log("pesos promedio",detalles);
-        console.log("PesoPromedio",this.state);
-       console.log("supuestas barras",idsBarras);
-        const resultados = {};
-        if(idsBarras != undefined){
-            idsBarras.forEach(barra => {
-                const { nombreFiltro2, pesoLineal, longitudTotal,cantidad } = barra;
-                // Convertir longitud de milímetros a metros si es necesario
-                //const longitudEnMetros = longitudTotal / 100;
-                const longitudEnMetros = longitudTotal ;
-                const pesoTotal = pesoLineal * longitudEnMetros;  // Aquí se calcula el peso total
-    
-                if (!resultados[nombreFiltro2]) {
-                    resultados[nombreFiltro2] = { totalPeso: 0, count: 0 };
-                }
-                resultados[nombreFiltro2].totalPeso += pesoTotal;  // Suma el peso calculado
-                resultados[nombreFiltro2].count++;
-            });
-    
-            // Calcular el promedio de peso para cada nombreFiltro2
-            const promedios = {};
-            Object.keys(resultados).forEach(key => {
-                const { totalPeso, count } = resultados[key];
-                promedios[key] = totalPeso / count;  // Calcula el promedio de peso
-            });
-    
-          //console.log("Promedios de peso por nombreFiltro2:", promedios);
-            const saveResponse = await fetch(`${API_BASE_URL}/api/crearPesoPromedio`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ urn:urn, pesos: promedios })
-            });
-    
-            if (!saveResponse.ok) {
-        //console.log("respuesta desde inserción",saveResponse);
-            }
-    
-            const saveResult = await saveResponse.json();
-          //console.log('Saved weight averages:', saveResult);
-            return promedios;
-        }
-        // Agrupar y calcular el peso total multiplicando peso lineal por longitud total
-        
+  try {
+    const { idsBarras } = this.state;
+    const detalles = await this.obtenerIdsBarras();
+    console.log("pesos promedio", detalles);
+    console.log("PesoPromedio", this.state);
+    console.log("supuestas barras", idsBarras);
 
-    } catch (error) {
-      //console.log("Error fetching or processing bar data:", error);
-        throw error; // Re-throw to handle it in the calling function
+    const resultados = {};
+    if (idsBarras != undefined) {
+      idsBarras.forEach(barra => {
+        const { nombreFiltro2, pesoLineal, longitudTotal, cantidad } = barra;
+        const longitudEnMetros = longitudTotal;
+        const pesoTotal = pesoLineal * longitudEnMetros * cantidad;  // Aquí se multiplica por cantidad
+
+        if (!resultados[nombreFiltro2]) {
+          resultados[nombreFiltro2] = { totalPeso: 0, totalCantidad: 0 };
+        }
+        resultados[nombreFiltro2].totalPeso += pesoTotal;
+        resultados[nombreFiltro2].totalCantidad += cantidad;  // Sumamos la cantidad total
+      });
+
+      // Calcular el promedio de peso para cada nombreFiltro2
+      const promedios = {};
+      Object.keys(resultados).forEach(key => {
+        const { totalPeso, totalCantidad } = resultados[key];
+        promedios[key] = totalPeso / totalCantidad;  // Calcula el promedio de peso considerando la cantidad
+      });
+
+      console.log("Promedios de peso por nombreFiltro2:", promedios);
+
+      const saveResponse = await fetch(`${API_BASE_URL}/api/crearPesoPromedio`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ urn: urn, pesos: promedios })
+      });
+
+      if (!saveResponse.ok) {
+        console.log("Error en la respuesta de inserción", saveResponse);
+      }
+
+      const saveResult = await saveResponse.json();
+      console.log('Saved weight averages:', saveResult);
+
+      return promedios;
     }
+  } catch (error) {
+    console.log("Error fetching or processing bar data:", error);
+    throw error;
+  }
 };
 
 porcentajePedidoTotal = async (urn) => {
@@ -637,6 +634,8 @@ porcentajePedidoTotal = async (urn) => {
     }
     convertirLongitud (valor, unidades) {
         let largoActual = parseFloat(valor);
+        console.log("llama a conversor "+valor);
+        console.log("llama a conversor "+unidades);
         if (isNaN(largoActual)) {
             return 0;
         }
@@ -652,10 +651,11 @@ porcentajePedidoTotal = async (urn) => {
         }
         // Convertir de centímetros
         if (unidades.includes("centimeters")) {
-            return largoActual / 100; // Ya está en centímetros, ajusta según necesidad
+            return largoActual / 100; // 
         }
         // Convertir de milímetros
         if (unidades.includes("millimeters")) {
+         
             return largoActual / 1000; // Convertir de milímetros a centímetros
         }
         // Convertir de pulgadas
@@ -744,19 +744,19 @@ porcentajePedidoTotal = async (urn) => {
                             estadosVisibilidadVista: valores['Estados de visibilidad en vista'],
                             geometria: valores['Geometría'],
                             estilo: valores['Estilo'],
-                            a: valores['A'],
-                            b: valores['B'],
-                            c: valores['C'],
-                            d: valores['D'],
-                            e: valores['E'],
-                            f: valores['F'],
-                            g: valores['G'],
-                            h: valores['H'],
-                            j: valores['J'],
-                            i: valores['I'],
-                            k: valores['K'],
-                            o: valores['O'],
-                            r: valores['R'],
+                            a: this.convertirLongitud(valores['A'], valores['AUnits']),
+                            b: this.convertirLongitud(valores['B'], valores['BUnits']),
+                            c: this.convertirLongitud(valores['C'], valores['CUnits']),
+                            d: this.convertirLongitud(valores['D'], valores['DUnits']),
+                            e: this.convertirLongitud(valores['E'], valores['EUnits']),
+                            f: this.convertirLongitud(valores['F'], valores['FUnits']),
+                            g: this.convertirLongitud(valores['G'], valores['GUnits']),
+                            h: this.convertirLongitud(valores['H'], valores['HUnits']),
+                            j: this.convertirLongitud(valores['J'], valores['JUnits']),
+                            i: this.convertirLongitud(valores['I'], valores['IUnits']),
+                            k: this.convertirLongitud(valores['K'], valores['KUnits']),
+                            o: this.convertirLongitud(valores['O'], valores['OUnits']),
+                            r: this.convertirLongitud(valores['R'], valores['RUnits']),
                             volumenRefuerzo: parseFloat(valores['Volumen de refuerzo'] || '0'),
                             reglaDiseno: valores['Regla de diseño'],
                             cantidad: parseFloat(valores['Cantidad'] || valores['Quantity'] || '0'),
@@ -811,6 +811,7 @@ porcentajePedidoTotal = async (urn) => {
             
         });
     };
+    
     consultaFiltro = (filtros) => {
         return new Promise((resolve, reject) => {
             if (!this.viewer || !this.viewer.model) {
