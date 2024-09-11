@@ -377,7 +377,9 @@ class Viewer extends React.Component {
     
             const filtrado1 = response.data.filtro01;
             const filtrado2 = response.data.filtro02;
-    
+            this.context.updateFiltrado1(filtrado1);
+            this.context.updateFiltrado2(filtrado2);
+          
             // Actualiza el estado con los nuevos filtros y fierros.
             await this.setStateAsync({ filtro1: filtrado1, filtro2: filtrado2, fierros: response.data.variableBarra });
     
@@ -439,7 +441,15 @@ class Viewer extends React.Component {
                 this.context.registerAction('obtenerIdsSinFecha', this.obtenerIdsSinFecha);
                 this.context.registerAction('buscaBarrasHormigon', this.buscaBarrasHormigon);
                 this.context.registerAction('gestionarYpintarIds', this.pintarIdFecha);
-                
+                this.context.registerAction('updateFiltrado1', (nuevoFiltrado) => {
+                    this.setState({ filtro1: nuevoFiltrado });
+                    this.context.updateFiltrado1(nuevoFiltrado);
+                  });
+            
+                  this.context.registerAction('updateFiltrado2', (nuevoFiltrado) => {
+                    this.setState({ filtro2: nuevoFiltrado });
+                    this.context.updateFiltrado2(nuevoFiltrado);
+                  });
             })
             .catch(err => console.error(err));
     }

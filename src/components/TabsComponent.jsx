@@ -49,7 +49,10 @@ const TabComponent = ({ urnBuscada }) => {
     const [adicional, setAdicional] = useState({ diametro: '', cantidad: '', largo: '' });
     const [adicionales, setAdicionales] = useState([]);
     const [selectedButtons, setSelectedButtons] = useState({});
-    const { updateIdentificadoresActuales } = useActions();
+    const { updateIdentificadoresActuales,filtrado1, 
+        filtrado2, 
+        updateFiltrado1, 
+        updateFiltrado2 } = useActions();
     const[esAdministradorEditor,setAdministradorEditor] = useState('');
     const [showConfirmChange, setShowConfirmChange] = useState(false);
     const [pedidoActual, setPedidoActual]=useState([]);
@@ -58,6 +61,7 @@ const TabComponent = ({ urnBuscada }) => {
     const userId = localStorage.getItem('userId');
     const { logout } = useAuth();
     const [tokenVar, setToken] = useState(null);
+   
     const handleOpenModalWithInfo = async (pedido) => {
         setPedidoActual(pedido);
         setModalInfo({ show: true, data: pedido });
@@ -76,6 +80,7 @@ const TabComponent = ({ urnBuscada }) => {
         revisionPermisos ();
        
     };
+    
     const verificarUsuario = async () => {
         try {
             const userId = localStorage.getItem('userId');
@@ -842,7 +847,9 @@ const TabComponent = ({ urnBuscada }) => {
                 <Tab eventKey="filtrosVisuales" title={<span><img src={getTabIcon('filtrosVisuales')} alt="Icono Filtros Visuales" /> Filtros visuales</span>}>
                     <div style={tabContentStyle}>
                         <div className="filasContenido" style={filasContenido}>
-                            <label htmlFor="particionHA" style={labelStyle}>Valores para AEC partición HA</label>
+                        <label htmlFor="particionHA" style={labelStyle}>
+                                Valores Para {filtrado1 || 'Filtro 1'}
+                            </label>
                             <Select
                                 isMulti
                                 options={opcionesParticionHA}
@@ -855,7 +862,9 @@ const TabComponent = ({ urnBuscada }) => {
                             />
                         </div>
                         <div className="filasContenido" style={filasContenido}>
-                            <label htmlFor="piso" style={labelStyle}>Valores para AEC Piso</label>
+                        <label htmlFor="piso" style={labelStyle}>
+                                Valores para {filtrado2 || 'Filtro 2'}
+                            </label>
                             <Select
                                 isMulti
                                 options={opcionesPiso}

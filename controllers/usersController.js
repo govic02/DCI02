@@ -1,6 +1,6 @@
 import Users from '../models/users.js';
 import nodemailer from 'nodemailer';
-// Obtener todos los usuarios
+import mongoose from 'mongoose';
 
 const transporter = nodemailer.createTransport({
     service: 'gmail', // Usa el servicio de Gmail, puedes cambiarlo por otro si prefieres
@@ -65,23 +65,42 @@ const obtenerUsuarioPorUsername = async (req, res) => {
 
 // Crear un nuevo usuario
 const crearUsuario = async (req, res) => {
-    try {
-      console.log("Recibo datos");
-      console.log(req.body);
-  
-      // Verificar si ya existe un usuario con el mismo email
-      const usuarioExistente = await Users.findOne({ username: new RegExp(`^${req.body.email}$`, 'i') });
-      if (usuarioExistente) {
-        console.log("ya existe");
-        return res.status(400).send('Ya existe un usuario registrado con ese correo electrónico.');
-      }
-  
-      const idUsu = Date.now();
-      const nuevoUsuario = new Users({
-        ...req.body,
-        idUsu: idUsu,
-      });
-      await nuevoUsuario.save();
+
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    console.log("Recibo datos");
+    console.log(req.body);
+    const { fullname, username, password, tipoUsuario } = req.body;
+    // Verificar si ya existe un usuario con el mismo email o username
+
+    const email = username.toLowerCase();
+    const usernameNormalizado = username.toLowerCase();
+
+     const usuarioExistente = await Users.findOne({
+      $or: [
+        { email: email },
+        { username: usernameNormalizado }
+      ]
+    }).session(session);
+
+    if (usuarioExistente) {
+      await session.abortTransaction();
+      console.log("ya existe");
+      return res.status(400).send('Ya existe un usuario registrado con ese correo electrónico o nombre de usuario.');
+    }
+
+    const nuevoUsuario = new Users({
+      fullname,
+      username: usernameNormalizado,
+      email,
+      password,
+      tipoUsuario,
+      idUsu: Date.now()
+    });
+
+    await nuevoUsuario.save({ session });
+
   
       // Prepara el mensaje de bienvenida
       const mailOptions = {
@@ -111,13 +130,18 @@ const crearUsuario = async (req, res) => {
           console.log('Correo enviado: ' + info.response);
         }
       });*/
+      await session.commitTransaction();
       console.log("se creó");
       res.json(nuevoUsuario);
     } catch (error) {
+      await session.abortTransaction();
       console.error("Error al crear el usuario:", error);
       res.status(400).send(error.message);
+    } finally {
+      session.endSession();
     }
   };
+
   
 // Actualizar un usuario por idUsu
 const actualizarUsuario = async (req, res) => {

@@ -17,7 +17,8 @@ export const ActionsProvider = ({ children, viewerRef }) => {
 
     const [resultadoFierros, setResultadoFierros] = useState([]);
     const [seleccionActual, setSeleccionActual] = useState([]);
-
+    const [filtrado1, setFiltrado1] = useState('');
+    const [filtrado2, setFiltrado2] = useState('');
 
     const actualizarResultadoFierros = (nuevosFierros) => {
         setResultadoFierros(nuevosFierros);
@@ -58,7 +59,13 @@ export const ActionsProvider = ({ children, viewerRef }) => {
         
         setDatosFiltro2(nuevosDatos);
     };
-
+    const updateFiltrado1 = (nuevoFiltrado) => {
+        setFiltrado1(nuevoFiltrado);
+      };
+    
+    const updateFiltrado2 = (nuevoFiltrado) => {
+        setFiltrado2(nuevoFiltrado);
+    };
     return (
         <ActionsContext.Provider 
               value={{ ...actions,  registerAction, 
@@ -79,7 +86,11 @@ export const ActionsProvider = ({ children, viewerRef }) => {
                                     resultadoFierros,
                                     actualizarResultadoFierros,
                                     seleccionActual,
-                                    actualizarSeleccionActual 
+                                    actualizarSeleccionActual,
+                                    filtrado1,
+                                    filtrado2,
+                                    updateFiltrado1,
+                                    updateFiltrado2 
                     }}>
             {children}
         </ActionsContext.Provider>
