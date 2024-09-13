@@ -114,6 +114,9 @@ const crearCuenta = async () => {
   //console.log("creación exitosa"); 
     window.location.reload();
   } catch (error) {
+    setModalOpen(true);
+    setMensajeError('Ya existe un usuario con el mismo e-mail asignado.');
+    setIsSubmitting(false);
     console.error('Error al crear el usuario:', error);
   }
 };

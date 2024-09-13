@@ -54,13 +54,14 @@ import {
 import { crearAdicionalPedido,obtenerAdicionalesPorPedidoId ,eliminarAdicionalPedido,obtenerAdicionalesPorUrn,transfiereAdicionalesPedidos } from '../controllers/pedidoController.js';
 import {crearActualizarLongitudPromedio ,obtenerLongitudPromedioPorUrn,eliminarLongitudPromedioPorUrn} from '../controllers/LongitudesPromedioController.js';
 import {crearActualizarPesosTotalversusPedidos, obtenerPesosTotalversusPedidosPorUrn} from '../controllers/PesosTotalversusPedidosController.js';
-
+import { v4 as uuidv4 } from 'uuid';
 
 import { 
   obtenerVistasSave, obtenerVistaSave,obtenerVistasPorUrn,crearVistaSave, eliminarVistaSave,transfiereVistas} from '../controllers/VistasSaveController.js'; // Importar los controladores de las vistas guardadas
 import Users from '../models/users.js';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
+
 dotenv.config();
 const JWT_SECRET = process.env.JWT_SECRET || 'Yb8+6Wxw9QFgJP9+R+7c31aD+aRfR2jCJCatX6Q8fgM=';
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
@@ -164,14 +165,6 @@ app.post('/api/login', async (req, res) => {
 });
 
 
-function randomString(length) {
-  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let result = '';
-  for (let i = 0; i < length; i++) {
-      result += characters.charAt(Math.floor(Math.random() * characters.length));
-  }
-  return result;
-}
 
 
 app.get('/api/gettoken', async (req, res) => {
@@ -282,81 +275,145 @@ app.get('/api/bucketsProyectos', async (req, res, next) => {
 function generateUniqueKey() {
   return '_'+crypto.randomBytes(4).toString('hex'); // Genera una cadena hexadecimal de 8 caracteres
 }
+function randomString(length) {
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+  for (let i = 0; i < length; i++) {
+      result += characters.charAt(Math.floor(Math.random() * characters.length));
+  }
+  return result;
+}
+
 app.post('/api/objects', upload.single('fileToUpload'), async (req, res) => {
   const file = req.file;
-  const { originalname, username, bucketKey } = req.body;
+  let { originalname, username, bucketKey, chunkNumber, totalChunks, fileId } = req.body;
 
   if (!file) {
     return res.status(400).json({ error: 'No se ha proporcionado un archivo válido' });
   }
 
-  // Crear un directorio temporal para almacenar el archivo ensamblado
-  const tempDir = path.join(__dirname, 'temp');
+  // Usar un identificador único para el archivo
+  const uniqueFileId = fileId || uuidv4();
+  const tempDir = path.join(__dirname, 'temp', uniqueFileId);
+
   if (!fs.existsSync(tempDir)) {
     fs.mkdirSync(tempDir, { recursive: true });
   }
 
-  // Añadir el código basado en la fecha y hora al final del nombre del archivo
-  const dateCode =generateUniqueKey();
-  const tempFileName = originalname.replace(/(\.[\w\d_-]+)$/i, `${dateCode}$1`);
-  const tempFilePath = path.join(tempDir, tempFileName);
+  // Si este es el primer chunk, generar el nombre modificado
+  let modifiedFilename;
+  if (!fileId) {
+    // Generar un código alfanumérico de 5 caracteres
+    const code = randomString(5);
+    // Agregar el código al final del nombre del archivo (antes de la extensión)
+    const ext = path.extname(originalname);
+    const baseName = path.basename(originalname, ext);
+    modifiedFilename = `${baseName}_${code}${ext}`;
 
-  // Guardar el archivo temporalmente
-  try {
-    fs.writeFileSync(tempFilePath, file.buffer);
-  } catch (err) {
-    console.error('Error al escribir el archivo temporal:', err);
-    return res.status(500).json({ error: 'Error al escribir el archivo temporal' });
+    // Guardar el nombre modificado en un archivo en tempDir
+    fs.writeFileSync(path.join(tempDir, 'filename.txt'), modifiedFilename, 'utf8');
+  } else {
+    // Leer el nombre modificado desde tempDir
+    modifiedFilename = fs.readFileSync(path.join(tempDir, 'filename.txt'), 'utf8');
   }
 
-  const totalChunks = parseInt(req.body.totalChunks); // Total de fragmentos esperados
-  const receivedChunkNumber = parseInt(req.body.chunkNumber); // Número del fragmento recibido
+  // Guardar cada chunk con su número de orden
+  const chunkPath = path.join(tempDir, `chunk_${chunkNumber}`);
+  fs.writeFileSync(chunkPath, file.buffer);
 
-  // Verificar si es el último fragmento
-  if (receivedChunkNumber === totalChunks) {
-    const assembledFilePath = tempFilePath;
-    const fileSize = fs.statSync(assembledFilePath).size;
-    const buffer = fs.readFileSync(assembledFilePath);
+  console.log(`Chunk ${chunkNumber} de ${totalChunks} recibido y almacenado.`);
 
-    const chunkSize = 10 * 1024 * 1024; // 10 MB por fragmento
-    const nbChunks = Math.ceil(fileSize / chunkSize);
-    const sessionId = randomString(12);
-    for (let i = 0; i < nbChunks; i++) {
-      const start = i * chunkSize;
-      const end = Math.min(start + chunkSize, fileSize);
-      const chunkBuffer = buffer.slice(start, end);
+  if (parseInt(chunkNumber) === parseInt(totalChunks)) {
+    // Reensamblar el archivo una vez que todos los chunks han sido recibidos
+    const assembledFilePath = path.join(tempDir, modifiedFilename);
+    const writeStream = fs.createWriteStream(assembledFilePath);
 
-      // Crear un nuevo stream para cada chunk
-      const memoryStream = new stream.Readable();
-      memoryStream.push(chunkBuffer);
-      memoryStream.push(null); // Marcar el final del stream
-
-      const range = `bytes ${start}-${end - 1}/${fileSize}`;
-      const length = end - start;
-
-      try {
-        const response = await new ObjectsApi().uploadChunk(
-          bucketKey, tempFileName,
-          length, range, sessionId,
-          memoryStream, {}, { autoRefresh: false }, req.oauth_token
-        );
-        console.log("Chunk enviado " + i);
-        if (response.statusCode !== 200 && response.statusCode !== 202) {
-          throw new Error(`Error al subir el fragmento: ${response.statusCode}`);
-        }
-      } catch (error) {
-        console.error('Error al subir el fragmento:', error);
-        fs.unlinkSync(assembledFilePath); // Eliminar archivo temporal
-        return res.status(500).json({ error: 'Error interno del servidor' });
-      }
+    for (let i = 1; i <= totalChunks; i++) {
+      const chunkPath = path.join(tempDir, `chunk_${i}`);
+      const data = fs.readFileSync(chunkPath);
+      writeStream.write(data);
+      fs.unlinkSync(chunkPath); // Eliminar el chunk después de escribirlo
     }
-    sendCompletionEmail(username);
-    fs.unlinkSync(assembledFilePath); // Eliminar archivo temporal después de subir todos los chunks
-    res.status(200).json({ message: 'Archivo completo subido y procesado exitosamente' });
+
+    writeStream.end();
+
+    writeStream.on('finish', async () => {
+      console.log('Archivo reensamblado correctamente.');
+
+      // Subir el archivo a Autodesk Forge utilizando uploadChunk
+      try {
+        const fileSize = fs.statSync(assembledFilePath).size;
+        const chunkSize = 10 * 1024 * 1024; // 10 MB por chunk
+        const nbChunks = Math.ceil(fileSize / chunkSize);
+        const sessionId = randomString(12);
+        const buffer = fs.readFileSync(assembledFilePath);
+
+        for (let i = 0; i < nbChunks; i++) {
+          const start = i * chunkSize;
+          const end = Math.min(start + chunkSize, fileSize);
+          const chunkBuffer = buffer.slice(start, end);
+
+          const memoryStream = new stream.Readable();
+          memoryStream.push(chunkBuffer);
+          memoryStream.push(null);
+
+          const range = `bytes ${start}-${end - 1}/${fileSize}`;
+          const length = end - start;
+
+          const response = await new ObjectsApi().uploadChunk(
+            bucketKey,
+            modifiedFilename,
+            length,
+            range,
+            sessionId,
+            memoryStream,
+            {},
+            req.oauth_client,
+            req.oauth_token
+          );
+
+          console.log(`Chunk ${i + 1} de ${nbChunks} subido a Forge.`);
+
+          if (response.statusCode !== 200 && response.statusCode !== 202) {
+            throw new Error(`Error al subir el fragmento a Forge: ${response.statusCode}`);
+          }
+        }
+
+        // Obtener el objectId y URN
+        const objectId = `urn:adsk.objects:os.object:${bucketKey}/${encodeURIComponent(modifiedFilename)}`;
+        const urn = Buffer.from(objectId).toString('base64');
+
+        sendCompletionEmail(username);
+        fs.unlinkSync(assembledFilePath); // Eliminar el archivo ensamblado
+        fs.unlinkSync(path.join(tempDir, 'filename.txt')); // Eliminar el archivo de nombre
+        fs.rmdirSync(tempDir); // Eliminar el directorio temporal
+
+        res.status(200).json({
+          message: 'Archivo subido y procesado exitosamente',
+          objectId,
+          urn,
+          modifiedFilename, // Enviar el nombre modificado al cliente
+          uniqueFileId,
+        });
+      } catch (error) {
+        console.error('Error al subir el archivo a Forge:', error);
+        fs.unlinkSync(assembledFilePath);
+        fs.rmdirSync(tempDir);
+        res.status(500).json({ error: 'Error interno del servidor' });
+      }
+    });
+
+    writeStream.on('error', (err) => {
+      console.error('Error al reensamblar el archivo:', err);
+      res.status(500).json({ error: 'Error al reensamblar el archivo' });
+    });
   } else {
-    res.status(202).json({ message: `Fragmento ${receivedChunkNumber} de ${totalChunks} recibido` });
+    // Enviar respuesta indicando que el chunk fue recibido
+    res.status(200).json({ message: `Chunk ${chunkNumber} recibido`, fileId: uniqueFileId, modifiedFilename });
   }
 });
+
+
 /*
 app.post('/api/objects', upload.single('fileToUpload'), async (req, res) => {
   const file = req.file;
@@ -459,27 +516,40 @@ async function sendCompletioTranslatenEmail(userEmail) {
       console.error('Error al enviar el email de notificación', error);
   }
 }
-app.post('/api/jobs', async (req, res, next) => {
+app.post('/api/jobs', async (req, res) => {
+  console.log('Intento inicio de traducción');
+  const { objectId, username } = req.body;
+
+  if (!objectId) {
+    return res.status(400).json({ error: 'objectId es requerido' });
+  }
+
+  const urn = Buffer.from(objectId).toString('base64');
+  console.log('objectId:', objectId);
+  console.log('URN codificado:', urn);
+
   let job = new JobPayload();
   job.input = new JobPayloadInput();
-  job.input.urn = req.body.objectName;
-  const username = req.body.username
+  job.input.urn = urn;
   job.output = new JobPayloadOutput([
-    new JobSvfOutputPayload()
+    {
+      type: 'svf',
+      views: ['2d', '3d'],
+    },
   ]);
-  job.output.formats[0].type = 'svf';
-  job.output.formats[0].views = ['2d', '3d'];
+
   try {
-    console.log("PREVIO JOB");
-    console.log(job);
-    // Submit a translation job using [DerivativesApi](https://github.com/Autodesk-Forge/forge-api-nodejs-client/blob/master/docs/DerivativesApi.md#translate).
-    await new DerivativesApi().translate(job, {}, req.oauth_client, req.oauth_token);
-    sendCompletioTranslatenEmail(username);
-    res.status(200).end();
+    console.log('Enviando trabajo de traducción:', job);
+    const response = await new DerivativesApi().translate(job, {}, req.oauth_client, req.oauth_token);
+    console.log('Respuesta de la API de traducción:', response.body);
+    sendCompletionTranslationEmail(username);
+    res.status(200).json({ message: 'Traducción iniciada correctamente' });
   } catch (err) {
-    next(err);
+    console.error('Error al iniciar la traducción:', err.response?.body || err);
+    res.status(500).json({ error: 'Error al iniciar la traducción', details: err.response?.body || err });
   }
 });
+
 app.post('/api/deleteObject', async (req, res, next) => {
   console.log("inicio operacion borrado");
   

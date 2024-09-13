@@ -96,10 +96,10 @@ const ListadoProyectos = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) 
         
       });
       const data = await response.json();
-    //console.log("Resultado usuario proyecto");
-    //console.log(data);
-    //console.log( urn);
-      // Puedes realizar acciones adicionales según sea necesario con la respuesta del servidor
+    console.log("Resultado usuario proyecto");
+    console.log(data);
+   console.log( urn);
+    
     } catch (error) {
       console.error('Error al actualizar el usuario-proyecto asignado:', error);
       toast.error('Error al abrir el proyecto');
@@ -233,7 +233,8 @@ const ListadoProyectos = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) 
             }
           });
           const data = await response.json();
-        //console.log(data);
+          console.log("DATOS BUCKET");
+          console.log(data);
           if (data.length > 0) {
            var data1 = data.sort((a, b) => a.objectKey.localeCompare(b.objectKey));
               //console.log("Datos ordenados:", data1);
@@ -314,6 +315,7 @@ const ListadoProyectos = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) 
       const chunkSize = 5 * 1024 * 1024; // 5 MB
       const totalChunks = Math.ceil(file.size / chunkSize);
       let currentChunk = 0;
+      let fileId = null;
       const toastId = toast.info(`Iniciando la carga de ${totalChunks} partes.`, { autoClose: false });
       while (currentChunk < totalChunks) {
         const start = currentChunk * chunkSize;
@@ -327,7 +329,9 @@ const ListadoProyectos = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) 
         formData.append('originalname', file.name);
         formData.append('bucketKey', bucketKey);
         formData.append('username', localStorage.getItem('username'));
-  
+        if (fileId) {
+          formData.append('fileId', fileId);
+        }
       //console.log(`Uploading chunk ${currentChunk + 1} of ${totalChunks}`);
         let ck = currentChunk+1
         
@@ -347,6 +351,16 @@ const ListadoProyectos = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) 
             body: formData
           });
           if (!response.ok) throw new Error('Failed to upload chunk.');
+
+          const data = await response.json();
+  
+          if (!fileId && data.fileId) {
+            fileId = data.fileId; // Guardar el fileId para las siguientes solicitudes
+          }
+  
+          toast.update(toastId, {
+            render: `Parte ${currentChunk + 1} de ${totalChunks} subida con éxito.`
+          });
           
         //console.log(`Chunk ${currentChunk + 1} uploaded successfully.`);
           
@@ -376,9 +390,10 @@ const ListadoProyectos = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) 
 
    
     var bucketKey = node.parents[0];
+    console.log("BUCKET KEY EXTRAIDO");
     var objectKey = node.id;
-  //console.log(bucketKey);
-  //console.log(objectKey);
+  console.log(bucketKey);
+  console.log(objectKey);
     const username = localStorage.getItem('username');
     try {
       toast.success(` Proceso de traducción  iniciado , el proceso tomará algunos minutos, recibirá un correo electrónico que notificará cuando esté disponible`);
@@ -394,6 +409,8 @@ const ListadoProyectos = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) 
       
      //console.log('Traducción Iniciada, espere unos instantes..');
       } else {
+        console.log("respuesta al traducir");
+        console.log(response);
         toast.success(` Error al intentar traducir , intente nuevamente`);
         console.error('Error al intentar traducir:', response.statusText);
       }
