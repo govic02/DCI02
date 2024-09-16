@@ -545,8 +545,8 @@ app.post('/api/jobs', async (req, res) => {
     sendCompletionTranslationEmail(username);
     res.status(200).json({ message: 'Traducción iniciada correctamente' });
   } catch (err) {
-    console.error('Error al iniciar la traducción:', err.response?.body || err);
-    res.status(500).json({ error: 'Error al iniciar la traducción', details: err.response?.body || err });
+    console.error('Error al iniciar la traducción:', err);
+    res.status(500).json({ error: 'Error al iniciar la traducción', details:  err });
   }
 });
 
