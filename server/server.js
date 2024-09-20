@@ -285,131 +285,141 @@ function randomString(length) {
 }
 
 app.post('/api/objects', upload.single('fileToUpload'), async (req, res) => {
-  const file = req.file;
-  let { originalname, username, bucketKey, chunkNumber, totalChunks, fileId } = req.body;
+  try {
+    const file = req.file;
+    let { originalname, username, bucketKey, chunkNumber, totalChunks, fileId } = req.body;
 
-  if (!file) {
-    return res.status(400).json({ error: 'No se ha proporcionado un archivo válido' });
-  }
-
-  // Usar un identificador único para el archivo
-  const uniqueFileId = fileId || uuidv4();
-  const tempDir = path.join(__dirname, 'temp', uniqueFileId);
-
-  if (!fs.existsSync(tempDir)) {
-    fs.mkdirSync(tempDir, { recursive: true });
-  }
-
-  // Si este es el primer chunk, generar el nombre modificado
-  let modifiedFilename;
-  if (!fileId) {
-    // Generar un código alfanumérico de 5 caracteres
-    const code = randomString(5);
-    // Agregar el código al final del nombre del archivo (antes de la extensión)
-    const ext = path.extname(originalname);
-    const baseName = path.basename(originalname, ext);
-    modifiedFilename = `${baseName}_${code}${ext}`;
-
-    // Guardar el nombre modificado en un archivo en tempDir
-    fs.writeFileSync(path.join(tempDir, 'filename.txt'), modifiedFilename, 'utf8');
-  } else {
-    // Leer el nombre modificado desde tempDir
-    modifiedFilename = fs.readFileSync(path.join(tempDir, 'filename.txt'), 'utf8');
-  }
-
-  // Guardar cada chunk con su número de orden
-  const chunkPath = path.join(tempDir, `chunk_${chunkNumber}`);
-  fs.writeFileSync(chunkPath, file.buffer);
-
-  console.log(`Chunk ${chunkNumber} de ${totalChunks} recibido y almacenado.`);
-
-  if (parseInt(chunkNumber) === parseInt(totalChunks)) {
-    // Reensamblar el archivo una vez que todos los chunks han sido recibidos
-    const assembledFilePath = path.join(tempDir, modifiedFilename);
-    const writeStream = fs.createWriteStream(assembledFilePath);
-
-    for (let i = 1; i <= totalChunks; i++) {
-      const chunkPath = path.join(tempDir, `chunk_${i}`);
-      const data = fs.readFileSync(chunkPath);
-      writeStream.write(data);
-      fs.unlinkSync(chunkPath); // Eliminar el chunk después de escribirlo
+    if (!file) {
+      return res.status(400).json({ error: 'No se ha proporcionado un archivo válido' });
     }
 
-    writeStream.end();
+    // Usar un identificador único para el archivo
+    const uniqueFileId = fileId || uuidv4();
+    const tempDir = path.join(__dirname, 'temp', uniqueFileId);
 
-    writeStream.on('finish', async () => {
-      console.log('Archivo reensamblado correctamente.');
+    if (!fs.existsSync(tempDir)) {
+      fs.mkdirSync(tempDir, { recursive: true });
+    }
 
-      // Subir el archivo a Autodesk Forge utilizando uploadChunk
+    // Si este es el primer chunk, generar el nombre modificado
+    let modifiedFilename;
+    if (!fileId) {
+      // Generar un código alfanumérico de 5 caracteres
+      const code = randomString(5);
+      // Agregar el código al final del nombre del archivo (antes de la extensión)
+      const ext = path.extname(originalname);
+      const baseName = path.basename(originalname, ext);
+      modifiedFilename = `${baseName}_${code}${ext}`;
+
+      // Guardar el nombre modificado en un archivo en tempDir
+      fs.writeFileSync(path.join(tempDir, 'filename.txt'), modifiedFilename, 'utf8');
+    } else {
+      // Leer el nombre modificado desde tempDir
+      modifiedFilename = fs.readFileSync(path.join(tempDir, 'filename.txt'), 'utf8');
+    }
+
+    // Guardar cada chunk con su número de orden
+    const chunkPath = path.join(tempDir, `chunk_${chunkNumber}`);
+    fs.writeFileSync(chunkPath, file.buffer);
+
+    console.log(`Chunk ${chunkNumber} de ${totalChunks} recibido y almacenado.`);
+
+    if (parseInt(chunkNumber) === parseInt(totalChunks)) {
+      // Reensamblar el archivo una vez que todos los chunks han sido recibidos
+      const assembledFilePath = path.join(tempDir, modifiedFilename);
+      const writeStream = fs.createWriteStream(assembledFilePath);
+
       try {
-        const fileSize = fs.statSync(assembledFilePath).size;
-        const chunkSize = 10 * 1024 * 1024; // 10 MB por chunk
-        const nbChunks = Math.ceil(fileSize / chunkSize);
-        const sessionId = randomString(12);
-        const buffer = fs.readFileSync(assembledFilePath);
-
-        for (let i = 0; i < nbChunks; i++) {
-          const start = i * chunkSize;
-          const end = Math.min(start + chunkSize, fileSize);
-          const chunkBuffer = buffer.slice(start, end);
-
-          const memoryStream = new stream.Readable();
-          memoryStream.push(chunkBuffer);
-          memoryStream.push(null);
-
-          const range = `bytes ${start}-${end - 1}/${fileSize}`;
-          const length = end - start;
-
-          const response = await new ObjectsApi().uploadChunk(
-            bucketKey,
-            modifiedFilename,
-            length,
-            range,
-            sessionId,
-            memoryStream,
-            {},
-            req.oauth_client,
-            req.oauth_token
-          );
-
-          console.log(`Chunk ${i + 1} de ${nbChunks} subido a Forge.`);
-
-          if (response.statusCode !== 200 && response.statusCode !== 202) {
-            throw new Error(`Error al subir el fragmento a Forge: ${response.statusCode}`);
-          }
+        for (let i = 1; i <= totalChunks; i++) {
+          const chunkPath = path.join(tempDir, `chunk_${i}`);
+          const data = fs.readFileSync(chunkPath);
+          writeStream.write(data);
+          fs.unlinkSync(chunkPath); // Eliminar el chunk después de escribirlo
         }
-
-        // Obtener el objectId y URN
-        const objectId = `urn:adsk.objects:os.object:${bucketKey}/${encodeURIComponent(modifiedFilename)}`;
-        const urn = Buffer.from(objectId).toString('base64');
-
-        sendCompletionEmail(username);
-        fs.unlinkSync(assembledFilePath); // Eliminar el archivo ensamblado
-        fs.unlinkSync(path.join(tempDir, 'filename.txt')); // Eliminar el archivo de nombre
-        fs.rmdirSync(tempDir); // Eliminar el directorio temporal
-
-        res.status(200).json({
-          message: 'Archivo subido y procesado exitosamente',
-          objectId,
-          urn,
-          modifiedFilename, // Enviar el nombre modificado al cliente
-          uniqueFileId,
-        });
-      } catch (error) {
-        console.error('Error al subir el archivo a Forge:', error);
-        fs.unlinkSync(assembledFilePath);
-        fs.rmdirSync(tempDir);
-        res.status(500).json({ error: 'Error interno del servidor' });
+        writeStream.end();
+      } catch (err) {
+        console.error('Error al reensamblar los chunks:', err);
+        res.status(500).json({ error: 'Error al reensamblar los chunks', details: err.message });
+        return;
       }
-    });
 
-    writeStream.on('error', (err) => {
-      console.error('Error al reensamblar el archivo:', err);
-      res.status(500).json({ error: 'Error al reensamblar el archivo' });
-    });
-  } else {
-    // Enviar respuesta indicando que el chunk fue recibido
-    res.status(200).json({ message: `Chunk ${chunkNumber} recibido`, fileId: uniqueFileId, modifiedFilename });
+      writeStream.on('finish', async () => {
+        console.log('Archivo reensamblado correctamente.');
+
+        // Subir el archivo a Autodesk Forge utilizando uploadChunk
+        try {
+          const fileSize = fs.statSync(assembledFilePath).size;
+          const chunkSize = 10 * 1024 * 1024; // 10 MB por chunk
+          const nbChunks = Math.ceil(fileSize / chunkSize);
+          const sessionId = randomString(12);
+          const buffer = fs.readFileSync(assembledFilePath);
+
+          for (let i = 0; i < nbChunks; i++) {
+            const start = i * chunkSize;
+            const end = Math.min(start + chunkSize, fileSize);
+            const chunkBuffer = buffer.slice(start, end);
+
+            const memoryStream = new stream.Readable();
+            memoryStream.push(chunkBuffer);
+            memoryStream.push(null);
+
+            const range = `bytes ${start}-${end - 1}/${fileSize}`;
+            const length = end - start;
+
+            const response = await new ObjectsApi().uploadChunk(
+              bucketKey,
+              modifiedFilename,
+              length,
+              range,
+              sessionId,
+              memoryStream,
+              {},
+              req.oauth_client,
+              req.oauth_token
+            );
+
+            console.log(`Chunk ${i + 1} de ${nbChunks} subido a Forge.`);
+
+            if (response.statusCode !== 200 && response.statusCode !== 202) {
+              throw new Error(`Error al subir el fragmento a Forge: ${response.statusCode}`);
+            }
+          }
+
+          // Obtener el objectId y URN
+          const objectId = `urn:adsk.objects:os.object:${bucketKey}/${encodeURIComponent(modifiedFilename)}`;
+          const urn = Buffer.from(objectId).toString('base64');
+
+          sendCompletionEmail(username);
+          fs.unlinkSync(assembledFilePath); // Eliminar el archivo ensamblado
+          fs.unlinkSync(path.join(tempDir, 'filename.txt')); // Eliminar el archivo de nombre
+          fs.rmdirSync(tempDir); // Eliminar el directorio temporal
+
+          res.status(200).json({
+            message: 'Archivo subido y procesado exitosamente',
+            objectId,
+            urn,
+            modifiedFilename, // Enviar el nombre modificado al cliente
+            uniqueFileId,
+          });
+        } catch (error) {
+          console.error('Error al subir el archivo a Forge:', error);
+          fs.unlinkSync(assembledFilePath);
+          fs.rmdirSync(tempDir);
+          res.status(500).json({ error: 'Error interno del servidor', details: error.message });
+        }
+      });
+
+      writeStream.on('error', (err) => {
+        console.error('Error al reensamblar el archivo:', err);
+        res.status(500).json({ error: 'Error al reensamblar el archivo', details: err.message });
+      });
+    } else {
+      // Enviar respuesta indicando que el chunk fue recibido
+      res.status(200).json({ message: `Chunk ${chunkNumber} recibido`, fileId: uniqueFileId, modifiedFilename });
+    }
+  } catch (err) {
+    console.error('Error en el procesamiento del archivo:', err);
+    res.status(500).json({ error: 'Error en el procesamiento del archivo', details: err.message });
   }
 });
 
@@ -524,21 +534,21 @@ app.post('/api/jobs', async (req, res) => {
     return res.status(400).json({ error: 'objectId es requerido' });
   }
 
-  const urn = Buffer.from(objectId).toString('base64');
-  console.log('objectId:', objectId);
-  console.log('URN codificado:', urn);
-
-  let job = new JobPayload();
-  job.input = new JobPayloadInput();
-  job.input.urn = urn;
-  job.output = new JobPayloadOutput([
-    {
-      type: 'svf',
-      views: ['2d', '3d'],
-    },
-  ]);
-
   try {
+    const urn = Buffer.from(objectId).toString('base64');
+    console.log('objectId:', objectId);
+    console.log('URN codificado:', urn);
+
+    let job = new JobPayload();
+    job.input = new JobPayloadInput();
+    job.input.urn = urn;
+    job.output = new JobPayloadOutput([
+      {
+        type: 'svf',
+        views: ['2d', '3d'],
+      },
+    ]);
+
     console.log('Enviando trabajo de traducción:', job);
     const response = await new DerivativesApi().translate(job, {}, req.oauth_client, req.oauth_token);
     console.log('Respuesta de la API de traducción:', response.body);
@@ -546,7 +556,7 @@ app.post('/api/jobs', async (req, res) => {
     res.status(200).json({ message: 'Traducción iniciada correctamente' });
   } catch (err) {
     console.error('Error al iniciar la traducción:', err);
-    res.status(500).json({ error: 'Error al iniciar la traducción', details:  err });
+    res.status(500).json({ error: 'Error al iniciar la traducción', details: err.message });
   }
 });
 
