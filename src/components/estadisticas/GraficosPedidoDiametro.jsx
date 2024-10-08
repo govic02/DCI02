@@ -18,12 +18,12 @@ const GraficosPedidoDiametro = ({ urn }) => {
     const [loading, setLoading] = useState(true); // Nuevo estado para manejar el cargado de datos
     const [sinDatos, setSinDatos] = useState(false); // Estado para manejar la ausencia de datos
 
-    const generarColorAleatorio = () => {
-        const r = Math.floor(Math.random() * 256);
-        const g = Math.floor(Math.random() * 256);
-        const b = Math.floor(Math.random() * 256);
-        return `rgb(${r},${g},${b})`;
-    };
+    // Paleta de 12 colores cálidos
+    const coloresCalidos = [
+        '#FF5733', '#FF8D1A', '#FFC300', '#FF5733', '#FF6F61',
+        '#FF7F50', '#FF4500', '#FF6347', '#FFA07A', '#FFD700',
+        '#FFA500', '#FFB347'
+    ];
 
     useEffect(() => {
         const fetchDatos = async () => {
@@ -56,7 +56,6 @@ const GraficosPedidoDiametro = ({ urn }) => {
                         if (barra) {
                             const diametroRedondeado = Math.round(barra.diametroBarra * 10) / 10; // Redondea a un decimal
                             diametrosSet.add(diametroRedondeado);
-                            //diametrosSet.add(barra.diametroBarra);
                             if (!pesosPorPedidoYDiametro[pedido.nombre_pedido][barra.diametroBarra]) {
                                 pesosPorPedidoYDiametro[pedido.nombre_pedido][barra.diametroBarra] = 0;
                             }
@@ -71,11 +70,12 @@ const GraficosPedidoDiametro = ({ urn }) => {
                 let datasets = [];
                 let diametrosVistos = {};
                 const redondearDiametro = (diametro) => Math.round(diametro * 100) / 100;
+
                 Object.keys(pesosPorPedidoYDiametro).forEach((pedido, idx) => {
                     Object.entries(pesosPorPedidoYDiametro[pedido]).forEach(([diametro, peso], i) => {
                         const diametroRedondeado = Math.round(diametro * 10) / 10; // Redondea a un decimal
                         if (!diametrosVistos[diametroRedondeado]) {
-                            diametrosVistos[diametroRedondeado] = generarColorAleatorio();
+                            diametrosVistos[diametroRedondeado] = coloresCalidos[Object.keys(diametrosVistos).length % coloresCalidos.length]; // Usa un color de la paleta
                         }
                         if (!datasets.some(dataset => dataset.label === `Diámetro ${diametroRedondeado}`)) {
                             datasets.push({
@@ -98,8 +98,6 @@ const GraficosPedidoDiametro = ({ urn }) => {
                 setSinDatos(labels.length === 0 || datasets.length === 0);
                 console.log("data set");
                 console.log(datasets);
-                console.log("data grafico");
-                console.log(datosGrafico);
             } catch (error) {
                 console.error("Error al obtener los datos para pedidos y barras:", error);
                 setSinDatos(true);
@@ -114,7 +112,6 @@ const GraficosPedidoDiametro = ({ urn }) => {
     const options = {
         responsive: true,
         scales: {
-            
             x: {
                 stacked: true,
                 barThickness: 20,
@@ -183,7 +180,6 @@ const GraficosPedidoDiametro = ({ urn }) => {
             </CardContent>
         </Card>
     );
-    
 };
 
 export default GraficosPedidoDiametro;
