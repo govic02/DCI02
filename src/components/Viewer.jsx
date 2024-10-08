@@ -79,11 +79,13 @@ class Viewer extends React.Component {
                 toast.success('Proceso completado con barras encontradas.');
                 // Aislar solo los IDs de las barras encontradas
                 const idsParaIsolar = resultado_fierros.map((barra) => barra.id);
+                console.log("barras encontradas");
+                console.log(idsParaIsolar);
                 this.viewer.isolate(idsParaIsolar);
                 this.calcularPesoYActualizarContexto(resultado_fierros.map(barra => barra.id));
                 this.context.actualizarResultadoFierros(resultado_fierros); // Actualiza con los objetos completos de las barras
                 this.context.actualizarSeleccionActual(seleccionActual);
-              //console.log("Barras que intersectan con la selección:", resultado_fierros);
+              console.log("Barras que intersectan con la selección:", resultado_fierros);
             } else {
                 toast.warn('No se encontraron barras que intersectan con la selección.');
               //console.log("No se encontraron barras que intersectan con la selección.");
@@ -102,6 +104,9 @@ class Viewer extends React.Component {
     
     calcularPesoYActualizarContexto = async (resultado_fierros) => {
         const identificadores = resultado_fierros; // Asume que resultado_fierros es un array de IDs
+
+        console.log("calculo pesos");
+        console.log(identificadores);
         const {  nombreParametroPesoLineal,  nombreParametrolargo} = this.state;
         let pesoTotal = 0;
         let largoTotal = 0;
@@ -121,10 +126,10 @@ class Viewer extends React.Component {
                 if (prop.attributeName === nombreParametroPesoLineal && parseFloat(prop.displayValue) > 0) {
                      if (prop.units) {
                          if (prop.units.includes("kilograms") || prop.units.includes("kilos") || prop.units.includes("kilogramos")) {
-                         //console.log("peso actual Kilos",prop.displayValue);
+           //               console.log("peso actual Kilos",prop.displayValue);
                             pesoActual = parseFloat(prop.displayValue); // No se necesita conversión
                          } else if (prop.units.includes("pounds") || prop.units.includes("libras")) {
-                          //console.log("peso actual libras",prop.displayValue);
+                        //   console.log("peso actual libras",prop.displayValue);
                              pesoActual = parseFloat(prop.displayValue) * 1.48816394; // libras x pie ==> kg por mtr
                          }
                      } else {
@@ -200,9 +205,9 @@ class Viewer extends React.Component {
             }
         });
     
-      //console.log("Peso Total:", pesoTotal.toFixed(1));
-      //console.log("Largo Total:", largoTotal.toFixed(1));
-      //console.log("Total Barras:", totalBarras);
+      // console.log("Peso Total:", pesoTotal.toFixed(1));
+      // console.log("Largo Total:", largoTotal.toFixed(1));
+     // console.log("Total Barras:", totalBarras);
     
         // Actualizar el contexto con los nuevos valores
         this.context.updatePesoTotal(pesoTotal);
@@ -565,6 +570,7 @@ class Viewer extends React.Component {
             this.props.guardarIdentificadores([]);
             this.viewer.fitToView(this.viewer.model);
             this.context.actualizarResultadoFierros([]);
+        
         this.restaurarColoresOriginales();
         }
         
@@ -594,14 +600,16 @@ class Viewer extends React.Component {
            let esBarraValida = false; // Asumimos que no es válida hasta encontrar las propiedades necesarias
            let cantidadActual = 0;
            result.properties.forEach(prop => {
-            console.log(prop);
+            //console.log("propiedad " +nombreParametroPesoLineal);
+            // console.log(prop);
                if (prop.attributeName === nombreParametroPesoLineal && parseFloat(prop.displayValue) > 0) {
+                   
                     if (prop.units) {
                         if (prop.units.includes("kilograms") || prop.units.includes("kilos") || prop.units.includes("kilogramos")) {
-                         console.log("peso actual Kilos",prop.displayValue);
+                      //   console.log("peso actual Kilos",prop.displayValue);
                             pesoActual = parseFloat(prop.displayValue); // No se necesita conversión
                         } else if (prop.units.includes("pounds") || prop.units.includes("libras")) {
-                          console.log("peso actual libras",prop.displayValue);
+                     //     console.log("peso actual libras",prop.displayValue);
                             pesoActual = parseFloat(prop.displayValue) * 1.48816394; // libras x pie ==> kg por mtr
                         }
                     } else {
@@ -609,59 +617,59 @@ class Viewer extends React.Component {
                         pesoActual = parseFloat(prop.displayValue);
                     }
                    esBarraValida = true; // Se encontró peso, marcamos como válida
-                   console.log("parametro largo "+nombreParametrolargo);
-                   console.log("condición "+prop.displayValue);
+                 //  console.log("parametro largo "+nombreParametrolargo);
+                //   console.log("condición "+prop.displayValue);
                    
                } else if ((prop.attributeName === nombreParametrolargo)||(prop.displayName === nombreParametrolargo) && parseFloat(prop.displayValue) > 0) {
-                 console.log("prop units "+prop.units);
+               //  console.log("prop units "+prop.units);
                     if (prop.units) {
                         if (prop.units.includes("autodesk.unit.unit:meters")) {
-                          console.log("tipo de unidad metros");
+                         // console.log("tipo de unidad metros");
                             largoActual = parseFloat(prop.displayValue) ; // *100 Convertir de metros a centímetros
                         } else if (prop.units.includes("feet-")) {
-                          console.log("encuentro pies");
-                          console.log("tipo de unidad pies");
+                       //   console.log("encuentro pies");
+                       //   console.log("tipo de unidad pies");
                             largoActual = parseFloat(prop.displayValue) * 30.48 *(0.01); // 
                         } else if (prop.units.includes("centimeters")) {
-                          console.log("tipo de unidad centimetros");
+                        //  console.log("tipo de unidad centimetros");
                             largoActual = parseFloat(prop.displayValue) / 100; //
                         }
                         else if (prop.units.includes("millimeters")) {
-                          console.log("tipo de unidad milimetros");
+                       //   console.log("tipo de unidad milimetros");
                             largoActual = parseFloat(prop.displayValue) /1000; //  milimetros a cm
                         }
                         else if (prop.units.includes("inches")) {
-                          console.log("tipo de unidad pulgadas");
-                          console.log("inches");
+                      //    console.log("tipo de unidad pulgadas");
+                        //  console.log("inches");
                             largoActual = parseFloat(prop.displayValue) *2.54 * (0.01); // 
                         }
                         else if (prop.units.includes("feetFractionalInches")) {
-                          console.log("tipo de unidad pies fraccionados pulgadas");
+                        //  console.log("tipo de unidad pies fraccionados pulgadas");
                           
                             largoActual = parseFloat(prop.displayValue) *30.48 * (0.01); //
-                          console.log("feetFractionalInches",prop.displayValue);
-                          console.log("feetFractionalInches",largoActual);
+                        //  console.log("feetFractionalInches",prop.displayValue);
+                       //   console.log("feetFractionalInches",largoActual);
                         }
                         else if (prop.units.includes("fractionalInches")) {
-                          console.log("tipo de unidad  pulgadas fraccionadas");
+                        //  console.log("tipo de unidad  pulgadas fraccionadas");
                            
                             largoActual = parseFloat(prop.displayValue) *2.54 * (0.01); //
-                          console.log(largoActual+"  "+prop.displayValue);
-                          console.log("fractionalInches actual",largoActual);
+                         // console.log(largoActual+"  "+prop.displayValue);
+                        //  console.log("fractionalInches actual",largoActual);
                         }
                         else if (prop.units.includes("decimeters")) {
-                          console.log("tipo de unidad decimetros");
-                          console.log("decimeters");
+                        //  console.log("tipo de unidad decimetros");
+                       //   console.log("decimeters");
                             largoActual = parseFloat(prop.displayValue) *0.1 ; //
                         }
                         else if (prop.units.includes("metersCentimeters")) {
-                          console.log("tipo de unidad metros centimetros");
-                          console.log("metersCentimeters");
+                       //   console.log("tipo de unidad metros centimetros");
+                        //  console.log("metersCentimeters");
                             largoActual = (parseFloat(prop.displayValue)) /100 ; //
                         }
                         else if (prop.units.includes("usSurveyFeet")) {
-                          console.log("tipo de unidad US Survey pie");
-                          console.log("usSurveyFeet");
+                        //  console.log("tipo de unidad US Survey pie");
+                      //    console.log("usSurveyFeet");
                             largoActual = (parseFloat(prop.displayValue)) *30.48006096 *(0.01); //
                         }//
                     } else {
@@ -676,11 +684,16 @@ class Viewer extends React.Component {
            });
            
            if (esBarraValida) {
+           
                // Solo acumula y cuenta si es una barra válida
                pesoTotal += pesoActual * (largoActual);
                largoTotal += (largoActual);
               // totalBarras += 1; // Incrementamos el contador de barras válidas
                totalBarras +=cantidadActual;
+             //  console.log("barra valida");
+             //  console.log("peso total "+ pesoTotal);
+            //   console.log("largo "+largoTotal);
+            //   console.log("cantidad "+  totalBarras);
            }
        });
    

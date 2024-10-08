@@ -61,7 +61,7 @@ const TabComponent = ({ urnBuscada }) => {
     const userId = localStorage.getItem('userId');
     const { logout } = useAuth();
     const [tokenVar, setToken] = useState(null);
-   
+    const { resultadoFierros } = useActions(); 
     const handleOpenModalWithInfo = async (pedido) => {
         setPedidoActual(pedido);
         setModalInfo({ show: true, data: pedido });
@@ -76,7 +76,7 @@ const TabComponent = ({ urnBuscada }) => {
         Invitado: []
     };
     const handleNextStateClick = () => {
-      //console.log("AQUIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII");
+      console.log("AQUIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII");
         revisionPermisos ();
        
     };
@@ -382,6 +382,8 @@ const TabComponent = ({ urnBuscada }) => {
         updatePesoTotal(0);
         updateLargoTotal(0);
         updateTotalBarras(0);
+        setSelectedIds([]); // Limpia selectedIds
+       
     }
     const fetchPedidosAct = async () => {
         try {
@@ -401,7 +403,7 @@ const TabComponent = ({ urnBuscada }) => {
     };
     const viewPedido = (ids) => {
         const idsInt = ids.map(id => parseInt(id, 10)); // Convierte cada elemento a entero
-      //console.log("IDs del pedido:", idsInt);
+        console.log("IDs del pedido:", idsInt);
         filtrar(idsInt);
         setSelectedIds(idsInt);
       };
@@ -558,13 +560,19 @@ const TabComponent = ({ urnBuscada }) => {
         }
         setIsSubmitting(true); 
       //console.log("Nombre del pedido:", pedidoNombre);
-        // Suponiendo que tienes un estado o una forma de obtener los IDs seleccionados, 
-        // aquí es donde mostrarías esos IDs. 
-        // A modo de ejemplo, usaré un estado ficticio llamado selectedIds para esta demostración:
-       
-      //console.log("Lista de IDs seleccionados:", selectedIds);
+     
+      const selectedIdsFromContext = resultadoFierros.map(fierro => fierro.id);
+      console.log("Lista de IDs seleccionados:", selectedIds);
+      console.log("Lista de IDs seleccionados2:", selectedIdsFromContext);
+     
+      let idsParaUsar = selectedIdsFromContext.length > 0 ? selectedIdsFromContext : selectedIds;
+      if (idsParaUsar.length === 0) {
+        toast.error("No hay IDs seleccionados para el pedido");
+        setIsSubmitting(false);
+        return;
+    }
         const datosPedido = {
-            ids: selectedIds,
+            ids:  idsParaUsar,
             fecha: new Date().toISOString().slice(0, 10), // Fecha actual en formato YYYY-MM-DD
             nombre_pedido: pedidoNombre,
             urn_actual: urnBuscada, // Asumiendo que urnBuscada es la URN actual del modelo
@@ -598,6 +606,8 @@ const TabComponent = ({ urnBuscada }) => {
                 };
                 const respuestaCSV = await axios.post(`${API_BASE_URL}/api/pedidoCVS`, pedidoInfo);
        
+                setSelectedIds([]); // Limpia selectedIds
+                updateResultadoFierros([]); // Limpia resultadoFierros (en el contexto)
                 const emailData = {
                     to: email, // Cambia esto por la dirección de correo a la que quieres enviar el mail
                     subject: 'Nuevo Pedido Creado',
@@ -606,6 +616,7 @@ const TabComponent = ({ urnBuscada }) => {
                            <p>Longitud Total: ${largoTotal.toFixed(1)} mts</p>
                            <p>Puedes descargar el archivo del pedido desde el siguiente enlace: <a href="${respuestaCSV.data.fileUrl}">Descargar Pedido</a></p>`
                 };
+
                 await axios.post(`${API_BASE_URL}/api/send-mail`, emailData);
             }
             if (respuesta.status === 305) {
@@ -613,7 +624,7 @@ const TabComponent = ({ urnBuscada }) => {
             }
         } catch (error) {
             console.error("Error al crear el pedido", error);
-            toast.error("Error al crear el pedido, vuelva a intentarlo");
+           // toast.error("Error al crear el pedido, vuelva a intentarlo");
             // Mantener el modal abierto para permitir correcciones
         }
         setIsSubmitting(false);
@@ -726,6 +737,16 @@ const TabComponent = ({ urnBuscada }) => {
       useEffect(() => {
         fetchFilters();
     }, [urnBuscada]);
+
+    const getLatestState = (estados, estadosData) => {
+        for (let i = estados.length - 1; i >= 0; i--) {
+            const estado = estados[i];
+            if (estadosData && estadosData[estado] && estadosData[estado].est === 'ok') {
+                return estado.replace('_', ' '); // Reemplaza guiones bajos por espacios si es necesario
+            }
+        }
+        return 'N/A'; // Retorna 'N/A' si no hay ningún estado actualizado
+    };
       const fetchFilters = async () => {
         if (tokenVar) {
             try {
@@ -925,13 +946,20 @@ const TabComponent = ({ urnBuscada }) => {
     overflowY: pedidos.length > 5 ? 'scroll' : 'hidden' // Permite desplazamiento vertical sólo si hay más de 5 elementos
 }}>
                 {pedidos.map((pedido, index) => (
+                    
                     <div key={index} className="list-group-item d-flex justify-content-between align-items-center">
                         <div className="flex-grow-1">
-                            <span className="fw-bold text-truncate" style={{ fontWeight:'bold' }}>{pedido.nombre_pedido}</span>
+                            <span className="fw-bold text-truncate" style={{ fontWeight:'bold' }}>
+                            {pedido.nombre_pedido.length > 9 ? pedido.nombre_pedido.substring(0,9) + '...' : pedido.nombre_pedido}
+                            </span>
                             <span> | </span>
                             <span>Fecha:</span><span className="text-truncate" style={{ color: '#DA291C' }}> {pedido.fecha}</span>
                             <span> | </span>
                            <span>Peso Total:</span> <span className="text-truncate" style={{ color: '#DA291C',fontWeight:'bold' }}> {pedido.pesos} kg</span>
+                           <span> | </span>
+                           <span className="text-truncate" >
+                                {getLatestState(estados, pedido.estados)}
+                            </span>
                         </div>
                         <div>
                         <Button 

@@ -162,9 +162,11 @@ class ViewerProyectos extends React.Component {
                 return;  // Detener la carga si se excede el número de cambios
             }
             try {
-                this.viewer.tearDown(); // Desmonta el modelo actual
-                this.viewer.finish(); // Finaliza y limpia el visor
-                this.viewer = null; // Elimina la referencia al visor
+              if (this.viewer) {
+                  this.viewer.tearDown(); // Desmonta el modelo actual
+                  this.viewer.finish(); // Finaliza y limpia el visor
+                  this.viewer = null; // Elimina la referencia al visor
+               }
                 this.viewer = new Autodesk.Viewing.GuiViewer3D(this.container.current);
               
                 this.viewer.start();
@@ -183,12 +185,12 @@ class ViewerProyectos extends React.Component {
                         } catch (error) {
                             // Captura errores durante la carga del documento
                           //console.log("Error al cargar el documento:", error);
-                            toast.info('Error al cargar el documento. Intenta nuevamente más tarde.');
+                          toast.info('Error al cargar el documento. Intenta nuevamente más tarde.', { toastId: 'errorCargarDocumento' });
                         }
                     },
                     (code, message, errors) => { 
                       //console.log("no se pudo cargar debe traducir");
-                        toast.info('No se pudo abrir, proceso de traducción del archivo iniciado');
+                      toast.info('Error al cargar. Verifica la URN e intenta nuevamente.', { toastId: 'errorCargarURN' });
                       //console.log(code, message, errors);
                     }
                 );
@@ -604,7 +606,8 @@ porcentajePedidoTotal = async (urn) => {
       //console.log("objeto con barras",idsBarras);
         const batchSize = 1000; 
         const numBatches = Math.ceil(idsBarras.length / batchSize);
-        toast.success('Inicio proceso de carga de barras');
+        const toastId = 'inicioCargaBarras';
+        toast.success('Inicio proceso de carga de barras', { toastId: 'inicioCargaBarras' });
         try {
             for (let i = 0; i < numBatches; i++) {
                 const batch = idsBarras.slice(i * batchSize, (i + 1) * batchSize);
@@ -625,17 +628,29 @@ porcentajePedidoTotal = async (urn) => {
     
                 const responseData = await response.json();
               //console.log("Datos de barras guardados con éxito:", responseData);
-                toast.success('Datos de barras guardados con éxito grupo '+i+'  de '+numBatches-1);
-            }
+              toast.update(toastId, { 
+                render: 'Datos de barras guardados con éxito grupo ' + (i + 1) + ' de ' + numBatches,
+                type: 'success',
+                autoClose: false,
+            });
+           } toast.update(toastId, { 
+            render: 'Proceso de carga de barras completado',
+            type: 'success',
+            autoClose: 5000,
+        });
         } catch (error) {
           //console.log("Error al guardar los datos de barras:", error);
-            toast.error('Error al guardar los datos de barras: ' + error.message);
+          toast.update(toastId, {
+            render: 'Error al guardar los datos de barras: ' + error.message,
+            type: 'error',
+            autoClose: 5000,
+        });
         }
     }
     convertirLongitud (valor, unidades) {
         let largoActual = parseFloat(valor);
-        console.log("llama a conversor "+valor);
-        console.log("llama a conversor "+unidades);
+      //  console.log("llama a conversor "+valor);
+       // console.log("llama a conversor "+unidades);
         if (isNaN(largoActual)) {
             return 0;
         }
@@ -1096,8 +1111,15 @@ porcentajePedidoTotal = async (urn) => {
             Autodesk.Viewing.Document.load(
                 'urn:' + this.props.urn,
                 (doc) => {
-                    this.viewer.tearDown(); // Limpia el visor actual
-                    this.viewer.start(); // Reinicia el visor
+                        if (this.viewer) {
+                            this.viewer.tearDown(); // Limpia el visor actual
+                            this.viewer.start();    // Reinicia el visor
+                        } else {
+                            // Si this.viewer es null, inicialízalo
+                            this.viewer = new Autodesk.Viewing.GuiViewer3D(this.container.current);
+                            this.viewer.start();
+                        }
+
                     this.viewer.loadDocumentNode(doc, doc.getRoot().getDefaultGeometry(), {
                         onLoadFinished: () => {
                           //console.log("Modelo cargado correctamente");
@@ -1114,7 +1136,7 @@ porcentajePedidoTotal = async (urn) => {
                 },
                 (code, message, errors) => {
                   //console.log("no se pudo cargar debe traducir");
-                    toast.info('No se pudo abrir, proceso de traducción del archivo iniciado');
+                  toast.info('No se pudo abrir, proceso de traducción del archivo iniciado', { toastId: 'traduccionIniciada' });
                   //console.log(code, message, errors);
                 }
             );

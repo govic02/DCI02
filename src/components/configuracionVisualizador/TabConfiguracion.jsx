@@ -3,6 +3,9 @@ import { Tabs, Tab, Form, Button } from 'react-bootstrap';
 import API_BASE_URL from '../../config';
 import Select from 'react-select';
 import { useActions } from '../../context/ProyectoContext';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 const TabConfiguracion = (urn) => {
     const [activeKey, setActiveKey] = useState('filtrosVisuales');
     const [filtroVisual01, setFiltroVisual01] = useState('');
@@ -143,8 +146,11 @@ const TabConfiguracion = (urn) => {
     
             const resultado = await response.json();
           //console.log(resultado);
+          toast.success('Configuración guardada con éxito', { toastId: 'configuracionguardada' });
         } catch (error) {
             console.error('Error al guardar la configuración:', error);
+            toasterror('Error al guardar la configuración', { toastId: 'errorconfiguracion' });
+           
         }
     };
     

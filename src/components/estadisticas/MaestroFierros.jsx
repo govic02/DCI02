@@ -107,33 +107,40 @@ const handleExpand = async (index) => {
             const requestedIds = pedidos.flatMap(pedido => pedido.ids);
             const availableBars = allBars.detalles.filter(bar => !requestedIds.includes(bar.id.toString()));
           //console.log("todas las barras no pedidas",availableBars);
-            const csvData = availableBars.map(bar => ({
-                'EJE/VIGA/LOSA': bar.nombreFiltro1,
-                'ELEM CONST': '',
-                'PISO': bar.aecPiso,
-                'CICLO': bar.aecSecuenciaHormigonado,
-                'Cantidad': bar.cantidad,
-                'Ø mm': bar.diametroBarra,
-                'Figura': bar.aecForma,
-                'L/m': bar.longitudTotal,
-                'Uso': bar.aecUsoBarra,
-                'A/cm': bar.a*100,
-                'B/cm': bar.b*100,
-                'C/cm': bar.c*100,
-                'D/cm': bar.d*100,
-                'E/cm': bar.e*100,
-                'F/cm': bar.f*100,
-                'G/cm': bar.g*100,
-                'H/cm': bar.h*100,
-                'I/cm': bar.i*100,
-                'J/cm': bar.j*100,
-                'AngV': '',
-                'AngV2': '',
-                'AngV3': '',
-                'R/cm': bar.r,
-                'Peso Kg': bar.pesoLineal,
-                'Id': bar.id
-            }));
+          const csvData = availableBars.map(bar => ({
+            'EJE/VIGA/LOSA': bar.nombreFiltro1,
+            'ELEM CONST': '',
+            'PISO': bar.aecPiso,
+            'CICLO': bar.aecSecuenciaHormigonado,
+            'Cantidad': bar.cantidad,
+            'Ø mm': typeof bar.diametroBarra === 'number' ? bar.diametroBarra.toFixed(2) : "0.00",
+            'Figura': bar.aecForma,
+            'L/m': (() => {
+                const cantidad = bar.cantidad;
+                const longitudTotal = bar.longitudTotal;
+                if (typeof longitudTotal === 'number' && cantidad && cantidad !== 0) {
+                    return (longitudTotal / cantidad).toFixed(2);
+                }
+                return "0.00";
+            })(),
+            'Uso': bar.aecUsoBarra,
+            'A/cm': formatNumber(bar.a * 100),
+            'B/cm': formatNumber(bar.b * 100),
+            'C/cm': formatNumber(bar.c * 100),
+            'D/cm': formatNumber(bar.d * 100),
+            'E/cm': formatNumber(bar.e * 100),
+            'F/cm': formatNumber(bar.f * 100),
+            'G/cm': formatNumber(bar.g * 100),
+            'H/cm': formatNumber(bar.h * 100),
+            'I/cm': formatNumber(bar.i * 100),
+            'J/cm': formatNumber(bar.j * 100),
+            'AngV': '',
+            'AngV2': '',
+            'AngV3': '',
+            'R/cm': formatNumber(bar.r),
+            'Peso Kg': typeof bar.pesoLineal === 'number' ? bar.pesoLineal.toFixed(2) : "0.00",
+            'Id': bar.id
+        }));
     
             const csvString = unparse(csvData, {
                 quotes: true,
@@ -161,29 +168,33 @@ const handleExpand = async (index) => {
             'ELEM CONST': '', // No tiene correspondencia, va vacío
             'PISO': barra.aecPiso,
             'CICLO': barra.aecSecuenciaHormigonado,
-            'Cantidad': barra.cantidad,
-            'Ø mm': barra.diametroBarra,
+            'Cantidad': barra.cantidad !== undefined ? barra.cantidad : barra.Quantity,
+            'Ø mm': typeof barra.diametroBarra === 'number' ? barra.diametroBarra.toFixed(2) : "0.00",
             'Figura': barra.aecForma,
-            'L/m': barra.longitudTotal,
+            'L/m': (() => {
+                const cantidad = barra.cantidad !== undefined ? barra.cantidad : barra.Quantity;
+                const longitudTotal = barra.longitudTotal;
+                if (typeof longitudTotal === 'number' && cantidad && cantidad !== 0) {
+                    return (longitudTotal / cantidad).toFixed(2);
+                }
+                return "0.00";
+            })(),
             'Uso': barra.aecUsoBarra,
-            'A/cm': barra.a*100,
-            'B/cm': barra.b*100,
-            'C/cm': barra.c*100,
-            'D/cm': barra.d*100,
-            'E/cm': barra.e*100,
-            'F/cm': barra.f*100,
-            'G/cm': barra.g*100,
-            'H/cm': barra.h*100,
-            'I/cm': barra.i*100, // Si no existe el campo 'i', se deja vacío
-            'AngV': '',
-            'AngV2': '',
-            'AngV3': '',
-            'J/cm': barra.j,
-            'AngV': '', // No tiene correspondencia, se mantiene vacío
-            'AngV2': '', // No tiene correspondencia, se mantiene vacío
-            'AngV3': '', // No tiene correspondencia, se mantiene vacío
-            'R/cm': barra.r,
-            'Peso Kg': barra.pesoLineal,
+            'A/cm': formatNumber(barra.a !== undefined ? barra.a * 100 : barra.A * 100),
+            'B/cm': formatNumber(barra.b !== undefined ? barra.b * 100 : barra.B * 100),
+            'C/cm': formatNumber(barra.c !== undefined ? barra.c * 100 : barra.C * 100),
+            'D/cm': formatNumber(barra.d !== undefined ? barra.d * 100 : barra.D * 100),
+            'E/cm': formatNumber(barra.e !== undefined ? barra.e * 100 : barra.E * 100),
+            'F/cm': formatNumber(barra.f !== undefined ? barra.f * 100 : barra.F * 100),
+            'G/cm': formatNumber(barra.g !== undefined ? barra.g * 100 : barra.G * 100),
+            'H/cm': formatNumber(barra.h !== undefined ? barra.h * 100 : barra.H * 100),
+            'I/cm': formatNumber(barra.i !== undefined ? barra.i * 100 : barra.I * 100),
+            'J/cm': formatNumber(barra.j !== undefined ? barra.j * 100 : barra.J * 100),
+            'AngV': '', // No tiene correspondencia, se deja vacío
+            'AngV2': '', // No tiene correspondencia, se deja vacío
+            'AngV3': '', // No tiene correspondencia, se deja vacío
+            'R/cm': formatNumber(barra.r),
+            'Peso Kg': typeof barra.pesoLineal === 'number' ? barra.pesoLineal.toFixed(2) : "0.00",
             'Ids': barra.id
         }));
     

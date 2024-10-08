@@ -15,7 +15,6 @@ const GraficoPesosPisoDiametroBarras = ({ urn }) => {
         datasets: [],
     });
 
-   
     useEffect(() => {
         const fetchDatos = async () => {
             try {
@@ -48,22 +47,61 @@ const GraficoPesosPisoDiametroBarras = ({ urn }) => {
     
                 // Mapea las etiquetas y conjuntos de datos
                 const labels = pesosPorPiso.map(item => item.piso);
-                const datasets = pesosPorPiso.reduce((acc, piso) => {
-                    piso.diametros.forEach((diametro, index) => {
-                        if (!acc[index]) {
-                            acc[index] = {
-                                label: `Diámetro ${diametro.diametro} mm`,
+                const datasetsMap = {};
+                const diameterKeysSet = new Set();
+
+                pesosPorPiso.forEach((piso, pisoIndex) => {
+                    piso.diametros.forEach((diametro) => {
+                        // Formatear el diámetro
+                        let diameterValue = parseFloat(diametro.diametro);
+                        let formattedDiameter = Number.isInteger(diameterValue) ? diameterValue : diameterValue.toFixed(1);
+        
+                        // Añadir el diámetro al conjunto para ordenarlo después
+                        diameterKeysSet.add(formattedDiameter);
+        
+                        // Crear una clave única para cada diámetro formateado
+                        const diameterKey = formattedDiameter;
+        
+                        if (!datasetsMap[diameterKey]) {
+                            datasetsMap[diameterKey] = {
+                                label: `Diámetro ${formattedDiameter} mm`,
                                 data: new Array(pesosPorPiso.length).fill(0),
-                                backgroundColor: getRandomColor(),
+                                backgroundColor: '', // Se asignará más adelante
                                 stack: 'Stack 0',
                             };
                         }
-                        const pisoIndex = labels.indexOf(piso.piso);
-                        acc[index].data[pisoIndex] = diametro.pesoTotal;
+        
+                        datasetsMap[diameterKey].data[pisoIndex] = diametro.pesoTotal;
                     });
-                    return acc;
-                }, []);
-    
+                });
+
+                // Ordenar los diámetros y asignar colores
+                const diameterKeys = Array.from(diameterKeysSet).sort((a, b) => a - b); // Orden numérico ascendente
+
+                // Definir la paleta de 12 colores desde colores fríos hasta cálidos
+                const colorPalette = [
+                    '#0000FF', // Azul
+                    '#0040FF', // Azul fuerte
+                    '#0080FF', // Azul medio
+                    '#00BFFF', // Azul claro
+                    '#00FFFF', // Cian
+                    '#00FF80', // Verde agua
+                    '#00FF00', // Verde
+                    '#80FF00', // Verde lima
+                    '#FFFF00', // Amarillo
+                    '#FFC000', // Naranja
+                    '#FF8000', // Naranja oscuro
+                    '#FF0000', // Rojo
+                ];
+
+                // Asignar colores a los datasets en orden
+                diameterKeys.forEach((diameterKey, index) => {
+                    const colorIndex = index % colorPalette.length; // Asegura que no exceda el tamaño de la paleta
+                    datasetsMap[diameterKey].backgroundColor = colorPalette[colorIndex];
+                });
+
+                const datasets = diameterKeys.map(diameterKey => datasetsMap[diameterKey]);
+
                 setDatosGrafico({
                     labels,
                     datasets,
@@ -75,30 +113,29 @@ const GraficoPesosPisoDiametroBarras = ({ urn }) => {
     
         fetchDatos();
     }, [urn]); // Dependencia del efecto basada en la URN
-    
 
     const options = {
         scales: {
             y: {
-              stacked: true,
-              ticks: {
-                callback: function(value) {
-                  return value + ' kg';
+                stacked: true,
+                ticks: {
+                    callback: function(value) {
+                        return value + ' kg';
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Peso (kg)'
                 }
-              },
-              title: {
-                display: true,
-                text: 'Peso (kg)'
-              }
             },
             x: {
-              stacked: true,
-              title: {
-                display: true,
-                text: 'Piso'
-              }
+                stacked: true,
+                title: {
+                    display: true,
+                    text: 'Piso'
+                }
             }
-          },
+        },
         plugins: {
             title: {
                 display: true,
@@ -108,23 +145,23 @@ const GraficoPesosPisoDiametroBarras = ({ urn }) => {
                 mode: 'index',
                 intersect: false,
                 callbacks: {
-                label: function(tooltipItem) {
-                    let label = tooltipItem.dataset.label || '';
-                    if (label) {
-                        label += ': ';
+                    label: function(tooltipItem) {
+                        let label = tooltipItem.dataset.label || '';
+                        if (label) {
+                            label += ': ';
+                        }
+                        label += `${tooltipItem.raw.toLocaleString()} kg`;
+                        return label;
+                    },
+                    footer: function(tooltipItems) {
+                        // Calcula el total sumando todos los pesos de los datasets en el índice del piso actual
+                        let total = 0;
+                        tooltipItems.forEach(tooltipItem => {
+                            total += tooltipItem.raw;
+                        });
+                        return `Total: ${total.toLocaleString()} kg`;
                     }
-                    label += `${tooltipItem.raw.toLocaleString()} kg`;
-                    return label;
-                },
-                footer: function(tooltipItems) {
-                    // Calcula el total sumando todos los pesos de los datasets en el índice del piso actual
-                    let total = 0;
-                    tooltipItems.forEach(tooltipItem => {
-                        total += tooltipItem.raw;
-                    });
-                    return `Total: ${total.toLocaleString()} kg`;
                 }
-            }
             }
         },
         responsive: true,
@@ -136,45 +173,11 @@ const GraficoPesosPisoDiametroBarras = ({ urn }) => {
         borderRadius: '20px',
     };
 
-    // Función para obtener colores aleatorios
-    function getRandomColor() {
-        // Define un arreglo con tus colores base
-        const baseColors = ['#DA291C', '#DBD0CE', '#0A0A0A', '#155EF1', '#F19415'];
-    
-        // Selecciona un color base al azar
-        const randomBaseColor = baseColors[Math.floor(Math.random() * baseColors.length)];
-    
-        // Descomponer el color en componentes RGB
-        let r = parseInt(randomBaseColor.substring(1, 3), 16);
-        let g = parseInt(randomBaseColor.substring(3, 5), 16);
-        let b = parseInt(randomBaseColor.substring(5, 7), 16);
-    
-        // Modificar ligeramente los componentes para variar el color
-        // Cambiar el brillo por una pequeña cantidad aleatoria en un rango de -15 a 15
-        const change = () => Math.floor(Math.random() * 31) - 15;
-    
-        r = Math.max(0, Math.min(255, r + change()));  // Asegúrate de que r esté entre 0 y 255
-        g = Math.max(0, Math.min(255, g + change()));  // Asegúrate de que g esté entre 0 y 255
-        b = Math.max(0, Math.min(255, b + change()));  // Asegúrate de que b esté entre 0 y 255
-    
-        // Convertir de vuelta a una cadena hexadecimal
-        function componentToHex(c) {
-            var hex = c.toString(16);
-            return hex.length == 1 ? "0" + hex : hex;
-        }
-    
-        // Reconstruir el color en formato hexadecimal
-        const newColor = "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
-    
-        return newColor;
-    }
-    
-
     return (
         <Card style={cardStyle}>
             <CardContent>
                 <Typography variant="h5" component="h2" style={{ fontSize: 14, marginBottom: '10px' }}>
-                    Distribución de Pesos por Diametro en Cada Nivel
+                    Distribución de Pesos por Diámetro en Cada Nivel
                 </Typography>
                 <div style={{ height: '310px' }}>
                     <Bar data={datosGrafico} options={options} />

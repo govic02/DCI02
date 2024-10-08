@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { Tabs, Tab, Form, Button, Table, Alert } from 'react-bootstrap';
 import TabConfiguracion from '../configuracionVisualizador/TabConfiguracion';
 import ListaReordenable from './ListaReordenable';
@@ -24,7 +25,16 @@ const AdministracionProyecto = (proyectoKey, urn) => {
     const [niveles, setNiveles] = useState([]);
     const [tipoUsuario, setTipoUsuario] = useState('');
     const [isAddingUser, setIsAddingUser] = useState(false);
+    const [dataStatus, setDataStatus] = useState({
+        hasPesoPromedioGeneral: false,
+        hasDiametroPromedioGeneral: false,
+        hasPesoTotalProyecto: false,
+        hasRespuestasDiametros: false,
+        hasLongitudPromedioNivel: false
+        // Puedes añadir más indicadores aquí si es necesario
+    });
 
+    const datosGenerados = Object.values(dataStatus).filter(Boolean).length;
     const handleReorder = (newOrder) => {
         setNiveles(newOrder);
     };
@@ -68,6 +78,111 @@ const AdministracionProyecto = (proyectoKey, urn) => {
         paddingBotom: '35px',
     };
 
+    const hasDataInResponse = (response, dataKey, expectedType) => {
+        return (
+          response.status === 'fulfilled' &&
+          response.value &&
+          response.value.data &&
+          response.value.data[dataKey] != null &&
+          (expectedType ? typeof response.value.data[dataKey] === expectedType : true)
+        );
+      };
+      const hasArrayDataInResponse = (response, dataKey) => {
+        return (
+          response.status === 'fulfilled' &&
+          response.value &&
+          response.value.data &&
+          Array.isArray(response.value.data[dataKey]) &&
+          response.value.data[dataKey].length > 0
+        );
+      };
+      useEffect(() => {
+        const urn = proyectoKey.urn;
+        if (!urn) {
+          // Si urn es null o undefined, no ejecutamos checkAllData
+          return;
+        }
+      
+        const checkAllData = async () => {
+          try {
+            console.log("datos de urn:", urn);
+      
+            // Realizamos todas las llamadas a la API en paralelo
+            const results = await Promise.allSettled([
+              axios.get(`${API_BASE_URL}/api/pesoPromedioGeneral/${encodeURIComponent(urn)}`),
+              axios.get(`${API_BASE_URL}/api/diametroPromedioGeneral/${encodeURIComponent(urn)}`),
+              axios.get(`${API_BASE_URL}/api/getPesovsPedidos/${encodeURIComponent(urn)}`),
+              axios.get(`${API_BASE_URL}/api/respuestasDiametros/${encodeURIComponent(urn)}`),
+              axios.get(`${API_BASE_URL}/api/getLongitudPromedio/${encodeURIComponent(urn)}`),
+              axios.get(`${API_BASE_URL}/api/getPesoPromedio/${encodeURIComponent(urn)}`) // Nueva llamada a la API
+            ]);
+      
+            console.log("Resultados obtenidos:", results);
+      
+            // Funciones auxiliares para verificar si hay datos en las respuestas
+            const hasDataInResponse = (response, dataKey, expectedType) => {
+              return (
+                response.status === 'fulfilled' &&
+                response.value &&
+                response.value.data &&
+                response.value.data[dataKey] != null &&
+                (expectedType ? typeof response.value.data[dataKey] === expectedType : true)
+              );
+            };
+      
+            const hasArrayDataInResponse = (response, dataKey) => {
+              return (
+                response.status === 'fulfilled' &&
+                response.value &&
+                response.value.data &&
+                Array.isArray(response.value.data[dataKey]) &&
+                response.value.data[dataKey].length > 0
+              );
+            };
+      
+            // Verificar si hay datos antes de actualizar el estado
+            const hasPesoPromedioGeneral = hasDataInResponse(results[0], 'pesoPromedioGeneral', 'number');
+            const hasDiametroPromedioGeneral = hasDataInResponse(results[1], 'diametroPromedio', 'number');
+            const hasPesoTotalProyecto = hasDataInResponse(results[2], 'pesoTotalProyecto', 'number');
+            const hasRespuestasDiametros = hasArrayDataInResponse(results[3], 'pesosPorPiso');
+            const hasLongitudPromedioNivel = hasDataInResponse(results[4], 'longitudes', 'object');
+            const hasPesoPromedioPisos = hasArrayDataInResponse(results[5], 'pesos'); // Nueva verificación
+      
+            // Ahora actualizamos el estado con los valores obtenidos
+            setDataStatus({
+              hasPesoPromedioGeneral,
+              hasDiametroPromedioGeneral,
+              hasPesoTotalProyecto,
+              hasRespuestasDiametros,
+              hasLongitudPromedioNivel,
+              hasPesoPromedioPisos // Nueva variable de estado
+            });
+      
+            // Mostrar los resultados en la consola
+            console.log('Peso Promedio General:', hasPesoPromedioGeneral ? 'datos disponibles' : 'sin datos');
+            console.log('Diámetro Promedio General:', hasDiametroPromedioGeneral ? 'datos disponibles' : 'sin datos');
+            console.log('Peso Total del Proyecto:', hasPesoTotalProyecto ? 'datos disponibles' : 'sin datos');
+            console.log('Respuestas Diámetros (Pesos Pisos Diámetro):', hasRespuestasDiametros ? 'datos disponibles' : 'sin datos');
+            console.log('Longitud Promedio Nivel:', hasLongitudPromedioNivel ? 'datos disponibles' : 'sin datos');
+            console.log('Pesos Promedio Pisos:', hasPesoPromedioPisos ? 'datos disponibles' : 'sin datos'); // Nuevo log
+          } catch (error) {
+            // En caso de error, establecemos los indicadores a false y mostramos el error
+            console.error('Error al verificar los datos:', error);
+      
+            setDataStatus({
+              hasPesoPromedioGeneral: false,
+              hasDiametroPromedioGeneral: false,
+              hasPesoTotalProyecto: false,
+              hasRespuestasDiametros: false,
+              hasLongitudPromedioNivel: false,
+              hasPesoPromedioPisos: false // Nueva variable de estado
+            });
+          }
+        };
+      
+        checkAllData();
+      }, [proyectoKey.urn]);
+      
     useEffect(() => {
         const fetchProyectos = async () => {
             try {
@@ -440,39 +555,53 @@ const AdministracionProyecto = (proyectoKey, urn) => {
         try {
             const response = await fetch(`${API_BASE_URL}/api/barraurn/${encodeURIComponent(urn)}`);
             if (!response.ok) {
-                throw new Error('Failed to fetch bar data');
+                throw new Error('Error al obtener los datos de las barras');
             }
-
+    
             const data = await response.json();
-            console.log('datos para longitudes', data);
+           //  console.log('Datos para longitudes:', data);
             if (!data || !data.detalles || data.detalles.length === 0) {
-                //console.log("No hay detalles disponibles para calcular el promedio.");
                 return {}; // Retornar un objeto vacío si no hay datos
             }
-
+    
             const detalles = data.detalles;
             const resultados = {};
-
+    
             // Agrupar y calcular longitud promedio por nombreFiltro2
             detalles.forEach((barra) => {
                 const { nombreFiltro2, longitudTotal, cantidad } = barra;
+    
+                // Asegurarse de que longitudTotal y cantidad sean números válidos
+                const longitudTotalNum = parseFloat(longitudTotal);
+                const cantidadNum = parseFloat(cantidad);
+    
+                if (isNaN(longitudTotalNum) || isNaN(cantidadNum)) {
+                 //    console.warn(`Datos inválidos para la barra: ${JSON.stringify(barra)}`);
+                    return; // Omitir este elemento
+                }
+    
                 if (!resultados[nombreFiltro2]) {
                     resultados[nombreFiltro2] = { totalLongitud: 0, count: 0 };
                 }
-                resultados[nombreFiltro2].totalLongitud += longitudTotal;
-                resultados[nombreFiltro2].count += cantidad;
+                resultados[nombreFiltro2].totalLongitud += longitudTotalNum;
+                resultados[nombreFiltro2].count += cantidadNum;
             });
-
+    
             // Calcular el promedio y guardar en un nuevo objeto
             const promedios = {};
             Object.keys(resultados).forEach((key) => {
                 const { totalLongitud, count } = resultados[key];
-                console.log('valor calculo longitud promedio' + totalLongitud + '   ' + count);
-                promedios[key] = totalLongitud / count;
-                console.log('promedios key' + promedios[key]);
+               //  console.log('Valores para cálculo de longitud promedio:', totalLongitud, count);
+    
+                if (isNaN(totalLongitud) || isNaN(count) || count === 0) {
+                    console.warn(`No se puede calcular el promedio para ${key}: totalLongitud o count inválidos`);
+                    promedios[key] = null; // O manejar según corresponda
+                } else {
+                    promedios[key] = totalLongitud / count;
+                }
+               //  console.log(`Promedio para ${key}: ${promedios[key]}`);
             });
-
-            //console.log("Promedios de longitud por nombreFiltro2:", promedios);
+    
             const saveResponse = await fetch(`${API_BASE_URL}/api/crearLongitudPromedio`, {
                 method: 'POST',
                 headers: {
@@ -480,17 +609,17 @@ const AdministracionProyecto = (proyectoKey, urn) => {
                 },
                 body: JSON.stringify({ urn, longitudes: promedios }),
             });
-
+    
             if (!saveResponse.ok) {
-                throw new Error('Failed to save length averages');
+                throw new Error('Error al guardar los promedios de longitud');
             }
-
+    
             const saveResult = await saveResponse.json();
-            //console.log('Saved length averages:', saveResult);
+           // console.log('Promedios de longitud guardados:', saveResult);
             return promedios;
         } catch (error) {
-            console.error('Error fetching or processing bar data:', error);
-            return null; // Retornar null o manejar el error según corresponda en la función que llama
+            console.error('Error al obtener o procesar los datos de las barras:', error);
+            return null;
         }
     };
 
@@ -677,6 +806,9 @@ const AdministracionProyecto = (proyectoKey, urn) => {
                                         >
                                             Extraer Información
                                         </Button>
+                                        <span style={{ marginTop: '10px', fontWeight: 'bold' }}>
+                                            {`${datosGenerados} de 6 indicadores generados`}
+                                        </span>
                                     </div>
                                 </div>
                                 <div className="col-4"></div>
