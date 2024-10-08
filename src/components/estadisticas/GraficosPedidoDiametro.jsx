@@ -15,40 +15,19 @@ const GraficosPedidoDiametro = ({ urn }) => {
         labels: [],
         datasets: [],
     });
-    const [diametrosEncontrados, setDiametrosEncontrados] = useState([]);
+    const [loading, setLoading] = useState(true); // Nuevo estado para manejar el cargado de datos
     const [sinDatos, setSinDatos] = useState(false); // Estado para manejar la ausencia de datos
 
     const generarColorAleatorio = () => {
-        const r = Math.floor(Math.random() * 256); // Valor aleatorio entre 0 y 255
-        const g = Math.floor(Math.random() * 256); // Valor aleatorio entre 0 y 255
-        const b = Math.floor(Math.random() * 256); // Valor aleatorio entre 0 y 255
+        const r = Math.floor(Math.random() * 256);
+        const g = Math.floor(Math.random() * 256);
+        const b = Math.floor(Math.random() * 256);
         return `rgb(${r},${g},${b})`;
     };
 
-    const getLastStatus = (states) => {
-        const estadoColores = {
-            'paquetizado': '#FFFF00', 'espera_aprobacion': '#90EE90',
-            'rechazado': '#FF0000', 'aceptado': '#00FF00',
-            'fabricacion': '#0000FF', 'despacho': '#FFA500',
-            'recepcionado': '#00FFFF', 'instalado': '#A52A2A',
-            'inspeccionado': '#006400', 'hormigonado': '#90EE90'
-        };
-    
-        if (!states) {
-            return { estado: 'paquetizado', color: estadoColores['paquetizado'] };
-        }
-    
-        let lastState = { fecha: new Date(0), estado: '', color: '' };
-        for (let [estado, { fecha }] of Object.entries(states)) {
-            if (new Date(fecha) > lastState.fecha) {
-                lastState = { fecha: new Date(fecha), estado, color: estadoColores[estado] };
-            }
-        }
-        return lastState;
-    }
-
     useEffect(() => {
         const fetchDatos = async () => {
+            setLoading(true); // Indica que los datos están siendo cargados
             try {
                 const urlBarras = `${API_BASE_URL}/api/barraurn/${encodeURIComponent(urn)}`;
                 const respuestaBarras = await axios.get(urlBarras);
@@ -56,17 +35,15 @@ const GraficosPedidoDiametro = ({ urn }) => {
                 const urlPedidos = `${API_BASE_URL}/api/listPedidos?urn=${urn}`;
                 const respuestaPedidos = await axios.get(urlPedidos);
                 const pedidos = respuestaPedidos.data;
-                
+
                 if (barras.length === 0 || pedidos.length === 0) {
-                    setSinDatos(true); // No hay datos para mostrar
+                    setSinDatos(true);
+                    setLoading(false);
                     return;
                 }
 
-                // Preparar un objeto para almacenar el peso por diámetro en cada pedido
                 let pesosPorPedidoYDiametro = {};
                 let diametrosSet = new Set();
-                let totalIdsPedidos = 0;
-                let totalIdsEncontradas = 0;
 
                 pedidos.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
 
@@ -74,43 +51,42 @@ const GraficosPedidoDiametro = ({ urn }) => {
                     if (!pesosPorPedidoYDiametro[pedido.nombre_pedido]) {
                         pesosPorPedidoYDiametro[pedido.nombre_pedido] = {};
                     }
-                    totalIdsPedidos += pedido.ids.length;
                     pedido.ids.forEach(id => {
                         const barra = barras.find(barra => barra.id.toString() === id.toString());
                         if (barra) {
-                            diametrosSet.add(barra.diametroBarra);
+                            const diametroRedondeado = Math.round(barra.diametroBarra * 10) / 10; // Redondea a un decimal
+                            diametrosSet.add(diametroRedondeado);
+                            //diametrosSet.add(barra.diametroBarra);
                             if (!pesosPorPedidoYDiametro[pedido.nombre_pedido][barra.diametroBarra]) {
                                 pesosPorPedidoYDiametro[pedido.nombre_pedido][barra.diametroBarra] = 0;
                             }
                             pesosPorPedidoYDiametro[pedido.nombre_pedido][barra.diametroBarra] += (parseFloat(barra.pesoLineal) * parseFloat(barra.longitudTotal));
-                            totalIdsEncontradas++;
                         } else {
                             console.log(`Barra con id ${id} no encontrada en la lista de barras.`);
                         }
                     });
                 });
 
-                setDiametrosEncontrados([...diametrosSet]);
-
-                let labels = Object.keys(pesosPorPedidoYDiametro); // Nombres de pedidos como labels del eje X
+                let labels = Object.keys(pesosPorPedidoYDiametro);
                 let datasets = [];
                 let diametrosVistos = {};
-                
+                const redondearDiametro = (diametro) => Math.round(diametro * 100) / 100;
                 Object.keys(pesosPorPedidoYDiametro).forEach((pedido, idx) => {
                     Object.entries(pesosPorPedidoYDiametro[pedido]).forEach(([diametro, peso], i) => {
-                        if (!diametrosVistos[diametro]) {
-                            diametrosVistos[diametro] = generarColorAleatorio(); // Asignar un color aleatorio
+                        const diametroRedondeado = Math.round(diametro * 10) / 10; // Redondea a un decimal
+                        if (!diametrosVistos[diametroRedondeado]) {
+                            diametrosVistos[diametroRedondeado] = generarColorAleatorio();
                         }
-                        if (!datasets.some(dataset => dataset.label === `Diámetro ${diametro}`)) {
+                        if (!datasets.some(dataset => dataset.label === `Diámetro ${diametroRedondeado}`)) {
                             datasets.push({
-                                label: `Diámetro ${diametro}`,
+                                label: `Diámetro ${diametroRedondeado}`, // Redondeado a un decimal
                                 data: new Array(Object.keys(pesosPorPedidoYDiametro).length).fill(0),
-                                backgroundColor: diametrosVistos[diametro], // Usar el color generado
+                                backgroundColor: diametrosVistos[diametroRedondeado],
                                 stack: 'Stack 0',
                                 barThickness: 20
                             });
                         }
-                        const datasetIndex = datasets.findIndex(dataset => dataset.label === `Diámetro ${diametro}`);
+                        const datasetIndex = datasets.findIndex(dataset => dataset.label === `Diámetro ${diametroRedondeado}`);
                         datasets[datasetIndex].data[idx] = peso;
                     });
                 });
@@ -119,19 +95,26 @@ const GraficosPedidoDiametro = ({ urn }) => {
                     labels,
                     datasets,
                 });
-                setSinDatos(labels.length === 0 || datasets.length === 0); // Actualiza el estado de sin datos
+                setSinDatos(labels.length === 0 || datasets.length === 0);
+                console.log("data set");
+                console.log(datasets);
+                console.log("data grafico");
+                console.log(datosGrafico);
             } catch (error) {
                 console.error("Error al obtener los datos para pedidos y barras:", error);
-                setSinDatos(true); // Error al obtener los datos
+                setSinDatos(true);
+            } finally {
+                setLoading(false); // Indica que los datos han sido cargados o hubo un error
             }
         };
-    
+
         fetchDatos();
     }, [urn]);
 
     const options = {
+        responsive: true,
         scales: {
-            responsive: false,
+            
             x: {
                 stacked: true,
                 barThickness: 20,
@@ -177,7 +160,7 @@ const GraficosPedidoDiametro = ({ urn }) => {
     };
 
     const cardContentStyle = {
-        overflowX: 'auto',  // Allows horizontal scrolling
+        overflowX: 'auto',
     };
 
     return (
@@ -186,7 +169,11 @@ const GraficosPedidoDiametro = ({ urn }) => {
                 <Typography variant="h5" component="h2" style={{ fontSize: 14 }}>
                     Distribución de Pesos por Diámetro en Pedidos
                 </Typography>
-                {sinDatos ? (
+                {loading ? (
+                    <Typography variant="h6" component="h2" style={{ fontSize: 14, textAlign: 'center', marginTop: '20px' }}>
+                        Cargando datos...
+                    </Typography>
+                ) : sinDatos || datosGrafico.labels.length === 0 || datosGrafico.datasets.length === 0 ? (
                     <Typography variant="h6" component="h2" style={{ fontSize: 14, textAlign: 'center', marginTop: '20px' }}>
                         Sin datos para calcular
                     </Typography>
@@ -196,6 +183,7 @@ const GraficosPedidoDiametro = ({ urn }) => {
             </CardContent>
         </Card>
     );
+    
 };
 
 export default GraficosPedidoDiametro;
