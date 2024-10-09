@@ -36,7 +36,8 @@ const GraficoPesosPisoDiametroBarras = ({ urn }) => {
                 // Obtén los datos principales para el gráfico
                 const response = await axios.get(`${API_BASE_URL}/api/respuestasDiametros/${urn}`);
                 let { pesosPorPiso } = response.data;
-    
+                console.log("urn desde diametro pesos diametro");
+                console.log(urn);
                 // Si existe un orden predefinido, ordena usando ese orden
                 if (usePredefinedOrder) {
                     pesosPorPiso.sort((a, b) => predefinedOrderMap[a.piso.trim()] - predefinedOrderMap[b.piso.trim()]);

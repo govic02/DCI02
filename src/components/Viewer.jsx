@@ -111,7 +111,7 @@ class Viewer extends React.Component {
         let pesoTotal = 0;
         let largoTotal = 0;
         let totalBarras = 0;
-    
+        console.log("parametros calculo y actualizo "+nombreParametroPesoLineal+"   "+nombreParametrolargo);
         const obtenerPropiedades = (id) => new Promise(resolve => this.viewer.getProperties(id, resolve));
         const promesasPropiedades = identificadores.map(id => obtenerPropiedades(id));
     
@@ -121,13 +121,18 @@ class Viewer extends React.Component {
             let pesoActual = 0;
             let largoActual = 0;
             let esBarraValida = false;
-    
+            let cantidadActual = 0;
+            console.log("propiedades revision general");
+            console.log(result.properties);
             result.properties.forEach(prop => {
+                
                 if (prop.attributeName === nombreParametroPesoLineal && parseFloat(prop.displayValue) > 0) {
                      if (prop.units) {
+                        console.log("tiene prop units", prop.units);
                          if (prop.units.includes("kilograms") || prop.units.includes("kilos") || prop.units.includes("kilogramos")) {
-           //               console.log("peso actual Kilos",prop.displayValue);
+                          console.log("peso actual Kilos",prop.displayValue);
                             pesoActual = parseFloat(prop.displayValue); // No se necesita conversión
+                            console.log("peso actual barra  hormigon "+pesoActual);
                          } else if (prop.units.includes("pounds") || prop.units.includes("libras")) {
                         //   console.log("peso actual libras",prop.displayValue);
                              pesoActual = parseFloat(prop.displayValue) * 1.48816394; // libras x pie ==> kg por mtr
@@ -137,8 +142,8 @@ class Viewer extends React.Component {
                          pesoActual = parseFloat(prop.displayValue);
                      }
                     esBarraValida = true; // Se encontró peso, marcamos como válida
-                } else if (prop.attributeName === nombreParametrolargo && parseFloat(prop.displayValue) > 0) {
-                  
+                } else if ((prop.attributeName === nombreParametrolargo||prop.displayName === nombreParametrolargo) && parseFloat(prop.displayValue) > 0) {
+                  console.log("tiene atributo largo ok",prop.units);
                     if (prop.units) {
                         if (prop.units.includes("autodesk.unit.unit:meters")) {
                           //console.log("tipo de unidad metros");
@@ -195,13 +200,15 @@ class Viewer extends React.Component {
                     }
                  //  largoActual = parseFloat(prop.displayValue) / 100; // Conversión si es necesario
                     esBarraValida = true; // Se encontró largo, marcamos como válida
-                }
+                }else if (prop.attributeName === 'Quantity' && parseFloat(prop.displayValue) > 0) {
+                    cantidadActual = parseFloat(prop.displayValue);
+                 }
             });
     
             if (esBarraValida) {
                 pesoTotal += pesoActual *(largoActual);
                 largoTotal += largoActual;
-                totalBarras += 1;
+                totalBarras += cantidadActual;
             }
         });
     

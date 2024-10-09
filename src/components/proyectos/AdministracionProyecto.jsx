@@ -625,26 +625,26 @@ const AdministracionProyecto = (proyectoKey, urn) => {
 
     const guardarDatosModelo = async () => {
         //console.log('El nombre del proyecto es:');
-
+        toast.info('Inicio de proceso de Cálculo de datos estadísticos del proyecto, el proceso puuede tomar algunos minutos...');
         const val = await actions.generarTotalPesoPisos(proyectoKey.urn);
         //console.log("resultado generar TotalPisos", val);
         setTickets((prev) => ({ ...prev, 'Peso por Piso': 'Completado' }));
-
+        toast.info('1 de 6 completado', { toastId: 'estadisticagenerales' });
         await actions.porcentajePedidoTotal(proyectoKey.urn);
         setTickets((prev) => ({ ...prev, 'Porcentaje Pedidos': 'Completado' }));
-
+        toast.info('2 de 6 completado', { toastId: 'estadisticagenerales' });
         await actions.PesoPromedio(proyectoKey.urn);
         setTickets((prev) => ({ ...prev, 'Pesos Promedio': 'Completado' }));
-
+        toast.info('3 de 6 completado', { toastId: 'estadisticagenerales' });
         await actions.PesoPromedioGeneral(proyectoKey.urn);
         setTickets((prev) => ({ ...prev, 'Pesos Promedio General': 'Completado' }));
-
+        toast.info('4 de 6 completado', { toastId: 'estadisticagenerales' });
         await actions.diametroPromedioGeneral(proyectoKey.urn);
         setTickets((prev) => ({ ...prev, 'diametro Promedio barras General': 'Completado' }));
-        //
+        toast.info('5 de 6 completado', { toastId: 'estadisticagenerales' });
         const promediosLongitud = await LongitudPromedio(proyectoKey.urn);
-        //console.log("Promedios de longitud por nombreFiltro2:", promediosLongitud);
-
+        console.log("Promedios de longitud por nombreFiltro2:", promediosLongitud);
+        toast.info('6 de 6 completado, proceso terminado', { toastId: 'estadisticagenerales' });
         setTickets((prev) => ({ ...prev, 'Longitud Promedio': 'Completado' }));
 
         const resultadoDiametro = await DiametroEquivalenteLargosIguales(proyectoKey.urn);

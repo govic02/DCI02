@@ -957,8 +957,11 @@ const TabComponent = ({ urnBuscada }) => {
                             <span> | </span>
                            <span>Peso Total:</span> <span className="text-truncate" style={{ color: '#DA291C',fontWeight:'bold' }}> {pedido.pesos} kg</span>
                            <span> | </span>
-                           <span className="text-truncate" >
-                                {getLatestState(estados, pedido.estados)}
+                           <span className="text-truncate">
+                                {(() => {
+                                    const estado = getLatestState(estados, pedido.estados);
+                                    return estado.length > 8 ? estado.substring(0, 8) + '...' : estado;
+                                })()}
                             </span>
                         </div>
                         <div>

@@ -20,9 +20,9 @@ const MaestroFierros = ({ urn,proyecto }) => {
                 const url = `${API_BASE_URL}/api/listPedidos?urn=${encodeURIComponent(urn)}`;
                 const response = await axios.get(url);
                 if (response.status === 200) {
-                    // Asigna la lista inicial de pedidos
+                    
                     const pedidosInicial = response.data;
-                    // Carga los detalles para todos los pedidos
+                  
                         const pedidosConDetalles = await Promise.all(pedidosInicial.map(async pedido => {
                         const detalles = await fetchBarDetails(pedido);
                        console.log("Detalle Pedidos",detalles);
@@ -451,7 +451,7 @@ const handleExpand = async (index) => {
                             <Accordion key={index}>
                                 <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                                     <Typography>
-                                        <b>{pedido.nombre_pedido}</b> - {pedido.fecha} - {Number(pedido.pesos).toLocaleString('es-ES')} kg
+                                        <b>{pedido.nombre_pedido}</b> - {pedido.fecha} 
                                     </Typography>
                                 </AccordionSummary>
                                 <AccordionDetails>

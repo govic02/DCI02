@@ -417,7 +417,8 @@ const ListadoProyectos = ({ onProyectoSeleccionado,onProyectoKeySeleccionado }) 
     //console.log(response);
       if (response.ok) {
       
-     //console.log('Traducción Iniciada, espere unos instantes..');
+     console.log('Traducción Iniciada, espere unos instantes..');
+     toast.success('Traducción Iniciada, el proyecto estará disponible en los proximos minutos..', { toastId: 'traduccion' });
       } else {
         console.log("respuesta al traducir");
         console.log(response);

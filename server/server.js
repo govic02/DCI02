@@ -515,8 +515,8 @@ async function sendCompletioTranslatenEmail(userEmail) {
   const mailOptions = {
       from: process.env.EMAIL_USERNAME,
       to: userEmail,
-      subject: 'Archivo Traducido Exitosamente',
-      html: `<p>Estimado usuario, tu archivo ha sido Traducido con éxito . Ahora puedes está listo para ser utilizado.</p>`
+      subject: 'Archivo ha iniciado el proceso de traducción Exitosamente,',
+      html: `<p>Estimado usuario, tu archivo ha iniciado el proceso de  Traducido con éxito . En los proximos minutos ya estará disponible para trabajar.</p>`
   };
 
   try {
@@ -528,37 +528,50 @@ async function sendCompletioTranslatenEmail(userEmail) {
 }
 app.post('/api/jobs', async (req, res) => {
   console.log('Intento inicio de traducción');
-  const { objectId, username } = req.body;
+  const { objectName: encodedUrn, username } = req.body;
+  console.log('Received encodedUrn:', encodedUrn);
 
-  if (!objectId) {
-    return res.status(400).json({ error: 'objectId es requerido' });
+  if (!encodedUrn) {
+    return res.status(400).json({ error: 'encodedUrn es requerido' });
   }
 
   try {
-    const urn = Buffer.from(objectId).toString('base64');
-    console.log('objectId:', objectId);
-    console.log('URN codificado:', urn);
+    // Usar directamente el encodedUrn como URN
+    const urn = encodedUrn.replace(/=/g, ''); // Quitar padding si es necesario
+    console.log('Encoded URN:', urn);
 
-    let job = new JobPayload();
-    job.input = new JobPayloadInput();
-    job.input.urn = urn;
-    job.output = new JobPayloadOutput([
-      {
-        type: 'svf',
-        views: ['2d', '3d'],
+    const job = {
+      input: {
+        urn: urn,
       },
-    ]);
+      output: {
+        formats: [
+          {
+            type: 'svf',
+            views: ['2d', '3d'],
+          },
+        ],
+      },
+    };
 
     console.log('Enviando trabajo de traducción:', job);
+
+    // Asegúrate de que req.oauth_client y req.oauth_token están correctamente configurados
     const response = await new DerivativesApi().translate(job, {}, req.oauth_client, req.oauth_token);
     console.log('Respuesta de la API de traducción:', response.body);
-    sendCompletionTranslationEmail(username);
+
+    
     res.status(200).json({ message: 'Traducción iniciada correctamente' });
+    sendCompletioTranslatenEmail(username);
   } catch (err) {
     console.error('Error al iniciar la traducción:', err);
+    if (err.response && err.response.body) {
+      console.error('Detalles del error:', err.response.body);
+    }
     res.status(500).json({ error: 'Error al iniciar la traducción', details: err.message });
   }
 });
+
 
 app.post('/api/deleteObject', async (req, res, next) => {
   console.log("inicio operacion borrado");

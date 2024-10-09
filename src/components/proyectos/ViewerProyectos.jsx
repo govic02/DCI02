@@ -125,7 +125,7 @@ class ViewerProyectos extends React.Component {
         this.viewer.addEventListener(Autodesk.Viewing.SELECTION_CHANGED_EVENT, this.onViewerSelectionChange);
         this.updateViewerState({});
     }
-
+ 
     componentWillUnmount() {
         if (this.viewer) {
             this.viewer.removeEventListener(Autodesk.Viewing.GEOMETRY_LOADED_EVENT, this.onModelLoaded);
@@ -138,12 +138,14 @@ class ViewerProyectos extends React.Component {
     
     componentDidUpdate(prevProps, prevState) {
        
-      //console.log("nueva urn a cargar");
-      //console.log(this.props.urn);
+      console.log("nueva urn a cargar!!!!!");
+      console.log(this.props.urn);
        
         if (this.viewer && (this.props.urn !== prevProps.urn || this.props.idUsuario !== prevProps.idUsuario || this.props.proyectoKey !== prevProps.proyectoKey)) {
-          this.setState({ idsBarras: [] });
-            const now = Date.now();
+          this.resetViewerState();
+          this.setState({ idsBarras: [], idsConFecha: [], idsSinFecha: [] });
+          this.viewer.impl.unloadCurrentModel();
+          const now = Date.now();
             const newTimes = [...this.state.cambioUrnTimes, now].filter(time => now - time <= 6000);
             const cambioUrnCount = newTimes.length;
             this.setState({ cambioUrnTimes: newTimes, cambioUrnCount });
@@ -164,8 +166,8 @@ class ViewerProyectos extends React.Component {
             try {
               if (this.viewer) {
                   this.viewer.tearDown(); // Desmonta el modelo actual
-                  this.viewer.finish(); // Finaliza y limpia el visor
-                  this.viewer = null; // Elimina la referencia al visor
+                  //this.viewer.finish(); // Finaliza y limpia el visor
+                 // this.viewer = null; // Elimina la referencia al visor
                }
                 this.viewer = new Autodesk.Viewing.GuiViewer3D(this.container.current);
               
@@ -205,7 +207,12 @@ class ViewerProyectos extends React.Component {
             this.guardarIdsBarras();
         }
     }
-    
+    resetViewerState = () => {
+      this.viewer.finish();
+      this.viewer = new Autodesk.Viewing.GuiViewer3D(this.container.current);
+      this.viewer.start();
+      this.updateViewerState({});
+  }
     cargarConfiguracion = async () => {
       //console.log("busco configuración en viewer proyectos");
         const url = `${API_BASE_URL}/api/configuracionViewer?urn=${encodeURIComponent(this.props.urn)}`;
@@ -603,7 +610,8 @@ porcentajePedidoTotal = async (urn) => {
    guardarIdsBarras = async () => {
         const { idsBarras } = this.state;
         const { urn } = this.props;
-      //console.log("objeto con barras",idsBarras);
+        console.log("objeto con barras",idsBarras);
+        console.log("objeto con barras",urn);
         const batchSize = 1000; 
         const numBatches = Math.ceil(idsBarras.length / batchSize);
         const toastId = 'inicioCargaBarras';
@@ -694,6 +702,8 @@ porcentajePedidoTotal = async (urn) => {
        console.log("inicio busqueda de barras", this.state);
       //console.log();
         this.setState({ idsBarras: [] });
+        console.log("urn desde obtener id baras");
+        console.log(this.props.urn);
         await this.obtenerFiltros(this.props.urn);
         const propiedades = await this.obtenerPropiedadesModelo();
         console.log("Propiedades obtenidas para completar forms:", propiedades);
@@ -1162,13 +1172,13 @@ porcentajePedidoTotal = async (urn) => {
           //console.log("Propiedades obtenidas para completar forms:", propiedades);
             await this.obtenerFiltros(this.props.urn).then(async () => {
                 try {
-                  //console.log("proceso Id Barras Proyecto");
+                 console.log("proceso Id Barras Proyecto");
                   const idsBarras = [];
                    idsBarras = await this.obtenerIdsBarras();
                     await  this.guardarIdsBarras();
                     if(!idsBarras.length ==0){
                         await this.generarTotalPesoPisos();
-                      //console.log("IDs2 de barras obtenidos:", idsBarras);
+                      console.log("IDs2 de barras obtenidos:", idsBarras);
                         this.setState.idsBarraActual = idsBarras
                    
                     }

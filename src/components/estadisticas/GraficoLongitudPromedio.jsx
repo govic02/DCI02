@@ -17,13 +17,15 @@ const GraficoLongitudPromedio = ({ urn }) => {
 
   
   useEffect(() => {
+  
     const fetchDatos = async () => {
       try {
         console.log("llamo grafico longitudes niveles");
         // Primero, intenta obtener el orden predefinido
         const ordenNivelesResponse = await axios.get(`${API_BASE_URL}/api/ordenNiveles/${encodeURIComponent(urn)}`);
         const ordenNivelesData = ordenNivelesResponse.data.listaNiveles;
-        
+        console.log("ordenes de niveles");
+        console.log(ordenNivelesData);
         let predefinedOrderMap = {};
         let usePredefinedOrder = ordenNivelesData && ordenNivelesData.length > 0;
         console.log( ordenNivelesResponse);
@@ -35,7 +37,8 @@ const GraficoLongitudPromedio = ({ urn }) => {
 
         // Obtén los datos principales para el gráfico
         const respuesta = await fetch(`${API_BASE_URL}/api/getLongitudPromedio/${urn}`);
-      
+       console.log("urn enviada");
+       console.log(urn);
         if (!respuesta.ok) throw new Error('Respuesta no satisfactoria del servidor');
         const { longitudes } = await respuesta.json();
         console.log("respuesta servidor "+longitudes);

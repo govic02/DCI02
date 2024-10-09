@@ -117,9 +117,10 @@ const Proyectos = ({ token, selectedIds, onCameraChange, onSelectionChange, refV
             <div className='row'>
 
                 <div className='col-4'>
+                <ErrorBoundary>
                     <ListadoProyectos onProyectoSeleccionado={handleProyectoSeleccionado}
                         onProyectoKeySeleccionado={setProyectoKeySeleccionado}
-                    />
+                    />  </ErrorBoundary>
                 </div>
                 <div className='col-8' style={estiloViewerContainer}>
                     <div className='row'>
@@ -135,7 +136,7 @@ const Proyectos = ({ token, selectedIds, onCameraChange, onSelectionChange, refV
                                     
 
                                 />
-                        </ErrorBoundary>
+                    </ErrorBoundary>
                     </div>
                 </div>
             </div>
