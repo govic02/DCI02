@@ -138,8 +138,8 @@ class ViewerProyectos extends React.Component {
     
     componentDidUpdate(prevProps, prevState) {
        
-      console.log("nueva urn a cargar!!!!!");
-      console.log(this.props.urn);
+       // console.log("nueva urn a cargar!!!!!");
+     //   console.log(this.props.urn);
        
         if (this.viewer && (this.props.urn !== prevProps.urn || this.props.idUsuario !== prevProps.idUsuario || this.props.proyectoKey !== prevProps.proyectoKey)) {
           this.resetViewerState();
@@ -242,7 +242,7 @@ class ViewerProyectos extends React.Component {
         }
     };
    sumarPesosPorFiltro2 = (idsBarras) => {
-    console.log("barras para suma",idsBarras);
+    //  console.log("barras para suma",idsBarras);
         // Agrupar y sumar los pesos por el valor de filtro2 (ejemplo: AEC Piso)
         const sumaPesos = idsBarras.reduce((acumulador, barraActual) => {
             // Usar el valor de filtro2 como clave
@@ -308,7 +308,7 @@ class ViewerProyectos extends React.Component {
         // sin necesidad de esperar una promesa.
         const resultado = await this.sumarPesosPorFiltro2(idsBarras);
         
-      console.log("PESOS POR PISO", resultado); // Esto imprimirá un objeto con los totales de peso por cada valor de 'AEC Piso'
+       // console.log("PESOS POR PISO", resultado); // Esto imprimirá un objeto con los totales de peso por cada valor de 'AEC Piso'
 
         
         // Preparar los datos para enviar
@@ -317,7 +317,7 @@ class ViewerProyectos extends React.Component {
             nombreFiltro2: this.state.filtro2, // Asegúrate de tener nombreFiltro2 en el ámbito
             pesosPorValor: Object.entries(resultado).map(([valor, sumaPeso]) => ({ valor, sumaPeso }))
         };
-      console.log("datos para enviar pesos pisos",datosParaEnviar);
+    //    console.log("datos para enviar pesos pisos",datosParaEnviar);
 
        
         // Enviar los datos al servidor
@@ -443,7 +443,7 @@ diametroPromedioGeneral = async (urn) => {
 
 PesoPromedioGeneral = async (urn) => {
     try {
-      console.log("inicio peso promedio general");
+      //  console.log("inicio peso promedio general");
         const { idsBarras } = this.state;
       //console.log("Datos de barras actuales", idsBarras);
         let totalPesoProyecto = 0;
@@ -454,18 +454,18 @@ PesoPromedioGeneral = async (urn) => {
             idsBarras.forEach(barra => {
              // console.log("Barra actual",bar);
                 const { pesoLineal, longitudTotal,cantidad } = barra;
-                console.log("cantidad de barra",cantidad);
+               //   console.log("cantidad de barra",cantidad);
                 const longitudEnMetros = longitudTotal ;
                 const pesoTotal = pesoLineal * longitudEnMetros; // Calcula el peso total para la barra actual
 
                 totalPesoProyecto += pesoTotal; // Suma acumulativa de todos los pesos
                 totalBarras= totalBarras+cantidad; // Contador de barras
             });
-            console.log("Pesos Total promedio general"+totalBarras);
-            console.log("Pesos Total promedio general "+totalPesoProyecto);
+          //    console.log("Pesos Total promedio general"+totalBarras);
+           //   console.log("Pesos Total promedio general "+totalPesoProyecto);
             if (totalBarras > 0) {
                 const pesoPromedioGeneral = totalPesoProyecto / totalBarras; // Calcula el peso promedio del proyecto
-              console.log(`Peso promedio del proyecto: ${pesoPromedioGeneral} kg`);
+           //     console.log(`Peso promedio del proyecto: ${pesoPromedioGeneral} kg`);
 
                 const response = await fetch(`${API_BASE_URL}/api/pesoPromedioGeneral`, {
                     method: 'POST',
@@ -498,9 +498,9 @@ PesoPromedio = async (urn) => {
   try {
     const { idsBarras } = this.state;
     const detalles = await this.obtenerIdsBarras();
-    console.log("pesos promedio", detalles);
-    console.log("PesoPromedio", this.state);
-    console.log("supuestas barras", idsBarras);
+    //  console.log("pesos promedio", detalles);
+    //  console.log("PesoPromedio", this.state);
+   //   console.log("supuestas barras", idsBarras);
 
     const resultados = {};
     if (idsBarras != undefined) {
@@ -523,7 +523,7 @@ PesoPromedio = async (urn) => {
         promedios[key] = totalPeso / totalCantidad;  // Calcula el promedio de peso considerando la cantidad
       });
 
-      console.log("Promedios de peso por nombreFiltro2:", promedios);
+     //   console.log("Promedios de peso por nombreFiltro2:", promedios);
 
       const saveResponse = await fetch(`${API_BASE_URL}/api/crearPesoPromedio`, {
         method: 'POST',
@@ -534,16 +534,16 @@ PesoPromedio = async (urn) => {
       });
 
       if (!saveResponse.ok) {
-        console.log("Error en la respuesta de inserción", saveResponse);
+      //    console.log("Error en la respuesta de inserción", saveResponse);
       }
 
       const saveResult = await saveResponse.json();
-      console.log('Saved weight averages:', saveResult);
+      //  console.log('Saved weight averages:', saveResult);
 
       return promedios;
     }
   } catch (error) {
-    console.log("Error fetching or processing bar data:", error);
+   //   console.log("Error fetching or processing bar data:", error);
     throw error;
   }
 };
@@ -610,8 +610,8 @@ porcentajePedidoTotal = async (urn) => {
    guardarIdsBarras = async () => {
         const { idsBarras } = this.state;
         const { urn } = this.props;
-        console.log("objeto con barras",idsBarras);
-        console.log("objeto con barras",urn);
+        //  console.log("objeto con barras",idsBarras);
+       //   console.log("objeto con barras",urn);
         const batchSize = 1000; 
         const numBatches = Math.ceil(idsBarras.length / batchSize);
         const toastId = 'inicioCargaBarras';
@@ -699,14 +699,14 @@ porcentajePedidoTotal = async (urn) => {
     }
     
     obtenerIdsBarras = async () => {
-       console.log("inicio busqueda de barras", this.state);
+      //   console.log("inicio busqueda de barras", this.state);
       //console.log();
         this.setState({ idsBarras: [] });
-        console.log("urn desde obtener id baras");
-        console.log(this.props.urn);
+      //    console.log("urn desde obtener id baras");
+      //    console.log(this.props.urn);
         await this.obtenerFiltros(this.props.urn);
         const propiedades = await this.obtenerPropiedadesModelo();
-        console.log("Propiedades obtenidas para completar forms:", propiedades);
+      //    console.log("Propiedades obtenidas para completar forms:", propiedades);
         return new Promise(async (resolve, reject) => {
             if (!this.viewer || !this.viewer.model) {
               //console.log("El modelo del visualizador no está cargado.");
@@ -716,15 +716,15 @@ porcentajePedidoTotal = async (urn) => {
     
             try {
                 const { filtro1, filtro2, nombreParametroFecha, nombreParametroBarra, nombreParametrolargo, nombreParametroPesoLineal, nombreParametroDiametro, nombreParametroNivel } = this.state;
-              console.log("parametro nivel buscado ", nombreParametroNivel);
-             console.log("Nombre Parámetro barra buscado",nombreParametroBarra);
+            //    console.log("parametro nivel buscado ", nombreParametroNivel);
+            //   console.log("Nombre Parámetro barra buscado",nombreParametroBarra);
                 this.viewer.model.getBulkProperties([], {
                     propFilter: [
                         'Category', filtro1, filtro2, nombreParametroPesoLineal, nombreParametrolargo, nombreParametroDiametro, nombreParametroFecha, nombreParametroNivel,
                         'Partición', 'Número de armadura', 'Imagen', 'Marca de tabla de planificación', 'Comentarios', 'Marca', 'AEC Grupo', 'AEC Forma', 'AEC Código Interno', 'AEC Bloquear barras','AEC Piso','AEC Secuencia Hormigonado', 'AEC Uso Barra', 'AEC Uso Barra (Bloquear)', 'AEC Cantidad', 'AEC Id', 'AEC Ubicación', 'AEC Sub Uso Barra', 'Fase de creación', 'Fase de derribo', 'Estados de visibilidad en vista', 'Geometría', 'Estilo', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J','I', 'K', 'O', 'R', 'Volumen de refuerzo', 'Regla de diseño', 'Cantidad','Quantity', 'Espaciado', 'Forma', 'Imagen de forma', 'Gancho al inicio', 'Rotación del gancho al inicio', 'Tratamiento de extremo al inicio', 'Gancho al final', 'Rotación del gancho al final', 'Tratamiento de extremo al final', 'Modificar longitudes de gancho', 'Categoría de anfitrión', 'Marca de anfitrión', 'Modificaciones de redondeo', 'Nombre de tipo', 'Material', 'Subcategoría', 'Diámetro de curvatura estándar', 'Diámetro de curvatura de gancho estándar', 'Diámetro de curvatura de estribo/tirante', 'Longitudes de gancho', 'Radio máximo de curvatura', 'Deformación', 'Imagen de tipo', 'Nota clave', 'Modelo', 'Fabricante', 'Comentarios de tipo', 'URL', 'Descripción', 'Descripción de montaje', 'Código de montaje', 'Marca de tipo', 'Costo'
                     ]
                 }, (result) => {
-                    console.log("respuesta bulk properties",result);
+                    //  console.log("respuesta bulk properties",result);
                      let idsBarras = result.filter(element => 
                         element.properties.some(prop => 
                             (prop.displayName === 'Category' && prop.displayValue === nombreParametroBarra)||prop.ttributeName === nombreParametroBarra
@@ -736,7 +736,7 @@ porcentajePedidoTotal = async (urn) => {
                             return acc;
                         }, {});
                         const longitudTotal = this.convertirLongitud(valores[nombreParametrolargo], valores[nombreParametrolargo + 'Units']);
-                        console.log("Longitud Modificada",longitudTotal);
+                     //     console.log("Longitud Modificada",longitudTotal);
                         return {
                             id: element.dbId,
                             nombreFiltro1: valores[filtro1],
@@ -823,7 +823,7 @@ porcentajePedidoTotal = async (urn) => {
             
                     // Guarda los resultados en el estado o maneja como prefieras
                     this.setState({ idsBarras });
-                  console.log("Barras generadas con datos ", idsBarras);
+                 //   console.log("Barras generadas con datos ", idsBarras);
                     resolve(idsBarras);
                 });
             } catch (error) {

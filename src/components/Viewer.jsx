@@ -79,13 +79,13 @@ class Viewer extends React.Component {
                 toast.success('Proceso completado con barras encontradas.');
                 // Aislar solo los IDs de las barras encontradas
                 const idsParaIsolar = resultado_fierros.map((barra) => barra.id);
-                console.log("barras encontradas");
-                console.log(idsParaIsolar);
+               //   console.log("barras encontradas");
+                //  console.log(idsParaIsolar);
                 this.viewer.isolate(idsParaIsolar);
                 this.calcularPesoYActualizarContexto(resultado_fierros.map(barra => barra.id));
                 this.context.actualizarResultadoFierros(resultado_fierros); // Actualiza con los objetos completos de las barras
                 this.context.actualizarSeleccionActual(seleccionActual);
-              console.log("Barras que intersectan con la selección:", resultado_fierros);
+              //  console.log("Barras que intersectan con la selección:", resultado_fierros);
             } else {
                 toast.warn('No se encontraron barras que intersectan con la selección.');
               //console.log("No se encontraron barras que intersectan con la selección.");
@@ -105,13 +105,13 @@ class Viewer extends React.Component {
     calcularPesoYActualizarContexto = async (resultado_fierros) => {
         const identificadores = resultado_fierros; // Asume que resultado_fierros es un array de IDs
 
-        console.log("calculo pesos");
-        console.log(identificadores);
+        //  console.log("calculo pesos");
+        //  console.log(identificadores);
         const {  nombreParametroPesoLineal,  nombreParametrolargo} = this.state;
         let pesoTotal = 0;
         let largoTotal = 0;
         let totalBarras = 0;
-        console.log("parametros calculo y actualizo "+nombreParametroPesoLineal+"   "+nombreParametrolargo);
+        //  console.log("parametros calculo y actualizo "+nombreParametroPesoLineal+"   "+nombreParametrolargo);
         const obtenerPropiedades = (id) => new Promise(resolve => this.viewer.getProperties(id, resolve));
         const promesasPropiedades = identificadores.map(id => obtenerPropiedades(id));
     
@@ -122,17 +122,17 @@ class Viewer extends React.Component {
             let largoActual = 0;
             let esBarraValida = false;
             let cantidadActual = 0;
-            console.log("propiedades revision general");
-            console.log(result.properties);
+          //    console.log("propiedades revision general");
+           //   console.log(result.properties);
             result.properties.forEach(prop => {
                 
                 if (prop.attributeName === nombreParametroPesoLineal && parseFloat(prop.displayValue) > 0) {
                      if (prop.units) {
-                        console.log("tiene prop units", prop.units);
+                     //     console.log("tiene prop units", prop.units);
                          if (prop.units.includes("kilograms") || prop.units.includes("kilos") || prop.units.includes("kilogramos")) {
-                          console.log("peso actual Kilos",prop.displayValue);
+                        //    console.log("peso actual Kilos",prop.displayValue);
                             pesoActual = parseFloat(prop.displayValue); // No se necesita conversión
-                            console.log("peso actual barra  hormigon "+pesoActual);
+                         //     console.log("peso actual barra  hormigon "+pesoActual);
                          } else if (prop.units.includes("pounds") || prop.units.includes("libras")) {
                         //   console.log("peso actual libras",prop.displayValue);
                              pesoActual = parseFloat(prop.displayValue) * 1.48816394; // libras x pie ==> kg por mtr
@@ -143,7 +143,7 @@ class Viewer extends React.Component {
                      }
                     esBarraValida = true; // Se encontró peso, marcamos como válida
                 } else if ((prop.attributeName === nombreParametrolargo||prop.displayName === nombreParametrolargo) && parseFloat(prop.displayValue) > 0) {
-                  console.log("tiene atributo largo ok",prop.units);
+                  //  console.log("tiene atributo largo ok",prop.units);
                     if (prop.units) {
                         if (prop.units.includes("autodesk.unit.unit:meters")) {
                           //console.log("tipo de unidad metros");
