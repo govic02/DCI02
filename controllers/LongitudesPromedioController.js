@@ -27,8 +27,8 @@ const obtenerLongitudPromedioPorUrn = async (req, res) => {
 // Crear o actualizar promedio de longitud
 const crearActualizarLongitudPromedio = async (req, res) => {
     const { urn, longitudes } = req.body;
-    console.log("inicio envio de datos longitudes promedio", urn);
-    console.log(longitudes);
+   // console.log("inicio envio de datos longitudes promedio", urn);
+   // console.log(longitudes);
 
     // Transformar el objeto de longitudes en un array de objetos adecuado para el modelo
     const longitudesArray = Object.keys(longitudes).map(nombreFiltro2 => ({

@@ -24,10 +24,10 @@ const obtenerPedido = async (req, res) => {
 // Función para actualizar el estado de un pedido
 const actualizarEstadoPedido = async (req, res) => {
     const { pedidoId, nombreEstado, fecha, nombreUsuario } = req.body;
-    console.log("Solicitud cambio estado pedido");
-    console.log("Pedido ID:", pedidoId);
-    console.log("Nombre Usuario:", nombreUsuario);
-    console.log("Estado a actualizar:", nombreEstado);
+   // console.log("Solicitud cambio estado pedido");
+   // console.log("Pedido ID:", pedidoId);
+    //console.log("Nombre Usuario:", nombreUsuario);
+   // console.log("Estado a actualizar:", nombreEstado);
 
     // Preparar la ruta de actualización
     const estadoPath = `estados.${nombreEstado}`; // Construye la ruta del campo del estado a actualizar
@@ -162,12 +162,12 @@ const obtenerPedidos = async (req, res) => {
         if (urn) {
             // Buscar pedidos que coincidan con el urn proporcionado
             let pedidos = await Pedido.find({ urn_actual: urn });
-            console.log("respuesta pedidos");
-            console.log(pedidos);
+         //   console.log("respuesta pedidos");
+        //    console.log(pedidos);
            
     
             // Enviar una respuesta con los pedidos encontrados
-            console.log("envio pedidos",pedidos);
+         //   console.log("envio pedidos",pedidos);
            return  res.status(200).json(pedidos);
         } else {
             // Buscar todos los documentos en la colección "Pedidos" si no se proporcionó urn

@@ -87,7 +87,7 @@ const crearUsuario = async (req, res) => {
     if (usuarioExistente) {
       await session.abortTransaction();
       console.log("ya existe");
-      return res.status(400).send('Ya existe un usuario registrado con ese correo electrónico o nombre de usuario.');
+      return res.json({ error: 'Ya existe un usuario registrado con ese correo electrónico o nombre de usuario.' });
     }
 
     const nuevoUsuario = new Users({
@@ -136,7 +136,7 @@ const crearUsuario = async (req, res) => {
     } catch (error) {
       await session.abortTransaction();
       console.error("Error al crear el usuario:", error);
-      res.status(400).send(error.message);
+      res.json({ error: 'Ya existe un usuario registrado con ese correo electrónico o nombre de usuario.' });
     } finally {
       session.endSession();
     }

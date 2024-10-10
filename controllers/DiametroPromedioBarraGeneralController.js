@@ -3,7 +3,7 @@ import DiametroPromedioBarraGeneral from '../models/DiametroPromedioBarraGeneral
 // Guardar o actualizar el diámetro promedio de barras general
 const crearActualizarDiametroPromedioGeneral = async (req, res) => {
     const { urn, diametroPromedio } = req.body;
-    console.log("Guardando o actualizando el diámetro promedio general para la URN: " + urn);
+    //console.log("Guardando o actualizando el diámetro promedio general para la URN: " + urn);
 
     try {
         // Verificar si ya existe un registro para la URN dada
@@ -32,7 +32,7 @@ const crearActualizarDiametroPromedioGeneral = async (req, res) => {
 // Obtener el diámetro promedio general por URN
 const obtenerDiametroPromedioGeneralPorUrn = async (req, res) => {
     const { urn } = req.params;
-    console.log("Obteniendo el diámetro promedio general para la URN: " + urn);
+   // console.log("Obteniendo el diámetro promedio general para la URN: " + urn);
 
     try {
         const promedio = await DiametroPromedioBarraGeneral.findOne({ urn });

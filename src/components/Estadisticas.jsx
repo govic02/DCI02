@@ -9,6 +9,7 @@ import GraficoPedidosTotal from './estadisticas/GraficoPedidosTotal';
 import GraficosPedidoDiametro from './estadisticas/GraficosPedidoDiametro';
 import GraficoLongitudPromedio from './estadisticas/GraficoLongitudPromedio';
 import GraficoPesosPromedio from './estadisticas/GraficoPesosPromedio';
+import GraficoDiametroPromedio from './estadisticas/GraficoDiametroPromedio';
 //
 import GraficoPesosPisoDiametroBarras from './estadisticas/GraficoPesosPisoDiametroBarras';
 import MaestroFierros from './estadisticas/MaestroFierros';
@@ -85,7 +86,7 @@ const Estadisticas = () => {
                                 <GraficoPesosPromedio urn={urnSelected} />
                                 </div>
                                 <div className="col-md-6">
-
+                                <GraficoDiametroPromedio urn={urnSelected}/>
                                 </div>
                             </div>
                             

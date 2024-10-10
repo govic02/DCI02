@@ -2,7 +2,7 @@ import BarraUrn from '../models/barraUrnSchema.js'; // Asegúrate de que la ruta
 
 const insertarObjetoConDetalles = async (req, res) => {
     const { urn, lista } = req.body;
-    console.log("INTENTO DE CARGA DE BARRAS PROYECTO", urn);
+  //  console.log("INTENTO DE CARGA DE BARRAS PROYECTO", urn);
     const registroExistente = await BarraUrn.findOne({ urn });
 
     if (!registroExistente) {
@@ -136,7 +136,7 @@ const obtenerRegistroPorUrnBarras = async (req, res) => {
 
     try {
         const registro = await BarraUrn.findOne({ urn });
-        console.log("barras generales", registro)
+    //    console.log("barras generales", registro)
         if (!registro) {
             return res.json("No existen Registros");
         }
@@ -165,7 +165,7 @@ const obtenerBarrasPorUrneIds = async (req, res) => {
             return res.status(404).json({ mensaje: "No se encontraron barras con los IDs proporcionados" });
         }
         console.log("si hay coincidencias");
-        console.log(detallesFiltrados);
+      //  console.log(detallesFiltrados);
         res.json(detallesFiltrados);
     } catch (error) {
         console.error("Error al buscar barras por URN e IDs:", error);

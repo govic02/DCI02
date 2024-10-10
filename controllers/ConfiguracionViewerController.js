@@ -7,8 +7,8 @@ const manipularConfiguracionViewer = async (req, res) => {
   const urn = req.body.urn.urn || req.body.urn; // Asegúrate de manejar ambos casos: como objeto y como string directo
 
   const { filtro01, filtro02, variableBarra, variableTiempo,variableLargo, variablePesoLineal ,variableDiametro,variableNivel} = req.body;
-  console.log("intento ingreso de configuracion viewer");
-  console.log(req.body);
+ // console.log("intento ingreso de configuracion viewer");
+//  console.log(req.body);
   try {
     // Intenta encontrar el documento por la URN y actualizarlo. Si no existe, crea uno nuevo.
     const configuracion = await ConfiguracionViewer.findOneAndUpdate(

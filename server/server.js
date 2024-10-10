@@ -56,6 +56,12 @@ import {crearActualizarLongitudPromedio ,obtenerLongitudPromedioPorUrn,eliminarL
 import {crearActualizarPesosTotalversusPedidos, obtenerPesosTotalversusPedidosPorUrn} from '../controllers/PesosTotalversusPedidosController.js';
 import { v4 as uuidv4 } from 'uuid';
 
+import {crearActualizarLongitudPromedioProyecto,obtenerLongitudPromedioProyecto} from '../controllers/LongitudPromedioProyectoController.js';
+import {
+  crearActualizarDiametroPromedio,
+  obtenerDiametrosPromedioPorUrn,
+  eliminarDiametroPromedioPorUrn
+} from '../controllers/diametroPromedioController.js';
 import { 
   obtenerVistasSave, obtenerVistaSave,obtenerVistasPorUrn,crearVistaSave, eliminarVistaSave,transfiereVistas} from '../controllers/VistasSaveController.js'; // Importar los controladores de las vistas guardadas
 import Users from '../models/users.js';
@@ -696,6 +702,15 @@ app.get('/api/getLongitudPromedio/:urn', obtenerLongitudPromedioPorUrn);
 app.post('/api/crearPesoPromedio', crearActualizarPesoPromedio);
 app.get('/api/getPesoPromedio/:urn',obtenerPesoPromedioPorUrn);
 
+///// diametro promedio por piso
+app.post('/api/crearDiametroPromedio', crearActualizarDiametroPromedio);
+app.get('/api/diametroPromedio/:urn', obtenerDiametrosPromedioPorUrn);
+
+// Estadistica longitud promedio proyecto
+app.post('/api/crearlongitudPromedioProyecto', crearActualizarLongitudPromedioProyecto);
+app.get('/api/getlongitudPromedioProyecto/:urn',obtenerLongitudPromedioProyecto);
+
+///
   // estadisticas pesos total vs pedidos , 
   app.post('/api/crearPesovsPedidos', crearActualizarPesosTotalversusPedidos);
   app.get('/api/getPesovsPedidos/:urn',obtenerPesosTotalversusPedidosPorUrn);

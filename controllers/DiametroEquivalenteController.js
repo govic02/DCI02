@@ -2,7 +2,7 @@ import DiametroEquivalente from '../models/DiametroEquivalente.js'; // Asegúrat
 
 const crearActualizarDiametroEquivalente = async (req, res) => {
     const { urn, filtros2 } = req.body;
-    console.log("Datos originales recibidos:", filtros2);
+  //  console.log("Datos originales recibidos:", filtros2);
 
     // Transformar filtros2 en una estructura adecuada para Mongoose
     const filtrosTransformados = Object.entries(filtros2).map(([nombreFiltro2, grupos]) => {
@@ -17,7 +17,7 @@ const crearActualizarDiametroEquivalente = async (req, res) => {
         };
     });
 
-    console.log("Filtros transformados:", filtrosTransformados);
+   // console.log("Filtros transformados:", filtrosTransformados);
 
     try {
         const registroExistente = await DiametroEquivalente.findOne({ urn });

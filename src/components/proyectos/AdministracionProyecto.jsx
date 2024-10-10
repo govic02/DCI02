@@ -30,8 +30,10 @@ const AdministracionProyecto = (proyectoKey, urn) => {
         hasDiametroPromedioGeneral: false,
         hasPesoTotalProyecto: false,
         hasRespuestasDiametros: false,
-        hasLongitudPromedioNivel: false
-        // Puedes añadir más indicadores aquí si es necesario
+        hasLongitudPromedioNivel: false,
+        hasPesoPromedioLongitudTotal:false,
+        hasPesoDiametroPromedioPiso:false ,
+        hasPesoPromedioPisos:false
     });
 
     const datosGenerados = Object.values(dataStatus).filter(Boolean).length;
@@ -105,7 +107,7 @@ const AdministracionProyecto = (proyectoKey, urn) => {
       
         const checkAllData = async () => {
           try {
-            console.log("datos de urn:", urn);
+        //    console.log("datos de urn:", urn);
       
             // Realizamos todas las llamadas a la API en paralelo
             const results = await Promise.allSettled([
@@ -114,10 +116,13 @@ const AdministracionProyecto = (proyectoKey, urn) => {
               axios.get(`${API_BASE_URL}/api/getPesovsPedidos/${encodeURIComponent(urn)}`),
               axios.get(`${API_BASE_URL}/api/respuestasDiametros/${encodeURIComponent(urn)}`),
               axios.get(`${API_BASE_URL}/api/getLongitudPromedio/${encodeURIComponent(urn)}`),
-              axios.get(`${API_BASE_URL}/api/getPesoPromedio/${encodeURIComponent(urn)}`) // Nueva llamada a la API
+              axios.get(`${API_BASE_URL}/api/getPesoPromedio/${encodeURIComponent(urn)}`) ,// Nueva llamada a la API
+              axios.get(`${API_BASE_URL}/api/getlongitudPromedioProyecto/${encodeURIComponent(urn)}`) ,
+              axios.get(`${API_BASE_URL}/api/diametroPromedio/${encodeURIComponent(urn)}`) 
+              
             ]);
       
-            console.log("Resultados obtenidos:", results);
+          console.log("Resultados obtenidos:", results);
       
             // Funciones auxiliares para verificar si hay datos en las respuestas
             const hasDataInResponse = (response, dataKey, expectedType) => {
@@ -143,11 +148,12 @@ const AdministracionProyecto = (proyectoKey, urn) => {
             // Verificar si hay datos antes de actualizar el estado
             const hasPesoPromedioGeneral = hasDataInResponse(results[0], 'pesoPromedioGeneral', 'number');
             const hasDiametroPromedioGeneral = hasDataInResponse(results[1], 'diametroPromedio', 'number');
-            const hasPesoTotalProyecto = hasDataInResponse(results[2], 'pesoTotalProyecto', 'number');
+            const hasPesoTotalProyecto = hasDataInResponse(results[2], 'pesoTotalPedidos', 'number');
             const hasRespuestasDiametros = hasArrayDataInResponse(results[3], 'pesosPorPiso');
-            const hasLongitudPromedioNivel = hasDataInResponse(results[4], 'longitudes', 'object');
+            const hasLongitudPromedioNivel = hasDataInResponse(results[4], 'longitudes');
             const hasPesoPromedioPisos = hasArrayDataInResponse(results[5], 'pesos'); // Nueva verificación
-      
+            const hasPesoPromedioLongitudTotal = hasDataInResponse(results[6], 'promedioLongitudProyecto');
+            const hasPesoDiametroPromedioPiso = hasArrayDataInResponse(results[7], 'diametros');
             // Ahora actualizamos el estado con los valores obtenidos
             setDataStatus({
               hasPesoPromedioGeneral,
@@ -155,17 +161,21 @@ const AdministracionProyecto = (proyectoKey, urn) => {
               hasPesoTotalProyecto,
               hasRespuestasDiametros,
               hasLongitudPromedioNivel,
-              hasPesoPromedioPisos // Nueva variable de estado
+              hasPesoPromedioPisos,
+              hasPesoPromedioLongitudTotal,
+              hasPesoDiametroPromedioPiso // Nueva variable de estado
             });
       
-            // Mostrar los resultados en la consola
-          //  console.log('Peso Promedio General:', hasPesoPromedioGeneral ? 'datos disponibles' : 'sin datos');
-          //  console.log('Diámetro Promedio General:', hasDiametroPromedioGeneral ? 'datos disponibles' : 'sin datos');
-          //  console.log('Peso Total del Proyecto:', hasPesoTotalProyecto ? 'datos disponibles' : 'sin datos');
-         //   console.log('Respuestas Diámetros (Pesos Pisos Diámetro):', hasRespuestasDiametros ? 'datos disponibles' : 'sin datos');
-         //   console.log('Longitud Promedio Nivel:', hasLongitudPromedioNivel ? 'datos disponibles' : 'sin datos');
-         //   console.log('Pesos Promedio Pisos:', hasPesoPromedioPisos ? 'datos disponibles' : 'sin datos'); // Nuevo log
-          } catch (error) {
+            //Mostrar los resultados en la consola
+           console.log('Peso Promedio General:', hasPesoPromedioGeneral ? 'datos disponibles' : 'sin datos');
+           console.log('Diámetro Promedio General:', hasDiametroPromedioGeneral ? 'datos disponibles' : 'sin datos');
+           console.log('Peso Total del Proyecto:', hasPesoTotalProyecto ? 'datos disponibles' : 'sin datos');
+          console.log('Respuestas Diámetros (Pesos Pisos Diámetro):', hasRespuestasDiametros ? 'datos disponibles' : 'sin datos');
+           console.log('Longitud Promedio Nivel:', hasLongitudPromedioNivel ? 'datos disponibles' : 'sin datos');
+            console.log('Pesos Promedio Pisos:', hasPesoPromedioPisos ? 'datos disponibles' : 'sin datos'); // Nuevo log
+         console.log('promedio longitud total:', hasPesoPromedioLongitudTotal ? 'datos disponibles' : 'sin datos');
+          console.log('Diametro pisos:', hasPesoDiametroPromedioPiso ? 'datos disponibles' : 'sin datos');   
+        } catch (error) {
             // En caso de error, establecemos los indicadores a false y mostramos el error
             console.error('Error al verificar los datos:', error);
       
@@ -175,7 +185,10 @@ const AdministracionProyecto = (proyectoKey, urn) => {
               hasPesoTotalProyecto: false,
               hasRespuestasDiametros: false,
               hasLongitudPromedioNivel: false,
-              hasPesoPromedioPisos: false // Nueva variable de estado
+              hasPesoPromedioPisos: false,
+              hasPesoPromedioLongitudTotal:false,
+              hasPesoDiametroPromedioPiso:false // Nueva variable de estado
+
             });
           }
         };
@@ -559,7 +572,7 @@ const AdministracionProyecto = (proyectoKey, urn) => {
             }
     
             const data = await response.json();
-            console.log('Datos para longitudes:', data);
+           // console.log('Datos para longitudes:', data);
             if (!data || !data.detalles || data.detalles.length === 0) {
                 return {}; // Retornar un objeto vacío si no hay datos
             }
@@ -623,33 +636,191 @@ const AdministracionProyecto = (proyectoKey, urn) => {
         }
     };
 
+    const DiametroPromedio = async (urn) => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/barraurn/${encodeURIComponent(urn)}`);
+            if (!response.ok) {
+                throw new Error('Error al obtener los datos de las barras');
+            }
+    
+            const data = await response.json();
+           // console.log('Datos para diámetros:', data);
+            if (!data || !data.detalles || data.detalles.length === 0) {
+                return {}; // Retornar un objeto vacío si no hay datos
+            }
+    
+            const detalles = data.detalles;
+            const resultados = {};
+    
+            // Agrupar y calcular diámetro promedio por nombreFiltro2 (piso o nivel)
+            detalles.forEach((barra) => {
+                const { nombreFiltro2, diametroBarra, cantidad } = barra;
+               // console.log("diametros dato barra promedio",diametroBarra);
+              //  console.log("diametros dato barra promedio",cantidad);
+                // Asegurarse de que diametro y cantidad sean números válidos
+                const diametroNum = parseFloat(diametroBarra);
+                const cantidadNum = parseFloat(cantidad);
+    
+                if (isNaN(diametroNum) || isNaN(cantidadNum)) {
+                    return; // Omitir este elemento si los datos no son válidos
+                }
+    
+                if (!resultados[nombreFiltro2]) {
+                    resultados[nombreFiltro2] = { totalDiametro: 0, count: 0 };
+                }
+                resultados[nombreFiltro2].totalDiametro += diametroNum;
+                resultados[nombreFiltro2].count += cantidadNum;
+            });
+    
+            // Calcular el promedio y guardar en un nuevo objeto
+            const promedios = {};
+            Object.keys(resultados).forEach((key) => {
+                const { totalDiametro, count } = resultados[key];
+    
+                if (isNaN(totalDiametro) || isNaN(count) || count === 0) {
+                    console.warn(`No se puede calcular el promedio para ${key}: totalDiametro o count inválidos`);
+                    promedios[key] = null;
+                } else {
+                    promedios[key] = totalDiametro / count;
+                }
+            });
+          //  console.log("promedios calculados diametros piso");
+          //  console.log(promedios);
+            // Guardar el resultado en la base de datos
+            const saveResponse = await fetch(`${API_BASE_URL}/api/crearDiametroPromedio`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ urn, diametros: promedios }),
+            });
+    
+            if (!saveResponse.ok) {
+                throw new Error('Error al guardar los promedios de diámetros');
+            }
+    
+            const saveResult = await saveResponse.json();
+          //  console.log('Promedios de diámetros guardados:', saveResult);
+            return promedios;
+        } catch (error) {
+            console.error('Error al obtener o procesar los datos de las barras:', error);
+            return null;
+        }
+    };
+    
+    const LongitudPromedioProyecto = async (urn) => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/barraurn/${encodeURIComponent(urn)}`);
+            if (!response.ok) {
+                throw new Error('Error al obtener los datos de las barras');
+            }
+    
+            const data = await response.json();
+          //  console.log('Datos para longitudes:', data);
+            if (!data || !data.detalles || data.detalles.length === 0) {
+                return null; // Retornar null si no hay datos
+            }
+    
+            const detalles = data.detalles;
+    
+            // Variables para acumular la longitud total y la cantidad total del proyecto
+            let longitudTotalProyecto = 0;
+            let cantidadTotalProyecto = 0;
+    
+            // Recorrer cada barra y acumular las longitudes y cantidades
+            detalles.forEach((barra) => {
+                const { longitudTotal, cantidad } = barra;
+    
+                // Asegurarse de que longitudTotal y cantidad sean números válidos
+                const longitudTotalNum = parseFloat(longitudTotal);
+                const cantidadNum = parseFloat(cantidad);
+    
+                if (isNaN(longitudTotalNum) || isNaN(cantidadNum) || cantidadNum === 0) {
+                    // Omitir este elemento si los datos no son válidos
+                    return;
+                }
+    
+                // Acumular la longitud total y la cantidad total
+                longitudTotalProyecto += longitudTotalNum;
+                cantidadTotalProyecto += cantidadNum;
+            });
+    
+            // Verificar que cantidadTotalProyecto no sea cero para evitar división por cero
+            if (cantidadTotalProyecto === 0) {
+                console.warn('La cantidad total es cero, no se puede calcular la longitud promedio del proyecto.');
+                return null;
+            }
+    
+            // Calcular la longitud promedio del proyecto
+            const promedioLongitudProyecto = longitudTotalProyecto / cantidadTotalProyecto;
+    
+            // Guardar el promedio de longitud en el servidor si es necesario
+            const saveResponse = await fetch(`${API_BASE_URL}/api/crearlongitudPromedioProyecto`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ urn, promedioLongitudProyecto }),
+            });
+    
+            if (!saveResponse.ok) {
+                throw new Error('Error al guardar el promedio de longitud del proyecto');
+            }
+    
+            const saveResult = await saveResponse.json();
+           // console.log('Promedio de longitud del proyecto guardado:', saveResult);
+    
+            return promedioLongitudProyecto;
+        } catch (error) {
+            console.error('Error al obtener o procesar los datos de las barras:', error);
+            return null;
+        }
+    };
     const guardarDatosModelo = async () => {
         //console.log('El nombre del proyecto es:');
         toast.info('Inicio de proceso de Cálculo de datos estadísticos del proyecto, el proceso puuede tomar algunos minutos...');
+        
+      
+
+        const promedioDiametroPisos = await DiametroPromedio(proyectoKey.urn);
+      //  console.log("Promedios de diametro por piso",promedioDiametroPisos);
+        setTickets((prev) => ({ ...prev, 'Diametro  Promedio piso': 'Completado' }));
+
         const val = await actions.generarTotalPesoPisos(proyectoKey.urn);
-        //console.log("resultado generar TotalPisos", val);
         setTickets((prev) => ({ ...prev, 'Peso por Piso': 'Completado' }));
-        toast.info('1 de 6 completado', { toastId: 'estadisticagenerales' });
+        toast.info('1 de 8 completado', { toastId: 'estadisticagenerales' });
+
         await actions.porcentajePedidoTotal(proyectoKey.urn);
         setTickets((prev) => ({ ...prev, 'Porcentaje Pedidos': 'Completado' }));
-        toast.info('2 de 6 completado', { toastId: 'estadisticagenerales' });
+        toast.info('2 de 8 completado', { toastId: 'estadisticagenerales' });
+
         await actions.PesoPromedio(proyectoKey.urn);
         setTickets((prev) => ({ ...prev, 'Pesos Promedio': 'Completado' }));
-        toast.info('3 de 6 completado', { toastId: 'estadisticagenerales' });
+        toast.info('3 de 8 completado', { toastId: 'estadisticagenerales' });
+
         await actions.PesoPromedioGeneral(proyectoKey.urn);
-        setTickets((prev) => ({ ...prev, 'Pesos Promedio General': 'Completado' }));
-        toast.info('4 de 6 completado', { toastId: 'estadisticagenerales' });
+        setTickets((prev) => ({ ...prev, 'Pesos Promedio General': 'Completado' })); 
+        toast.info('4 de 8 completado', { toastId: 'estadisticagenerales' });
+
         await actions.diametroPromedioGeneral(proyectoKey.urn);
-        setTickets((prev) => ({ ...prev, 'diametro Promedio barras General': 'Completado' }));
-        toast.info('5 de 6 completado', { toastId: 'estadisticagenerales' });
+        setTickets((prev) => ({ ...prev, 'diametro Promedio barras General': 'Completado' })); 
+        toast.info('5 de 8 completado', { toastId: 'estadisticagenerales' });
+       
         const promediosLongitud = await LongitudPromedio(proyectoKey.urn);
-        console.log("Promedios de longitud por nombreFiltro2:", promediosLongitud);
-        toast.info('6 de 6 completado, proceso terminado', { toastId: 'estadisticagenerales' });
+       // console.log("Promedios de longitud por nombreFiltro2:", promediosLongitud);
+        toast.info('6 de 8 completado', { toastId: 'estadisticagenerales' });
         setTickets((prev) => ({ ...prev, 'Longitud Promedio': 'Completado' }));
 
+        const promedioLongitudProyecto = await LongitudPromedioProyecto(proyectoKey.urn);
+        toast.info('7 de 8 completado', { toastId: 'PromedioLongitud' });
+         setTickets((prev) => ({ ...prev, 'Longitud Promedio Proyecto': 'Completado' }));
+
         const resultadoDiametro = await DiametroEquivalenteLargosIguales(proyectoKey.urn);
-        //console.log("Resultados de Diametro Equivalente por Largos Iguales:", resultadoDiametro);
+        toast.info('8 de 8 completado, proceso terminado', { toastId: 'Diametro Equivalente' });
         setTickets((prev) => ({ ...prev, 'Diametro Equivalente': 'Completado' }));
+
+
+       
     };
 
     const asignarUsuarioAProyecto = (e) => {
@@ -700,7 +871,7 @@ const AdministracionProyecto = (proyectoKey, urn) => {
             return;
         }
         const usuarioSeleccionadoId = Number(usuarioSeleccionado);
-        console.log('el usuario seleccionado (convertido a número si necesario)', usuarioSeleccionadoId);
+        //console.log('el usuario seleccionado (convertido a número si necesario)', usuarioSeleccionadoId);
 
         const usuarioEncontrado = usuariosNoAdmin.find(
             (usuario) => Number(usuario.idUsu) === usuarioSeleccionadoId
@@ -807,7 +978,7 @@ const AdministracionProyecto = (proyectoKey, urn) => {
                                             Extraer Información
                                         </Button>
                                         <span style={{ marginTop: '10px', fontWeight: 'bold' }}>
-                                            {`${datosGenerados} de 6 indicadores generados`}
+                                            {`${datosGenerados} de 8 indicadores generados`}
                                         </span>
                                     </div>
                                 </div>
