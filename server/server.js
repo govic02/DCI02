@@ -526,6 +526,18 @@ async function sendCompletioTranslatenEmail(userEmail) {
       console.error('Error al enviar el email de notificación', error);
   }
 }
+app.get('/api/manifests/:urn', async (req, res) => {
+  const urn = req.params.urn;
+  const derivativesApi = new DerivativesApi();
+
+  try {
+    const manifest = await derivativesApi.getManifest(urn, {}, req.oauth_client, req.oauth_token);
+    res.json(manifest.body);
+  } catch (error) {
+    console.error('Error al obtener el manifiesto:', error);
+    res.status(error.statusCode || 500).json({ error: error.statusMessage });
+  }
+});
 app.post('/api/jobs', async (req, res) => {
   console.log('Intento inicio de traducción');
   const { objectName: encodedUrn, username } = req.body;

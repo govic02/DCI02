@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react'; 
 import axios from 'axios';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
@@ -14,6 +14,8 @@ const GraficoPesosPisoDiametroBarras = ({ urn }) => {
         labels: [],
         datasets: [],
     });
+    const [loading, setLoading] = useState(true); // Estado de carga
+    const [sinDatos, setSinDatos] = useState(false); // Estado para indicar si no hay datos
 
     useEffect(() => {
         const fetchDatos = async () => {
@@ -38,6 +40,14 @@ const GraficoPesosPisoDiametroBarras = ({ urn }) => {
                 let { pesosPorPiso } = response.data;
                 console.log("urn desde diametro pesos diametro");
                 console.log(urn);
+
+                // Verificar si hay datos
+                if (!pesosPorPiso || pesosPorPiso.length === 0) {
+                    setSinDatos(true);
+                    setLoading(false);
+                    return;
+                }
+
                 // Si existe un orden predefinido, ordena usando ese orden
                 if (usePredefinedOrder) {
                     pesosPorPiso.sort((a, b) => predefinedOrderMap[a.piso.trim()] - predefinedOrderMap[b.piso.trim()]);
@@ -107,8 +117,13 @@ const GraficoPesosPisoDiametroBarras = ({ urn }) => {
                     labels,
                     datasets,
                 });
+
+                setSinDatos(false); // Hay datos disponibles
+                setLoading(false); // Datos cargados, actualizar el estado de carga
             } catch (error) {
                 console.error("Error al obtener los datos:", error);
+                setSinDatos(true); // Indicar que no hay datos disponibles debido al error
+                setLoading(false); // Asegurarse de ocultar el mensaje de carga incluso si hay error
             }
         };
     
@@ -174,6 +189,33 @@ const GraficoPesosPisoDiametroBarras = ({ urn }) => {
         borderRadius: '20px',
     };
 
+    if (loading) {
+        // Mostrar mensaje de carga mientras se obtienen los datos
+        return (
+            <Card style={cardStyle}>
+                <CardContent>
+                    <Typography variant="h5" component="h2" style={{ fontSize: 16, textAlign: 'center', marginTop: '100px' }}>
+                        Cargando información...
+                    </Typography>
+                </CardContent>
+            </Card>
+        );
+    }
+
+    if (sinDatos) {
+        // Mostrar mensaje si no hay datos disponibles
+        return (
+            <Card style={cardStyle}>
+                <CardContent>
+                    <Typography variant="h5" component="h2" style={{ fontSize: 16, textAlign: 'center', marginTop: '100px' }}>
+                        Sin datos disponibles
+                    </Typography>
+                </CardContent>
+            </Card>
+        );
+    }
+
+    // Una vez que los datos están disponibles, renderizar el gráfico
     return (
         <Card style={cardStyle}>
             <CardContent>

@@ -20,9 +20,18 @@ const GraficosPedidoDiametro = ({ urn }) => {
 
     // Paleta de 12 colores cálidos
     const coloresCalidos = [
-        '#FF5733', '#FF8D1A', '#FFC300', '#FF5733', '#FF6F61',
-        '#FF7F50', '#FF4500', '#FF6347', '#FFA07A', '#FFD700',
-        '#FFA500', '#FFB347'
+        '#0000FF', // Azul
+                    '#0040FF', // Azul fuerte
+                    '#0080FF', // Azul medio
+                    '#00BFFF', // Azul claro
+                    '#00FFFF', // Cian
+                    '#00FF80', // Verde agua
+                    '#00FF00', // Verde
+                    '#80FF00', // Verde lima
+                    '#FFFF00', // Amarillo
+                    '#FFC000', // Naranja
+                    '#FF8000', // Naranja oscuro
+                    '#FF0000', // Rojo
     ];
 
     useEffect(() => {

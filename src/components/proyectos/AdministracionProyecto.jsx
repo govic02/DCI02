@@ -159,12 +159,12 @@ const AdministracionProyecto = (proyectoKey, urn) => {
             });
       
             // Mostrar los resultados en la consola
-            console.log('Peso Promedio General:', hasPesoPromedioGeneral ? 'datos disponibles' : 'sin datos');
-            console.log('Diámetro Promedio General:', hasDiametroPromedioGeneral ? 'datos disponibles' : 'sin datos');
-            console.log('Peso Total del Proyecto:', hasPesoTotalProyecto ? 'datos disponibles' : 'sin datos');
-            console.log('Respuestas Diámetros (Pesos Pisos Diámetro):', hasRespuestasDiametros ? 'datos disponibles' : 'sin datos');
-            console.log('Longitud Promedio Nivel:', hasLongitudPromedioNivel ? 'datos disponibles' : 'sin datos');
-            console.log('Pesos Promedio Pisos:', hasPesoPromedioPisos ? 'datos disponibles' : 'sin datos'); // Nuevo log
+          //  console.log('Peso Promedio General:', hasPesoPromedioGeneral ? 'datos disponibles' : 'sin datos');
+          //  console.log('Diámetro Promedio General:', hasDiametroPromedioGeneral ? 'datos disponibles' : 'sin datos');
+          //  console.log('Peso Total del Proyecto:', hasPesoTotalProyecto ? 'datos disponibles' : 'sin datos');
+         //   console.log('Respuestas Diámetros (Pesos Pisos Diámetro):', hasRespuestasDiametros ? 'datos disponibles' : 'sin datos');
+         //   console.log('Longitud Promedio Nivel:', hasLongitudPromedioNivel ? 'datos disponibles' : 'sin datos');
+         //   console.log('Pesos Promedio Pisos:', hasPesoPromedioPisos ? 'datos disponibles' : 'sin datos'); // Nuevo log
           } catch (error) {
             // En caso de error, establecemos los indicadores a false y mostramos el error
             console.error('Error al verificar los datos:', error);
@@ -559,7 +559,7 @@ const AdministracionProyecto = (proyectoKey, urn) => {
             }
     
             const data = await response.json();
-           //  console.log('Datos para longitudes:', data);
+            console.log('Datos para longitudes:', data);
             if (!data || !data.detalles || data.detalles.length === 0) {
                 return {}; // Retornar un objeto vacío si no hay datos
             }

@@ -120,7 +120,8 @@ const Proyectos = ({ token, selectedIds, onCameraChange, onSelectionChange, refV
                 <ErrorBoundary>
                     <ListadoProyectos onProyectoSeleccionado={handleProyectoSeleccionado}
                         onProyectoKeySeleccionado={setProyectoKeySeleccionado}
-                    />  </ErrorBoundary>
+                    /> 
+                 </ErrorBoundary>
                 </div>
                 <div className='col-8' style={estiloViewerContainer}>
                     <div className='row'>

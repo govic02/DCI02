@@ -6,6 +6,7 @@ import { Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
 import API_BASE_URL from '../../config';
 import axios from 'axios';
+
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 const GraficoPesosPromedio = ({ urn }) => {
@@ -13,6 +14,8 @@ const GraficoPesosPromedio = ({ urn }) => {
     labels: [],
     datasets: []
   });
+  const [loading, setLoading] = useState(true); // Estado de carga
+  const [sinDatos, setSinDatos] = useState(false); // Estado para indicar si no hay datos
 
   useEffect(() => {
     const fetchDatos = async () => {
@@ -34,6 +37,13 @@ const GraficoPesosPromedio = ({ urn }) => {
         if (!respuesta.ok) throw new Error('Respuesta no satisfactoria del servidor');
         const data = await respuesta.json();
         let pesos = data.pesos;
+
+        // Verificar si hay datos
+        if (!pesos || pesos.length === 0) {
+          setSinDatos(true);
+          setLoading(false);
+          return;
+        }
 
         // Si existe un orden predefinido, ordena usando ese orden
         if (usePredefinedOrder) {
@@ -57,8 +67,13 @@ const GraficoPesosPromedio = ({ urn }) => {
             borderWidth: 1
           }]
         });
+
+        setSinDatos(false);
+        setLoading(false);
       } catch (error) {
         console.error("Error al obtener los datos:", error);
+        setSinDatos(true);
+        setLoading(false);
       }
     };
 
@@ -70,7 +85,7 @@ const GraficoPesosPromedio = ({ urn }) => {
       y: {
         beginAtZero: true,
         ticks: {
-          callback: function(value) {
+          callback: function (value) {
             return value + ' kg';
           }
         },
@@ -87,8 +102,34 @@ const GraficoPesosPromedio = ({ urn }) => {
     marginRight: '40px',
     marginTop: '40px',
     borderRadius: '20px',
-    height: '370px !important' 
+    height: '370px !important'
   };
+
+  if (loading) {
+    // Mostrar mensaje de carga mientras se obtienen los datos
+    return (
+      <Card style={cardStyle}>
+        <CardContent>
+          <Typography variant="h5" component="h2" style={{ fontSize: 16, textAlign: 'center', marginTop: '100px' }}>
+            Cargando información...
+          </Typography>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (sinDatos) {
+    // Mostrar mensaje si no hay datos disponibles
+    return (
+      <Card style={cardStyle}>
+        <CardContent>
+          <Typography variant="h5" component="h2" style={{ fontSize: 16, textAlign: 'center', marginTop: '100px' }}>
+            Sin información disponible
+          </Typography>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card style={cardStyle}>
