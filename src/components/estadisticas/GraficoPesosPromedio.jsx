@@ -62,7 +62,8 @@ const GraficoPesosPromedio = ({ urn }) => {
           datasets: [{
             label: 'Promedio de Peso por Nivel',
             data: pesosData,
-            backgroundColor: 'rgba(255, 99, 132, 0.5)',
+            backgroundColor: 'rgba(218, 41, 28, 1)', // Rojo con transparencia
+               borderColor: '#DA291C', // Rojo sólidoackgroundColor: 'rgba(255, 99, 132, 0.5)',
             borderColor: 'rgba(255, 99, 132, 1)',
             borderWidth: 1
           }]

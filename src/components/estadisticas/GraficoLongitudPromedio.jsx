@@ -57,8 +57,8 @@ const GraficoLongitudPromedio = ({ urn }) => {
             datasets: [{
               label: 'Promedio de Longitud por Nivel',
               data,
-              backgroundColor: 'rgba(54, 162, 235, 0.5)',
-              borderColor: 'rgba(54, 162, 235, 1)',
+              backgroundColor: 'rgba(218, 41, 28, 1)', // Rojo con transparencia
+              borderColor: '#DA291C', // Rojo sólido
               borderWidth: 1,
             }]
           });

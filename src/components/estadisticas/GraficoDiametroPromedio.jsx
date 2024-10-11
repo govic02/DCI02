@@ -41,8 +41,8 @@ const GraficoDiametroPromedio = ({ urn }) => {
             datasets: [{
               label: 'Promedio de Diámetro por Nivel',
               data,
-              backgroundColor: 'rgba(255, 99, 132, 0.5)',
-              borderColor: 'rgba(255, 99, 132, 1)',
+              backgroundColor: 'rgba(218, 41, 28, 1)', // Rojo con transparencia
+               borderColor: '#DA291C', // Rojo sólido
               borderWidth: 1,
             }]
           });

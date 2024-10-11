@@ -91,18 +91,18 @@ const GraficoPesosPisoDiametroBarras = ({ urn }) => {
 
                 // Definir la paleta de 12 colores desde colores fríos hasta cálidos
                 const colorPalette = [
-                    '#0000FF', // Azul
-                    '#0040FF', // Azul fuerte
-                    '#0080FF', // Azul medio
-                    '#00BFFF', // Azul claro
-                    '#00FFFF', // Cian
-                    '#00FF80', // Verde agua
-                    '#00FF00', // Verde
-                    '#80FF00', // Verde lima
-                    '#FFFF00', // Amarillo
-                    '#FFC000', // Naranja
-                    '#FF8000', // Naranja oscuro
-                    '#FF0000', // Rojo
+                    '#0000FF', // Azul 
+                    '#FFD700', // Amarillo Oro 
+                    '#32CD32', // Verde Lima Vivo 
+                    '#FF4500', // Naranja Rojo 
+                    '#1E90FF', // Azul Dodger 
+                    '#FF1493', // Rosa Profundo 
+                    '#00FF7F', // Verde Primavera 
+                    '#8A2BE2', // Azul Violeta 
+                    '#FF6347', // Rojo Tomate 
+                    '#00CED1', // Turquesa Oscuro 
+                    '#9400D3', // Violeta Oscuro 
+                    '#B22222', // Rojo Ladrillo 
                 ];
 
                 // Asignar colores a los datasets en orden
