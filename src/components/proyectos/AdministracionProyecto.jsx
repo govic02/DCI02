@@ -503,7 +503,7 @@ const AdministracionProyecto = (proyectoKey, urn) => {
 
     const DiametroEquivalenteLargosIguales = async (urn) => {
         try {
-            // Llamada a la API para obtener datos
+            
             const response = await fetch(`${API_BASE_URL}/api/barraurn/${encodeURIComponent(urn)}`);
             if (!response.ok) throw new Error('Error al obtener datos de barras');
 
@@ -566,6 +566,7 @@ const AdministracionProyecto = (proyectoKey, urn) => {
 
     const LongitudPromedio = async (urn) => {
         try {
+            console.log("urn buscada ",urn);
             const response = await fetch(`${API_BASE_URL}/api/barraurn/${encodeURIComponent(urn)}`);
             if (!response.ok) {
                 throw new Error('Error al obtener los datos de las barras');
@@ -583,7 +584,7 @@ const AdministracionProyecto = (proyectoKey, urn) => {
             // Agrupar y calcular longitud promedio por nombreFiltro2
             detalles.forEach((barra) => {
                 const { nombreFiltro2, longitudTotal, cantidad } = barra;
-    
+              //  console.log(" largo nombreFiltro2 ",nombreFiltro2);
                 // Asegurarse de que longitudTotal y cantidad sean números válidos
                 const longitudTotalNum = parseFloat(longitudTotal);
                 const cantidadNum = parseFloat(cantidad);
@@ -635,7 +636,7 @@ const AdministracionProyecto = (proyectoKey, urn) => {
             return null;
         }
     };
-
+    // Diametro equivalente   
     const DiametroPromedio = async (urn) => {
         try {
             const response = await fetch(`${API_BASE_URL}/api/barraurn/${encodeURIComponent(urn)}`);
@@ -644,48 +645,49 @@ const AdministracionProyecto = (proyectoKey, urn) => {
             }
     
             const data = await response.json();
-           // console.log('Datos para diámetros:', data);
             if (!data || !data.detalles || data.detalles.length === 0) {
-                return {}; // Retornar un objeto vacío si no hay datos
+                return {}; 
             }
     
             const detalles = data.detalles;
             const resultados = {};
     
-            // Agrupar y calcular diámetro promedio por nombreFiltro2 (piso o nivel)
+            // Agrupar y calcular diámetro equivalente por nombreFiltro2 (piso o nivel)
             detalles.forEach((barra) => {
-                const { nombreFiltro2, diametroBarra, cantidad } = barra;
-               // console.log("diametros dato barra promedio",diametroBarra);
-              //  console.log("diametros dato barra promedio",cantidad);
-                // Asegurarse de que diametro y cantidad sean números válidos
-                const diametroNum = parseFloat(diametroBarra);
-                const cantidadNum = parseFloat(cantidad);
+                const { nombreFiltro2, diametroBarra, longitudTotal } = barra;
     
-                if (isNaN(diametroNum) || isNaN(cantidadNum)) {
-                    return; // Omitir este elemento si los datos no son válidos
+              
+                const diametroNum = parseFloat(diametroBarra);
+                const longitudTotalNum = parseFloat(longitudTotal);
+    
+                if (isNaN(diametroNum) || isNaN(longitudTotalNum)) {
+                    return; 
                 }
     
                 if (!resultados[nombreFiltro2]) {
-                    resultados[nombreFiltro2] = { totalDiametro: 0, count: 0 };
+                    resultados[nombreFiltro2] = { sumNumerador: 0, sumDenominador: 0 };
                 }
-                resultados[nombreFiltro2].totalDiametro += diametroNum;
-                resultados[nombreFiltro2].count += cantidadNum;
+    
+                // num y den  diámetro equivalente
+                resultados[nombreFiltro2].sumNumerador += (diametroNum ** 2) * longitudTotalNum;
+                resultados[nombreFiltro2].sumDenominador += longitudTotalNum;
             });
     
-            // Calcular el promedio y guardar en un nuevo objeto
+            // Calcular el diámetro equivalente por piso
             const promedios = {};
             Object.keys(resultados).forEach((key) => {
-                const { totalDiametro, count } = resultados[key];
+                const { sumNumerador, sumDenominador } = resultados[key];
     
-                if (isNaN(totalDiametro) || isNaN(count) || count === 0) {
-                    console.warn(`No se puede calcular el promedio para ${key}: totalDiametro o count inválidos`);
+                if (isNaN(sumNumerador) || isNaN(sumDenominador) || sumDenominador === 0) {
+                    console.warn(`No se puede calcular el diámetro equivalente para ${key}: sumNumerador o sumDenominador inválidos`);
                     promedios[key] = null;
                 } else {
-                    promedios[key] = totalDiametro / count;
+                    // Diámetro equivalente
+                    promedios[key] = Math.sqrt(sumNumerador / sumDenominador);
                 }
             });
-          //  console.log("promedios calculados diametros piso");
-          //  console.log(promedios);
+            console.log("diametros equivalentes");
+            console.log(promedios);
             // Guardar el resultado en la base de datos
             const saveResponse = await fetch(`${API_BASE_URL}/api/crearDiametroPromedio`, {
                 method: 'POST',
@@ -696,17 +698,17 @@ const AdministracionProyecto = (proyectoKey, urn) => {
             });
     
             if (!saveResponse.ok) {
-                throw new Error('Error al guardar los promedios de diámetros');
+                throw new Error('Error al guardar los diámetros equivalentes');
             }
     
             const saveResult = await saveResponse.json();
-          //  console.log('Promedios de diámetros guardados:', saveResult);
             return promedios;
         } catch (error) {
             console.error('Error al obtener o procesar los datos de las barras:', error);
             return null;
         }
     };
+    
     
     const LongitudPromedioProyecto = async (urn) => {
         try {
@@ -777,52 +779,104 @@ const AdministracionProyecto = (proyectoKey, urn) => {
         }
     };
     const guardarDatosModelo = async () => {
-        //console.log('El nombre del proyecto es:');
-        toast.info('Inicio de proceso de Cálculo de datos estadísticos del proyecto, el proceso puuede tomar algunos minutos...');
-        
-      
-
-        const promedioDiametroPisos = await DiametroPromedio(proyectoKey.urn);
-      //  console.log("Promedios de diametro por piso",promedioDiametroPisos);
-        setTickets((prev) => ({ ...prev, 'Diametro  Promedio piso': 'Completado' }));
-
-        const val = await actions.generarTotalPesoPisos(proyectoKey.urn);
-        setTickets((prev) => ({ ...prev, 'Peso por Piso': 'Completado' }));
-        toast.info('1 de 8 completado', { toastId: 'estadisticagenerales' });
-
-        await actions.porcentajePedidoTotal(proyectoKey.urn);
-        setTickets((prev) => ({ ...prev, 'Porcentaje Pedidos': 'Completado' }));
-        toast.info('2 de 8 completado', { toastId: 'estadisticagenerales' });
-
-        await actions.PesoPromedio(proyectoKey.urn);
-        setTickets((prev) => ({ ...prev, 'Pesos Promedio': 'Completado' }));
-        toast.info('3 de 8 completado', { toastId: 'estadisticagenerales' });
-
-        await actions.PesoPromedioGeneral(proyectoKey.urn);
-        setTickets((prev) => ({ ...prev, 'Pesos Promedio General': 'Completado' })); 
-        toast.info('4 de 8 completado', { toastId: 'estadisticagenerales' });
-
-        await actions.diametroPromedioGeneral(proyectoKey.urn);
-        setTickets((prev) => ({ ...prev, 'diametro Promedio barras General': 'Completado' })); 
-        toast.info('5 de 8 completado', { toastId: 'estadisticagenerales' });
-       
-        const promediosLongitud = await LongitudPromedio(proyectoKey.urn);
-       // console.log("Promedios de longitud por nombreFiltro2:", promediosLongitud);
-        toast.info('6 de 8 completado', { toastId: 'estadisticagenerales' });
-        setTickets((prev) => ({ ...prev, 'Longitud Promedio': 'Completado' }));
-
-        const promedioLongitudProyecto = await LongitudPromedioProyecto(proyectoKey.urn);
-        toast.info('7 de 8 completado', { toastId: 'PromedioLongitud' });
-         setTickets((prev) => ({ ...prev, 'Longitud Promedio Proyecto': 'Completado' }));
-
-        const resultadoDiametro = await DiametroEquivalenteLargosIguales(proyectoKey.urn);
-        toast.info('8 de 8 completado, proceso terminado', { toastId: 'Diametro Equivalente' });
-        setTickets((prev) => ({ ...prev, 'Diametro Equivalente': 'Completado' }));
-
-
-       
+        try {
+            toast.info('Inicio de proceso de Cálculo de datos estadísticos del proyecto, el proceso puede tomar algunos minutos...');
+    
+            // 1. Calcular el promedio de diámetros por piso
+            try {
+                const promedioDiametroPisos = await DiametroPromedio(proyectoKey.urn);
+                setTickets((prev) => ({ ...prev, 'Diametro  Promedio piso': 'Completado' }));
+            } catch (error) {
+                console.error('Error en DiametroPromedio:', error);
+                toast.error('Error al calcular el Diametro Promedio por piso');
+            }
+    
+            // 2. Generar total de peso por pisos
+         
+    
+            // 3. Calcular porcentaje de pedido total
+            try {
+                await actions.porcentajePedidoTotal(proyectoKey.urn);
+                setTickets((prev) => ({ ...prev, 'Porcentaje Pedidos': 'Completado' }));
+                toast.info('2 de 8 completado', { toastId: 'estadisticagenerales' });
+            } catch (error) {
+                console.error('Error en porcentajePedidoTotal:', error);
+                toast.error('Error al calcular el Porcentaje de Pedidos');
+            }
+    
+            // 4. Calcular el peso promedio
+            try {
+                await actions.PesoPromedio(proyectoKey.urn);
+                setTickets((prev) => ({ ...prev, 'Pesos Promedio': 'Completado' }));
+                toast.info('3 de 8 completado', { toastId: 'estadisticagenerales' });
+            } catch (error) {
+                console.error('Error en PesoPromedio:', error);
+                toast.error('Error al calcular el Peso Promedio');
+            }
+    
+            // 5. Calcular el peso promedio general
+            try {
+                await actions.PesoPromedioGeneral(proyectoKey.urn);
+                setTickets((prev) => ({ ...prev, 'Pesos Promedio General': 'Completado' }));
+                toast.info('4 de 8 completado', { toastId: 'estadisticagenerales' });
+            } catch (error) {
+                console.error('Error en PesoPromedioGeneral:', error);
+                toast.error('Error al calcular el Peso Promedio General');
+            }
+    
+            // 6. Calcular el diámetro promedio general
+            try {
+                await actions.diametroPromedioGeneral(proyectoKey.urn);
+                setTickets((prev) => ({ ...prev, 'diametro Promedio barras General': 'Completado' }));
+                toast.info('5 de 8 completado', { toastId: 'estadisticagenerales' });
+            } catch (error) {
+                console.error('Error en diametroPromedioGeneral:', error);
+                toast.error('Error al calcular el Diametro Promedio General');
+            }
+    
+            // 7. Calcular la longitud promedio por nivel
+            try {
+                const promediosLongitud = await LongitudPromedio(proyectoKey.urn);
+                setTickets((prev) => ({ ...prev, 'Longitud Promedio': 'Completado' }));
+                toast.info('6 de 8 completado', { toastId: 'estadisticagenerales' });
+            } catch (error) {
+                console.error('Error en LongitudPromedio:', error);
+                toast.error('Error al calcular la Longitud Promedio');
+            }
+    
+            // 8. Calcular la longitud promedio total del proyecto
+            try {
+                const promedioLongitudProyecto = await LongitudPromedioProyecto(proyectoKey.urn);
+                setTickets((prev) => ({ ...prev, 'Longitud Promedio Proyecto': 'Completado' }));
+                toast.info('7 de 8 completado', { toastId: 'PromedioLongitud' });
+            } catch (error) {
+                console.error('Error en LongitudPromedioProyecto:', error);
+                toast.error('Error al calcular la Longitud Promedio del Proyecto');
+            }
+    
+            // 9. Calcular el diámetro equivalente para largos iguales
+            try {
+                const resultadoDiametro = await DiametroEquivalenteLargosIguales(proyectoKey.urn);
+                setTickets((prev) => ({ ...prev, 'Diametro Equivalente': 'Completado' }));
+                toast.info('8 de 8 completado, proceso terminado', { toastId: 'Diametro Equivalente' });
+            } catch (error) {
+                console.error('Error en DiametroEquivalenteLargosIguales:', error);
+                toast.error('Error al calcular el Diametro Equivalente');
+            }   try {
+                const val = await actions.generarTotalPesoPisos(proyectoKey.urn);
+                setTickets((prev) => ({ ...prev, 'Peso por Piso': 'Completado' }));
+                toast.info('1 de 8 completado', { toastId: 'estadisticagenerales' });
+            } catch (error) {
+                console.error('Error en generarTotalPesoPisos:', error);
+                toast.error('Error al calcular el Peso por Piso');
+            }
+    
+        } catch (error) {
+            console.error('Error en guardarDatosModelo:', error);
+            toast.error('Error en el proceso de cálculo de datos estadísticos.');
+        }
     };
-
+    
     const asignarUsuarioAProyecto = (e) => {
         setUsuarioSeleccionado(e.target.value);
     };

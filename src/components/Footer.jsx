@@ -27,7 +27,7 @@ const Footer = () => {
     return (
         <footer style={footerStyle}>
             <div style={divStyle}>
-                <p>Copyright &copy; {new Date().getFullYear()} ICD.  1.2.17</p>
+                <p>Copyright &copy; {new Date().getFullYear()} ICD.  1.2.18</p>
                 {/* Puedes agregar más contenido aquí, como enlaces o información adicional */}
             </div>
         </footer>

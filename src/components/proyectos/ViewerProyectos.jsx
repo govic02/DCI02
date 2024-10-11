@@ -78,8 +78,7 @@ class ViewerProyectos extends React.Component {
             const result = await response.json();
     
             if (!result.detalles || result.detalles.length === 0) {
-                // Si no hay detalles o están vacíos, ejecuta generarTotalPesoPisos
-              //console.log('No se encontraron detalles, generando pesos totales de pisos...');
+              
                 this.generarTotalPesoPisos();
             } else {
               //console.log('Detalles recibidos:', result.detalles);
@@ -313,8 +312,8 @@ class ViewerProyectos extends React.Component {
         
         // Preparar los datos para enviar
         const datosParaEnviar = {
-            urn: this.props.urn, // Asegúrate de tener urn en el ámbito
-            nombreFiltro2: this.state.filtro2, // Asegúrate de tener nombreFiltro2 en el ámbito
+            urn: this.props.urn, 
+            nombreFiltro2: this.state.filtro2, 
             pesosPorValor: Object.entries(resultado).map(([valor, sumaPeso]) => ({ valor, sumaPeso }))
         };
     //    console.log("datos para enviar pesos pisos",datosParaEnviar);
@@ -361,7 +360,7 @@ class ViewerProyectos extends React.Component {
         }
 
         try {
-            const datosParaInsertar = {
+          /*  const datosParaInsertar = {
                 urn: this.props.urn, 
                 lista: idsBarras.map(barra => ({ 
                     nombreFiltro1: barra.nombreFiltro1, 
@@ -379,7 +378,7 @@ class ViewerProyectos extends React.Component {
             const barrasInsertadas = await axios.post(urlBarras, datosParaInsertar);
           //console.log("PESOS POR diametro piso", diametroPiso);
           //console.log("Barras insertadas",barrasInsertadas);
-            this.guardarIdsBarras();
+            this.guardarIdsBarras();*/
         }
         catch(error){
           //console.log("error en envvío",error);
@@ -392,25 +391,124 @@ class ViewerProyectos extends React.Component {
       //console.log("Error generando total de peso por pisos:", error);
     }
 };
-
-
-
 diametroPromedioGeneral = async (urn) => {
+  try {
+      let sumNumerador = 0;
+      let sumDenominador = 0;
+      const { idsBarras } = this.state;
+
+      if (idsBarras && idsBarras.length > 0) {
+          idsBarras.forEach(barra => {
+              const { diametroBarra, longitudTotal } = barra;
+
+              const diametroNum = parseFloat(diametroBarra);
+              const longitudTotalNum = parseFloat(longitudTotal);
+
+              if (isNaN(diametroNum) || isNaN(longitudTotalNum)) {
+                  return;  // Omitir este elemento si los datos no son válidos
+              }
+
+              // Acumular valores para el diámetro equivalente
+              sumNumerador += (diametroNum ** 2) * longitudTotalNum;
+              sumDenominador += longitudTotalNum;
+          });
+
+          if (sumDenominador > 0) {
+              // Calcular el diámetro equivalente
+              const diametroPromedio = Math.sqrt(sumNumerador / sumDenominador);
+              console.log("diametro promedio equivalente proyecto", diametroPromedio);
+              // Realizar la llamada a la API para guardar el resultado
+              const response = await fetch(`${API_BASE_URL}/api/diametroPromedioGeneral`, {
+                  method: 'POST',
+                  headers: {
+                      'Content-Type': 'application/json'
+                  },
+                  body: JSON.stringify({ urn, diametroPromedio })
+              });
+
+              if (!response.ok) {
+                  console.log("Error en la inserción", response.statusText);
+                  return;
+              }
+
+              const saveResult = await response.json();
+              console.log('Saved project equivalent diameter:', saveResult);
+              return { diametroPromedioProyecto: diametroPromedio };
+          } else {
+              console.log("No hay barras para calcular el diámetro equivalente");
+              return { diametroPromedioProyecto: 0 };
+          }
+      }
+
+  } catch (error) {
+      console.log("Error al procesar los datos de las barras:", error);
+      throw error;  // Re-lanza el error para manejarlo en la función que llama
+  }
+};
+/*
+diametroPromedioGeneral = async (urn) => {
+  try {
+      let totalDiametro = 0;
+      let totalBarras = 0;
+      const { idsBarras } = this.state;
+
+      if(idsBarras && idsBarras.length > 0) {
+          idsBarras.forEach(barra => {
+              const { diametroBarra, cantidad } = barra;
+
+              totalDiametro += diametroBarra 
+              totalBarras += cantidad;  
+          });
+
+          if (totalBarras > 0) {
+              const diametroPromedio = totalDiametro / totalBarras;  // Calcula el diámetro promedio
+              
+              // Realiza la llamada a la API para guardar el resultado
+              const response = await fetch(`${API_BASE_URL}/api/diametroPromedioGeneral`, {
+                  method: 'POST',
+                  headers: {
+                      'Content-Type': 'application/json'
+                  },
+                  body: JSON.stringify({ urn, diametroPromedio })
+              });
+
+              if (!response.ok) {
+                  console.log("Error en la inserción", response.statusText);
+                  return;
+              }
+
+              const saveResult = await response.json();
+              console.log('Saved project average diameter:', saveResult);
+              return { diametroPromedioProyecto: diametroPromedio };
+          } else {
+              console.log("No hay barras para calcular el promedio");
+              return { diametroPromedioProyecto: 0 };
+          }
+      }
+      
+  } catch (error) {
+      console.log("Error al procesar los datos de las barras:", error);
+      throw error;  // Re-lanza el error para manejarlo en la función que llama
+  }
+};
+*/
+diametroPromedioGeneral_02 = async (urn) => {
     try {
         let totalDiametro = 0;
         let totalBarras = 0;
         const { idsBarras } = this.state;
-      //console.log("barras previo diametro general");
+      
         if(idsBarras && idsBarras.length>0){
             idsBarras.forEach(barra => {
                 const { diametroBarra } = barra;
+                console.log();
                 totalDiametro += diametroBarra;  // Suma acumulativa de todos los diámetros
                 totalBarras++;  // Contador de barras
             });
     
             if (totalBarras > 0) {
                 const diametroPromedio = totalDiametro / totalBarras;  // Calcula el diámetro promedio del proyecto
-              //console.log(`Diámetro promedio del proyecto: ${diametroPromedio} unidades`);
+            
     
                 // Realiza la llamada a la API para guardar el resultado
                 const response = await fetch(`${API_BASE_URL}/api/diametroPromedioGeneral`, {
@@ -1169,12 +1267,14 @@ porcentajePedidoTotal = async (urn) => {
             
             this.cargarConfiguracion();
             const propiedades = await this.obtenerPropiedadesModelo();
-          //console.log("Propiedades obtenidas para completar forms:", propiedades);
+            console.log("Propiedades obtenidas para completar forms:", propiedades);
             await this.obtenerFiltros(this.props.urn).then(async () => {
                 try {
                  console.log("proceso Id Barras Proyecto");
                   const idsBarras = [];
-                   idsBarras = await this.obtenerIdsBarras();
+                  this.setState.idsBarras =[];
+                   this.setState.idsBarras = await this.obtenerIdsBarras();
+                   idsBarras =  this.setState.idsBarras;
                     await  this.guardarIdsBarras();
                     if(!idsBarras.length ==0){
                         await this.generarTotalPesoPisos();

@@ -106,10 +106,10 @@ const IndicadorPesoPromedio = ({ urn }) => {
                 <Typography variant="body2" style={{ fontSize: 16, textAlign: 'center', marginBottom: '20px' }}>
                     <b>{formatNumber(pesoTotalProyecto, 1, 1)} kg</b>
                 </Typography>
-                <Typography variant="h5" component="h2" style={{ fontSize: 14, textAlign: 'center', marginBottom: '10px' }}>
+                <Typography variant="h5" component="h2" style={{ fontSize: 16, textAlign: 'center', marginBottom: '10px' }}>
                     Peso Promedio General del Proyecto
                 </Typography>
-                <Typography variant="body2" style={{ fontSize: 14, marginBottom: '10px', textAlign: 'center', marginBottom: '20px' }}>
+                <Typography variant="body2" style={{ fontSize: 16, textAlign: 'center', marginBottom: '20px' }}>
                     <b>{formatNumber(pesoPromedioGeneral, 2, 2)} kg</b>
                 </Typography>
 
@@ -124,7 +124,7 @@ const IndicadorPesoPromedio = ({ urn }) => {
                     LPB (Longitud Promedio del Proyecto)
                 </Typography>
                 <Typography variant="body2" style={{ fontSize: 16, textAlign: 'center' }}>
-                    <b>{formatNumber(longitudPromedioProyecto, 2, 2)} cm</b>
+                    <b>{formatNumber(longitudPromedioProyecto, 2, 2)} mt</b>
                 </Typography>
             </CardContent>
         </Card>

@@ -84,12 +84,12 @@ const GraficoLongitudPromedio = ({ urn }) => {
         beginAtZero: true,
         ticks: {
           callback: function (value) {
-            return value + ' cm';
+            return value + ' mt';
           }
         },
         title: {
           display: true,
-          text: 'Longitud (cm)'
+          text: 'Longitud (mt)'
         }
       }
     },
