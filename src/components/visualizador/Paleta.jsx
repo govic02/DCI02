@@ -236,7 +236,7 @@ const Paleta = ({ urnBuscada }) => {
                 break;
             default:
                 filteredProps = [
-                    'Material', 'Level',,'AEC piso', 'Structural', 'Building Story', 'Bar Diameter', 'Standard Bend Diameter', 'Standard Hook Bend Diameter',
+                    'Material', 'Level','AEC piso','AEC Piso', 'Structural', 'Building Story', 'Bar Diameter', 'Standard Bend Diameter', 'Standard Hook Bend Diameter',
                     'Stirrup/Tie Bend Diameter', 'Partition', 'Rebar Number', 'Schedule Mark', 'AEC Grupo', 'AEC Forma', 'AEC Peso Lineal',
                     'AEC Código Interno', 'AEC Bloquear barras', 'AEC Uso Barra', 'AEC Uso Barra (Bloquear)', 'AEC Cantidad', 'AEC Id',
                     'AEC Sub Uso Barra', 'AEC Uso Barra (Categoría)', 'View Visibility States', 'Geometry', 'Style', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'O', 'R',
