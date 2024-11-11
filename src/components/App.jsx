@@ -2,7 +2,8 @@ import React, { useState,useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import ColumnaIzquierda from './ColumnaIzquierda';
 import ColumnaDerecha from './ColumnaDerecha';
-import Estadisticas from './Estadisticas'; // Asegúrate de importar tu nuevo componente de estadísticas
+import Estadisticas from './Estadisticas';
+import Pedidos from './Pedidos'; 
 import Proyectos from './Proyectos'; 
 import ConfiguracionVisualizador from './ConfiguracionVisualizador'; 
 import Perfil from './Perfil'; 
@@ -60,6 +61,9 @@ const App = ({ token, urn ,data}) => {
                                             <ErrorBoundary>
                                             <Proyectos token={token} urn={urn}/></ErrorBoundary>
                                             } />
+                                            
+                                        <Route path="/pedidos" element={<Pedidos urn={urn} />} />
+                                        
                                         <Route path="/AdministracionCuentas" element={<AdministracionCuentas />} />
                                         <Route path="/Perfil" element={<Perfil />} />
                                         <Route path="/ConfiguracionVisualizador" element={<ConfiguracionVisualizador />} />

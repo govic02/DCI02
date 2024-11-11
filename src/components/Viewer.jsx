@@ -856,7 +856,7 @@ class Viewer extends React.Component {
         const dbId = event.dbIdArray[0]; // Obtiene el primer elemento seleccionado
         const seleccionActual = this.viewer.getSelection();
         this.context.actualizarSeleccionActual(seleccionActual);
-      //console.log("SELECCIONO ELEMENTO");
+      console.log("SELECCIONO ELEMENTO");
       //console.log(nombreParametroPesoLineal,  nombreParametrolargo);
       //console.log(event.dbIdArray);
       //console.log(seleccionActual);
@@ -874,7 +874,7 @@ class Viewer extends React.Component {
           
       
             viewer.getProperties(dbId, (data) => {
-             //console.log("data seleccion", data);
+             console.log("data seleccion", data);
                const convertirYRedondear = (valor, factor) => {
                 return parseFloat((valor * factor).toFixed(2));
               };

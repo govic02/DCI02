@@ -179,7 +179,12 @@ const liNormal = {
                                     Estadísticas 
                                 </Link>
                                 </li>
-
+                                <li style={isCollapsed ? liNormalColap : liNormal}>
+                                <Link  onClick={() => verificarUsuario()} to="/pedidos" style={{ textDecoration: 'none', color: 'inherit' }}>
+                                        <img src={isCollapsed ? "images/variableTiempoIcn.svg" : "images/variableTiempoIcn.svg"} alt="Pedidos" style={isCollapsed ?imgStylesColap:imgStyles} />
+                                    Pedidos
+                                </Link>
+                                </li>
                         
                                 <li style={isCollapsed ? tituloLiColap : tituloLi}>
                                     {isCollapsed ? 'Administración': 'Administración'}
