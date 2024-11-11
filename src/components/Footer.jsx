@@ -27,7 +27,7 @@ const Footer = () => {
     return (
         <footer style={footerStyle}>
             <div style={divStyle}>
-                <p>AEC Construcción 1.0 © AEC Shift SpA.  &copy; {new Date().getFullYear()} ICD.  1.2.22</p>
+                <p>AEC Construcción 1.0 © AEC Shift SpA.  &copy; {new Date().getFullYear()}  1.2.22</p>
                 {/* Puedes agregar más contenido aquí, como enlaces o información adicional */}
             </div>
         </footer>
