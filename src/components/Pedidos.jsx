@@ -13,6 +13,8 @@ import 'react-toastify/dist/ReactToastify.css';
 import { unparse } from 'papaparse';
 import { useAuth } from '../context/AuthContext';
 
+const estados = ['paquetizado', 'espera_aprobacion', 'rechazado', 'aceptado', 'fabricacion', 'despacho', 'recepcionado', 'instalado', 'inspeccionado', 'hormigonado'];
+
 const Pedidos = () => {
     const [pedidos, setPedidos] = useState([]);
     const [esAdministrador, setEsAdministrador] = useState(false);
@@ -126,14 +128,15 @@ const Pedidos = () => {
 
     const formatNumber = (value) => (isNaN(value) ? "0.00" : parseFloat(value).toFixed(2));
 
-    if (!esAdministrador) {
-        return (
-            <div>
-                <HeaderApp />
-                <p>Usted no tiene los permisos necesarios para ver esta sección</p>
-            </div>
-        );
-    }
+    const getLatestState = (estados, estadosData) => {
+        for (let i = estados.length - 1; i >= 0; i--) {
+            const estado = estados[i];
+            if (estadosData && estadosData[estado] && estadosData[estado].est === 'ok') {
+                return estado.replace('_', ' ');
+            }
+        }
+        return 'N/A';
+    };
 
     return (
         <div>
@@ -244,32 +247,41 @@ const Pedidos = () => {
                         <Card style={{ marginTop: '20px' }}>
                             <CardContent>
                                 <Typography variant="h6" style={{ marginBottom: '10px' }}>Historial de Pedido</Typography>
-                                {selectedPedido.historial && selectedPedido.historial.length > 0 ? (
-                                    <TableContainer component={Paper}>
-                                        <Table>
-                                            <TableHead>
-                                                <TableRow>
-                                                    <TableCell>Fecha</TableCell>
-                                                    <TableCell>Acción</TableCell>
-                                                    <TableCell>Descripción</TableCell>
-                                                </TableRow>
-                                            </TableHead>
-                                            <TableBody>
-                                                {selectedPedido.historial.map((evento, idx) => (
-                                                    <TableRow key={idx}>
-                                                        <TableCell>{evento.fecha}</TableCell>
-                                                        <TableCell>{evento.accion}</TableCell>
-                                                        <TableCell>{evento.descripcion}</TableCell>
+                                <TableContainer component={Paper}>
+                                    <Table>
+                                        <TableHead>
+                                            <TableRow>
+                                                <TableCell>Estado</TableCell>
+                                                <TableCell>Est</TableCell>
+                                                <TableCell>Fecha</TableCell>
+                                                <TableCell>Usuario</TableCell>
+                                            </TableRow>
+                                        </TableHead>
+                                        <TableBody>
+                                            {estados.map((estado) => {
+                                                const estadoData = selectedPedido.estados && selectedPedido.estados[estado];
+                                                return (
+                                                    <TableRow key={estado}>
+                                                        <TableCell>{estado.replace('_', ' ')}</TableCell>
+                                                        <TableCell>
+                                                            <span
+                                                                style={{
+                                                                    backgroundColor: estadoData && estadoData.est === 'ok' ? '#28a745' : '#dc3545',
+                                                                    width: '15px',
+                                                                    height: '15px',
+                                                                    display: 'inline-block',
+                                                                    borderRadius: '50%',
+                                                                }}
+                                                            ></span>
+                                                        </TableCell>
+                                                        <TableCell>{estadoData ? new Date(estadoData.fecha).toLocaleDateString("es-ES") : 'N/A'}</TableCell>
+                                                        <TableCell>{estadoData ? estadoData.nombreUsuario : 'N/A'}</TableCell>
                                                     </TableRow>
-                                                ))}
-                                            </TableBody>
-                                        </Table>
-                                    </TableContainer>
-                                ) : (
-                                    <Typography variant="body2" style={{ textAlign: 'center', marginTop: '10px' }}>
-                                        Sin datos de historial.
-                                    </Typography>
-                                )}
+                                                );
+                                            })}
+                                        </TableBody>
+                                    </Table>
+                                </TableContainer>
                             </CardContent>
                         </Card>
                     )}

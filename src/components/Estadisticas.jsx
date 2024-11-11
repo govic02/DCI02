@@ -105,7 +105,8 @@ const Estadisticas = () => {
                             <IndicadorTotalPeso urn={urnSelected} />
                            
                             <GraficosPedidoDiametro urn={urnSelected} />
-                            <MaestroFierros urn={urnSelected}  proyecto={proyectoKeySeleccionado}/>
+                            <br></br>  <br></br>  <br></br>
+                           {/*<MaestroFierros urn={urnSelected}  proyecto={proyectoKeySeleccionado} /> */}
                         </div>
                     )}
                 </div>

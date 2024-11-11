@@ -4,7 +4,9 @@ import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
 import { Bar } from 'react-chartjs-2';
-import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
+import {
+    Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend
+} from 'chart.js';
 import API_BASE_URL from '../../config';
 
 // Registramos los componentes necesarios de ChartJS para un gráfico de barras apiladas
@@ -15,10 +17,10 @@ const GraficosPedidoDiametro = ({ urn }) => {
         labels: [],
         datasets: [],
     });
-    const [loading, setLoading] = useState(true); // Nuevo estado para manejar el cargado de datos
-    const [sinDatos, setSinDatos] = useState(false); // Estado para manejar la ausencia de datos
+    const [loading, setLoading] = useState(true);
+    const [sinDatos, setSinDatos] = useState(false);
 
-    // Paleta de 12 colores cálidos
+    // Paleta de colores
     const coloresCalidos = [
         '#0000FF', // Azul 
         '#FFD700', // Amarillo Oro 
@@ -36,12 +38,12 @@ const GraficosPedidoDiametro = ({ urn }) => {
 
     useEffect(() => {
         const fetchDatos = async () => {
-            setLoading(true); // Indica que los datos están siendo cargados
+            setLoading(true);
             try {
                 const urlBarras = `${API_BASE_URL}/api/barraurn/${encodeURIComponent(urn)}`;
                 const respuestaBarras = await axios.get(urlBarras);
                 const barras = respuestaBarras.data.detalles;
-                const urlPedidos = `${API_BASE_URL}/api/listPedidos?urn=${urn}`;
+                const urlPedidos = `${API_BASE_URL}/api/listPedidos?urn=${encodeURIComponent(urn)}`;
                 const respuestaPedidos = await axios.get(urlPedidos);
                 const pedidos = respuestaPedidos.data;
 
@@ -65,38 +67,42 @@ const GraficosPedidoDiametro = ({ urn }) => {
                         if (barra) {
                             const diametroRedondeado = Math.round(barra.diametroBarra * 10) / 10; // Redondea a un decimal
                             diametrosSet.add(diametroRedondeado);
-                            if (!pesosPorPedidoYDiametro[pedido.nombre_pedido][barra.diametroBarra]) {
-                                pesosPorPedidoYDiametro[pedido.nombre_pedido][barra.diametroBarra] = 0;
+                            if (!pesosPorPedidoYDiametro[pedido.nombre_pedido][diametroRedondeado]) {
+                                pesosPorPedidoYDiametro[pedido.nombre_pedido][diametroRedondeado] = 0;
                             }
-                            pesosPorPedidoYDiametro[pedido.nombre_pedido][barra.diametroBarra] += (parseFloat(barra.pesoLineal) * parseFloat(barra.longitudTotal));
+                            pesosPorPedidoYDiametro[pedido.nombre_pedido][diametroRedondeado] += (parseFloat(barra.pesoLineal) * parseFloat(barra.longitudTotal));
                         } else {
                             console.log(`Barra con id ${id} no encontrada en la lista de barras.`);
                         }
                     });
                 });
 
-                let labels = Object.keys(pesosPorPedidoYDiametro);
+                const labels = Object.keys(pesosPorPedidoYDiametro);
                 let datasets = [];
                 let diametrosVistos = {};
-                const redondearDiametro = (diametro) => Math.round(diametro * 100) / 100;
 
-                Object.keys(pesosPorPedidoYDiametro).forEach((pedido, idx) => {
-                    Object.entries(pesosPorPedidoYDiametro[pedido]).forEach(([diametro, peso], i) => {
-                        const diametroRedondeado = Math.round(diametro * 10) / 10; // Redondea a un decimal
-                        if (!diametrosVistos[diametroRedondeado]) {
-                            diametrosVistos[diametroRedondeado] = coloresCalidos[Object.keys(diametrosVistos).length % coloresCalidos.length]; // Usa un color de la paleta
-                        }
-                        if (!datasets.some(dataset => dataset.label === `Diámetro ${diametroRedondeado}`)) {
-                            datasets.push({
-                                label: `Diámetro ${diametroRedondeado}`, // Redondeado a un decimal
-                                data: new Array(Object.keys(pesosPorPedidoYDiametro).length).fill(0),
-                                backgroundColor: diametrosVistos[diametroRedondeado],
-                                stack: 'Stack 0',
-                                barThickness: 20
-                            });
-                        }
-                        const datasetIndex = datasets.findIndex(dataset => dataset.label === `Diámetro ${diametroRedondeado}`);
-                        datasets[datasetIndex].data[idx] = peso;
+                // Ordenamos los diámetros para mantener consistencia en el orden de los colores
+                const diametrosOrdenados = Array.from(diametrosSet).sort((a, b) => a - b);
+
+                // Inicializamos datasets para cada diámetro
+                diametrosOrdenados.forEach((diametro, idx) => {
+                    diametrosVistos[diametro] = coloresCalidos[idx % coloresCalidos.length];
+                    datasets.push({
+                        label: `Diámetro ${diametro}`,
+                        data: [],
+                        backgroundColor: diametrosVistos[diametro],
+                        stack: 'Stack 0',
+                        barThickness: 30, // Ancho fijo de la barra
+                        maxBarThickness: 30, // Ancho máximo de la barra
+                    });
+                });
+
+                // Rellenamos los datos para cada dataset
+                labels.forEach(pedido => {
+                    datasets.forEach(dataset => {
+                        const diametro = parseFloat(dataset.label.replace('Diámetro ', ''));
+                        const peso = pesosPorPedidoYDiametro[pedido][diametro] || 0;
+                        dataset.data.push(peso);
                     });
                 });
 
@@ -104,14 +110,13 @@ const GraficosPedidoDiametro = ({ urn }) => {
                     labels,
                     datasets,
                 });
+
                 setSinDatos(labels.length === 0 || datasets.length === 0);
-                console.log("data set");
-                console.log(datasets);
             } catch (error) {
                 console.error("Error al obtener los datos para pedidos y barras:", error);
                 setSinDatos(true);
             } finally {
-                setLoading(false); // Indica que los datos han sido cargados o hubo un error
+                setLoading(false);
             }
         };
 
@@ -120,21 +125,21 @@ const GraficosPedidoDiametro = ({ urn }) => {
 
     const options = {
         responsive: true,
+        maintainAspectRatio: false,
         scales: {
             x: {
                 stacked: true,
-                barThickness: 20,
-                categoryPercentage: 1.0,
-                offset: true,
+                offset: false, // Alinea las barras al centro de la etiqueta
                 ticks: {
                     autoSkip: false,
                     maxRotation: 50,
                     minRotation: 50
                 },
                 grid: {
-                    offset: false,
                     display: false
-                }
+                },
+                categoryPercentage: 1.0, // Las barras ocupan todo el ancho de la categoría
+                barPercentage: 1.0, // Las barras ocupan todo el ancho permitido
             },
             y: {
                 stacked: true,
@@ -151,11 +156,6 @@ const GraficosPedidoDiametro = ({ urn }) => {
                 position: 'top',
             },
         },
-        layout: {
-            padding: {
-                right: datosGrafico.labels.length > 20 ? 0 : Math.max(1120 - (datosGrafico.labels.length - 3) * 50, 0),
-            }
-        }
     };
 
     const cardStyle = {
@@ -163,10 +163,20 @@ const GraficosPedidoDiametro = ({ urn }) => {
         marginRight: '40px',
         marginTop: '40px',
         borderRadius: '20px',
+        height: '500px',
     };
 
     const cardContentStyle = {
-        overflowX: 'auto',
+        overflowX: 'none',
+        height: '100%',
+        overflowY:'none'
+    };
+
+    const chartContainerStyle = {
+        position: 'relative',
+        height: '100%',
+        overflowY: 'hidden',
+        minWidth: `${datosGrafico.labels.length * 50}px`, // Ajustamos el ancho mínimo según el número de etiquetas
     };
 
     return (
@@ -177,17 +187,21 @@ const GraficosPedidoDiametro = ({ urn }) => {
                 </Typography>
                 {loading ? (
                     <Typography variant="h6" component="h2" style={{ fontSize: 14, textAlign: 'center', marginTop: '20px' }}>
-                        Cargando datos...
+                        Cargando gráfico...
                     </Typography>
-                ) : sinDatos || datosGrafico.labels.length === 0 || datosGrafico.datasets.length === 0 ? (
+                ) : sinDatos ? (
                     <Typography variant="h6" component="h2" style={{ fontSize: 14, textAlign: 'center', marginTop: '20px' }}>
-                        Sin datos para calcular
+                        No hay datos para desplegar
                     </Typography>
                 ) : (
-                    <Bar data={datosGrafico} options={options} />
+                    <div style={chartContainerStyle}>
+                        <Bar data={datosGrafico} options={options} />
+                    </div>
                 )}
             </CardContent>
+           
         </Card>
+        
     );
 };
 
